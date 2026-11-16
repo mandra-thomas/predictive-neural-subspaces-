@@ -74,6 +74,9 @@ def report(results: list[dict], step: str) -> None:
 def log_run(cfg: dict, step: str, note: str) -> None:
     """Append one line to ANALYSIS_LOG.md (date, git hash, config hash, step, note). Runs on overridden
     data paths (e.g. synthetic smoke tests) log into their own results folder instead."""
+    res_root = Path(cfg["paths"]["results"]).resolve()
+    if res_root != (ROOT / "results").resolve():
+        note = f"[results: {res_root.name}] {note}"
     line = f"| {dt.datetime.now():%Y-%m-%d %H:%M} | {git_hash()} | {cfg['_hash']} | {step} | {note} |\n"
     real_data = Path(cfg["paths"]["data"]).resolve() == (ROOT / "data").resolve()
     log = ROOT / "ANALYSIS_LOG.md" if real_data else Path(cfg["paths"]["results"]) / "ANALYSIS_LOG.md"

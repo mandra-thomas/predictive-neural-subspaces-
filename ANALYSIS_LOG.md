@@ -27,3 +27,4 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-16 09:33 | e8a277f-dirty | 3d83323a46 | 04_fit_subspaces | d=10; 16/16 ok |
 | 2026-11-16 09:36 | e8a277f-dirty | 3d83323a46 | 05_decode | d=10; n_pseudo=200; 16/16 ok |
 | 2026-11-16 09:36 | e8a277f-dirty | 3d83323a46 | 06_stats | d=10; 12 sessions/10 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00293; P2 prior p_holm=0.812; P3 cur_side p_holm=0.00586 |
+| 2026-11-16 | - | - | note | The 09:15 02_preprocess row regenerated interim files (adds movement/feedback times; counts unchanged). The 09:17 04_fit_subspaces and 09:25 05_decode/06_stats rows are the trial-locked residual add-on (A11), written to results_residual/. |
