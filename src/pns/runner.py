@@ -19,6 +19,8 @@ def base_parser(desc: str) -> argparse.ArgumentParser:
     p.add_argument("--force", action="store_true", help="recompute even if outputs exist")
     p.add_argument("--n-jobs", type=int, default=None)
     p.add_argument("--config", default=None)
+    p.add_argument("--residual", action="store_true",
+                   help="add-on A11: analyse residuals after removing trial-locked responses")
     return p
 
 
@@ -80,12 +82,20 @@ def log_run(cfg: dict, step: str, note: str) -> None:
         f.write(line)
 
 
+def residual_guard(cfg: dict, args) -> None:
+    """--residual runs must write to a separate results root (PNS_RESULTS), never over the main results."""
+    if getattr(args, "residual", False) and Path(cfg["paths"]["results"]).resolve() == (ROOT / "results").resolve():
+        raise SystemExit("--residual requires PNS_RESULTS (and PNS_FIGURES) pointing to a separate folder, "
+                         "e.g. PNS_RESULTS=results_residual")
+
+
 def setup(desc: str, extra=None):
     p = base_parser(desc)
     if extra:
         extra(p)
     args = p.parse_args()
     cfg = load_config(args.config)
+    residual_guard(cfg, args)
     n_jobs = args.n_jobs or cfg["n_jobs"]
     return args, cfg, n_jobs
 

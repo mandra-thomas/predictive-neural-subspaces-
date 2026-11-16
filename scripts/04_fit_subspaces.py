@@ -8,7 +8,7 @@ import json
 import numpy as np
 
 from pns.config import session_seed
-from pns.pipeline import fit_session
+from pns.pipeline import fit_session, residualize_session
 from pns.runner import (interim_path, load_npz, log_run, out_dir, report, run_sessions, select_eids, setup,
                         write_json)
 
@@ -34,6 +34,8 @@ def main():
             write_json(sd / f"{tag}.json", meta)
             return meta
         pre = load_npz(ip)
+        if args.residual:
+            pre = residualize_session(pre, cfg)
         p = pre["counts"].shape[1]
         if d == 10 and p < cfg["model"]["d10_min_units"]:
             meta = {"excluded": True, "reason": f"d=10 needs > 40 units (p={p})"}

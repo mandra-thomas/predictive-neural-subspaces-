@@ -13,3 +13,4 @@ __pycache__/
 /*.pdf
 slurm/logs/
 logs/
+results_residual/

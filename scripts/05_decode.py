@@ -8,7 +8,7 @@ import json
 import numpy as np
 
 from pns.config import session_seed
-from pns.pipeline import decode_session
+from pns.pipeline import decode_session, residualize_session
 from pns.runner import interim_path, load_npz, log_run, out_dir, report, run_sessions, select_eids, setup
 
 
@@ -34,6 +34,8 @@ def main():
                 return {"excluded": True}
             raise FileNotFoundError("run 04_fit_subspaces first")
         pre = load_npz(interim_path(cfg, eid))
+        if args.residual:
+            pre = residualize_session(pre, cfg)
         fits = load_npz(sd / f"{tag}.npz")
         rng = np.random.default_rng(session_seed(eid, cfg["seed"], "null"))   # same pseudo draws for every d
         real, null = decode_session(pre, fits, cfg, rng, n_pseudo)

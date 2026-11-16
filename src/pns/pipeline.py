@@ -56,15 +56,80 @@ def preprocess_session(spike_times, spike_clusters, n_units: int, trials: dict, 
                mask=np.asarray(mask, dtype=bool), choice=np.asarray(trials["choice"], dtype=float),
                feedbackType=np.asarray(trials["feedbackType"], dtype=float), probabilityLeft=pl,
                stimOn_times=np.asarray(trials["stimOn_times"], dtype=float),
+               firstMovement_times=np.asarray(trials["firstMovement_times"], dtype=float),
+               feedback_times=np.asarray(trials["feedback_times"], dtype=float),
                prior_pleft_corr=float(np.corrcoef(prior[ok], pl[ok])[0, 1]) if ok.sum() > 2 else np.nan,
                median_trial_s=float(np.nanmedian(np.diff(iv[:, 0]))))
+    return out
+
+
+def session_S(pre: dict) -> np.ndarray:
+    """sqrt-transformed continuous bins (or their trial-locked residuals if residualized)."""
+    return pre["S_resid"] if "S_resid" in pre else sqrt_counts(pre["counts"])
+
+
+def window_S(pre: dict, w: str) -> np.ndarray:
+    """sqrt-transformed trial-window counts (or residuals), same units as session_S."""
+    return pre[f"Swin_resid_{w}"] if f"Swin_resid_{w}" in pre else sqrt_counts(pre[f"win_{w}"])
+
+
+# --------------------------------------------------------------------------- trial-locked residuals (add-on A11)
+EVENTS = ("stimOn_times", "firstMovement_times", "feedback_times")
+
+
+def _raised_cosines(t: np.ndarray, span=(-1.0, 2.0), n_basis: int = 8) -> np.ndarray:
+    """Raised-cosine bumps tiling `span` (seconds relative to an event), evaluated at lags t."""
+    centers = np.linspace(span[0], span[1], n_basis)
+    width = centers[1] - centers[0]
+    x = (t[:, None] - centers[None, :]) / width
+    return np.where(np.abs(x) < 1, 0.5 * (1 + np.cos(np.pi * x)), 0.0)
+
+
+def _event_design(times: np.ndarray, events: dict, span=(-1.0, 2.0), n_basis: int = 8) -> np.ndarray:
+    """Design matrix (len(times), n_events * n_basis): summed basis responses to every event occurrence."""
+    cols = []
+    for name in EVENTS:
+        ev = np.sort(events[name][~np.isnan(events[name])])
+        D = np.zeros((len(times), n_basis))
+        lo = np.searchsorted(ev, times - span[1], side="left")
+        hi = np.searchsorted(ev, times - span[0], side="right")
+        for k in range(len(times)):
+            if hi[k] > lo[k]:
+                D[k] += _raised_cosines(times[k] - ev[lo[k]:hi[k]], span, n_basis).sum(0)
+        cols.append(D)
+    return np.hstack(cols)
+
+
+def residualize_session(pre: dict, cfg: dict, ridge: float = 1.0) -> dict:
+    """Remove event-locked (stimOn, firstMovement, feedback) responses that are identical on every trial.
+    Fitted by ridge on the continuous bins; the same coefficients are applied to the trial windows (design
+    evaluated at window centres). Side- and block-specific signals are untouched (the design ignores them)."""
+    out = dict(pre)
+    edges = pre["edges"]
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    events = {e: np.asarray(pre[e], dtype=float) for e in EVENTS}
+    valid = np.asarray(pre["valid"], bool)
+    S = sqrt_counts(pre["counts"])
+    D = _event_design(centers, events)
+    dm, sm = D[valid].mean(0), S[valid].mean(0)
+    Dc, Sc = D[valid] - dm, S[valid] - sm
+    beta = np.linalg.solve(Dc.T @ Dc + ridge * np.eye(D.shape[1]), Dc.T @ Sc)
+    out["S_resid"] = S - (D - dm) @ beta
+    for name, spec in cfg["windows"].items():
+        ev_t = np.asarray(pre[spec["event"]], dtype=float) + 0.5 * (spec["win"][0] + spec["win"][1])
+        W = sqrt_counts(pre[f"win_{name}"])
+        ok = ~np.isnan(ev_t)
+        Dw = np.zeros((len(ev_t), D.shape[1]))
+        Dw[ok] = _event_design(ev_t[ok], events)
+        out[f"Swin_resid_{name}"] = W - (Dw - dm) @ beta
+    out["resid_r2"] = float(1 - np.sum((Sc - Dc @ beta) ** 2) / np.sum(Sc ** 2))
     return out
 
 
 # --------------------------------------------------------------------------- subspaces
 def fit_session(pre: dict, cfg: dict, d: int, rng: np.random.Generator) -> tuple[dict, pd.DataFrame, pd.DataFrame, dict]:
     """Fit lagged RRR subspaces (full session and halves), the estimator check and geometry tables."""
-    S = sqrt_counts(pre["counts"])
+    S = session_S(pre)
     valid = np.asarray(pre["valid"], dtype=bool)
     T, p = S.shape
     if d >= p:
@@ -190,7 +255,7 @@ def decode_session(pre: dict, fits: dict, cfg: dict, rng: np.random.Generator, n
     main, dims = feature_sets(fits)
     targets = _trial_targets(pre, cfg)
     side, prior = pre["side"], pre["prior"]
-    Zw = {w: zs.transform(sqrt_counts(pre[f"win_{w}"])) for w in cfg["windows"]}
+    Zw = {w: zs.transform(window_S(pre, w)) for w in cfg["windows"]}
 
     sides_null = np.stack([pseudo_sides(len(side), rng)[1] for _ in range(n_pseudo)]) if n_pseudo else None
     prior_null = bayes_optimal_prior(sides_null) if n_pseudo else None
@@ -226,7 +291,7 @@ def decode_session(pre: dict, fits: dict, cfg: dict, rng: np.random.Generator, n
                              for b in range(n_pseudo)]
 
     # continuous-bin targets: wheel speed and elapsed time (no null; descriptive / drift probe)
-    S = sqrt_counts(pre["counts"])
+    S = session_S(pre)
     Z = zs.transform(S)
     edges = pre["edges"]
     elapsed = 0.5 * (edges[:-1] + edges[1:]) - edges[0]
@@ -247,7 +312,7 @@ def decode_session(pre: dict, fits: dict, cfg: dict, rng: np.random.Generator, n
 def gate_session(pre: dict, cfg: dict, rng: np.random.Generator, n_pseudo: int) -> dict:
     """Full-population prior decoding (Lasso, nested interleaved CV) against the pseudo-session null."""
     mask = np.asarray(pre["mask"], bool)
-    W = sqrt_counts(pre["win_pre_stim"])
+    W = window_S(pre, "pre_stim")
     tr = np.flatnonzero(mask & ~np.any(np.isnan(W), axis=1))
     F = W[tr]
     y = pre["prior"][tr]

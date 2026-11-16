@@ -13,3 +13,7 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-16 09:02 | c1193f8-dirty | fa1a9a7190 | 02_preprocess | 16 sessions requested; 16 included |
 | 2026-11-16 09:04 | c1193f8-dirty | 3d83323a46 | 05_decode | d=5; n_pseudo=200; 10/10 ok |
 | 2026-11-16 09:04 | c1193f8-dirty | 3d83323a46 | 06_stats | d=5; 10 sessions/10 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00293; P2 prior p_holm=0.884; P3 cur_side p_holm=0.0488 |
+| 2026-11-16 09:09 | 3d808e1 | 3d83323a46 | 03_prior_gate | GO: {'n_sessions': 16, 'median_corrected_r2': 0.06424744950058905, 'frac_sessions_p05': 0.3125, 'fisher_p': 1.2266414803038271e-05, 'n_pseudo': 200, 'decision': 'GO'} |
+| 2026-11-16 09:10 | 3d808e1-dirty | 3d83323a46 | 04_fit_subspaces | d=5; 16/16 ok |
+| 2026-11-16 09:12 | 3d808e1-dirty | 3d83323a46 | 05_decode | d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-16 09:12 | 3d808e1-dirty | 3d83323a46 | 06_stats | d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00256; P2 prior p_holm=0.892; P3 cur_side p_holm=0.0061 |
