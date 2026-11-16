@@ -71,12 +71,19 @@ def main():
     gs["subject"] = gs["eid"].map(subjects)
     a = gs.groupby("subject")[["same_short", "cross", "same_long"]].mean()
     x = np.arange(3)
-    for _, r in a.iterrows():
-        ax.plot(x, r.to_numpy(), color=MUTED, lw=1, marker="o", ms=4, zorder=1)
-    ax.plot(x, a.mean().to_numpy(), color=SERIES[0], lw=2.5, marker="o", ms=8, zorder=2)
-    direct_label(ax, 2, a.mean().iloc[2], "animal mean", dx=8)
-    ax.axhline(floor, color=INK_2, lw=1, ls="--")
-    ax.text(0, floor, " chance", color=INK_2, fontsize=8, va="bottom")
+    for n_, (subj, r) in enumerate(a.iterrows()):
+        ax.plot(x, r.to_numpy(), color=MUTED, lw=1, marker="o", ms=4, zorder=1,
+                label="single animal" if n_ == 0 else None)
+    low = a["cross"].idxmin()
+    if a.loc[low, "cross"] < a["cross"].median() - 15:       # name the outlier animal (see RESULTS.md)
+        ax.annotate(f"{low}", (2, a.loc[low, "same_long"]), xytext=(6, 0), textcoords="offset points",
+                    fontsize=7, color=INK_2, va="center")
+    mu = a.mean().to_numpy()
+    ax.plot(x, mu, color=SERIES[0], lw=2.5, marker="o", ms=8, zorder=2, label="animal mean")
+    ax.legend(loc="center", bbox_to_anchor=(0.7, 0.36), fontsize=8)
+    ax.axhline(floor, color=INK_2, lw=1, ls="--", zorder=0)
+    ax.annotate("chance", (1, floor), xycoords=("axes fraction", "data"), xytext=(4, 0),
+                textcoords="offset points", color=INK_2, fontsize=8, va="center", annotation_clip=False)
     ax.set_xticks(x, [f"same lag\n{lag_lbl[0]} vs {lag_lbl[0]}", f"cross lag\n{lag_lbl[0]} vs {lag_lbl[-1]}",
                       f"same lag\n{lag_lbl[-1]} vs {lag_lbl[-1]}"])
     ax.set_ylabel("mean principal angle (deg)")

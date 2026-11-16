@@ -35,6 +35,7 @@ Each script caches its outputs per session and skips sessions that are already d
 | `scripts/05_decode.py` | Content decoding plus the paired pseudo-session null. |
 | `scripts/06_stats.py` | Primary and secondary tests. Writes to `results/stats/d{d}/`. |
 | `scripts/07_figures.py` | Builds the figures in `figures/`. |
+| `scripts/08_robustness.py` | Post hoc (not pre-registered): leave-one-animal-out and flagged-session checks of the primary tests. |
 
 To run on the 10-session checkpoint first, add `--subset checkpoint` to scripts 02–06. A single session can be run with `--eids <eid>`.
 
@@ -56,3 +57,5 @@ On the laptop this takes about 3 minutes. A real run (15–20 sessions, 200 pseu
 | `src/pns/` | Library modules: `prior`, `binning`, `transform`, `lagged`, `rrr`, `geometry`, `decode`, `stats`, `pipeline`, `analysis`, `synth`, `plotting`, `io_ibl` (the only IBL-importing module), `runner`, `config` |
 | `config.yaml` | Frozen constants. Change them only through a logged amendment. |
 | `tests/` | Unit tests and synthetic positive and negative controls. `tests/reference/` holds the original `optimal_Bayesian` (MIT licence, IBL) for comparison. |
+
+Current findings, robustness checks and interpretation: see `RESULTS.md`.

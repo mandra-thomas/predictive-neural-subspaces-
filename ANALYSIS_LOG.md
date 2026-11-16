@@ -30,3 +30,18 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-16 | - | - | note | The 09:15 02_preprocess row regenerated interim files (adds movement/feedback times; counts unchanged). The 09:17 04_fit_subspaces and 09:25 05_decode/06_stats rows are the trial-locked residual add-on (A11), written to results_residual/. |
 | 2026-11-16 10:44 | 7820535 | 3d83323a46 | 08_robustness | POST HOC d=5; LOAO max p_holm P1=0.00513, P2=0.954, P3=0.0122 |
 | 2026-11-16 10:44 | 7820535-dirty | 3d83323a46 | 08_robustness | [results: results_residual] POST HOC d=5; LOAO max p_holm P1=0.0923, P2=1, P3=0.0242 |
+| 2026-11-16 10:47 | c6893b1-dirty | 3d83323a46 | 04_fit_subspaces | d=5; 16/16 ok |
+| 2026-11-16 10:51 | c6893b1-dirty | 3d83323a46 | 05_decode | d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-16 10:51 | c6893b1-dirty | 3d83323a46 | 06_stats | d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00256; P2 prior p_holm=0.892; P3 cur_side p_holm=0.0061 |
+| 2026-11-16 10:52 | c6893b1-dirty | 3d83323a46 | 04_fit_subspaces | d=3; 16/16 ok |
+| 2026-11-16 10:56 | c6893b1-dirty | 3d83323a46 | 05_decode | d=3; n_pseudo=200; 16/16 ok |
+| 2026-11-16 10:56 | c6893b1-dirty | 3d83323a46 | 06_stats | d=3; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0322; P2 prior p_holm=0.207; P3 cur_side p_holm=0.11 |
+| 2026-11-16 10:58 | c6893b1-dirty | 3d83323a46 | 04_fit_subspaces | d=10; 16/16 ok |
+| 2026-11-16 11:01 | c6893b1-dirty | 3d83323a46 | 05_decode | d=10; n_pseudo=200; 16/16 ok |
+| 2026-11-16 11:02 | c6893b1-dirty | 3d83323a46 | 06_stats | d=10; 12 sessions/10 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00293; P2 prior p_holm=0.884; P3 cur_side p_holm=0.00586 |
+| 2026-11-16 11:02 | c6893b1-dirty | 3d83323a46 | 08_robustness | POST HOC d=5; LOAO max p_holm P1=0.00513, P2=0.954, P3=0.0122 |
+| 2026-11-16 11:03 | c6893b1-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_residual] d=5; 16/16 ok |
+| 2026-11-16 11:07 | c6893b1-dirty | 3d83323a46 | 05_decode | [results: results_residual] d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-16 11:07 | c6893b1-dirty | 3d83323a46 | 06_stats | [results: results_residual] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0134; P2 prior p_holm=0.996; P3 cur_side p_holm=0.00513 |
+| 2026-11-16 11:08 | c6893b1-dirty | 3d83323a46 | 08_robustness | [results: results_residual] POST HOC d=5; LOAO max p_holm P1=0.0269, P2=0.998, P3=0.0103 |
+| 2026-11-16 | - | - | note | Rows from 10:47 to 11:08 are the full rerun after amendment D10 (z-score SD floor; commit c6893b1). The "-dirty" flag on those rows is only the in-progress Fig 1b label fix in scripts/07_figures.py; no analysis code was uncommitted. Raw d=5 primary p-values are unchanged. Residual P1 Holm p went from 0.048 to 0.013. d=3 P1 went from 0.049 to 0.032. Earlier 08_robustness rows (before 10:47) are pre-fix. Pre-fix outputs are in results*/prefix_D10/. |
