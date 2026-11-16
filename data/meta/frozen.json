@@ -1,0 +1,133 @@
+{
+  "region": "MOs",
+  "created": "2026-11-16T08:16:41",
+  "git": "1c3b991-dirty",
+  "config_hash": "fac6882b34",
+  "rule": "eligible: >=15 sessions and >=min_animals subjects; pick max Findling prior_dec_ep",
+  "sessions": [
+    {
+      "eid": "d2918f52-8280-43c0-924b-029b2317e62c",
+      "pids": "2564dc27-4eda-4fc3-a151-c13475796ee1",
+      "subject": "CSHL049",
+      "n_units": 54,
+      "n_trials_table": 592
+    },
+    {
+      "eid": "fb70ebf7-8175-42b0-9b7a-7c6e8612226e",
+      "pids": "5fd00035-89d6-4e7c-bb26-f103388b731d,acf04c3f-650a-4de0-b0d0-edf695dd2025",
+      "subject": "CSHL058",
+      "n_units": 70,
+      "n_trials_table": 489
+    },
+    {
+      "eid": "2e6e179c-fccc-4e8f-9448-ce5b6858a183",
+      "pids": "9f99bd34-40d4-4aac-ae2b-7bc7f7086ccb",
+      "subject": "CSHL060",
+      "n_units": 50,
+      "n_trials_table": 451
+    },
+    {
+      "eid": "8207abc6-6b23-4762-92b4-82e05bed5143",
+      "pids": "9bd71ac6-c455-41f3-8c56-59987a649ac4",
+      "subject": "CSH_ZAD_024",
+      "n_units": 51,
+      "n_trials_table": 492
+    },
+    {
+      "eid": "ee8b36de-779f-4dea-901f-e0141c95722b",
+      "pids": "b375a0ee-4c5a-4a53-9cea-d753f206e5c5",
+      "subject": "DY_014",
+      "n_units": 44,
+      "n_trials_table": 441
+    },
+    {
+      "eid": "a4000c2f-fa75-4b3e-8f06-a7cf599b87ad",
+      "pids": "adca9242-0725-41d4-8eb1-5655a464431d",
+      "subject": "KS023",
+      "n_units": 22,
+      "n_trials_table": 513
+    },
+    {
+      "eid": "aad23144-0e52-4eac-80c5-c4ee2decb198",
+      "pids": "45e7731f-4a43-45d5-9029-c080150bc596",
+      "subject": "KS023",
+      "n_units": 52,
+      "n_trials_table": 484
+    },
+    {
+      "eid": "dfbe628d-365b-461c-a07f-8b9911ba83aa",
+      "pids": "df350b09-a420-42bb-9952-17862cbb9f1c",
+      "subject": "KS046",
+      "n_units": 48,
+      "n_trials_table": 516
+    },
+    {
+      "eid": "0f77ca5d-73c2-45bd-aa4c-4c5ed275dbde",
+      "pids": "1ab86a7f-578b-4a46-9c9c-df3be97abcca,eb7e9f3f-b79d-4cdd-bc24-b13a4008c1b5",
+      "subject": "NR_0027",
+      "n_units": 69,
+      "n_trials_table": 615
+    },
+    {
+      "eid": "ae8787b1-4229-4d56-b0c2-566b61a25b77",
+      "pids": "06cb2ee3-0fb8-4ace-acbe-19c716f3ca40,310c60b6-d68f-4018-a86a-3668ce296837",
+      "subject": "NR_0027",
+      "n_units": 44,
+      "n_trials_table": 551
+    },
+    {
+      "eid": "5ec72172-3901-4771-8777-6e9490ca51fc",
+      "pids": "298e2a70-9801-45f0-b91c-d6bb9718427e",
+      "subject": "NYU-30",
+      "n_units": 41,
+      "n_trials_table": 694
+    },
+    {
+      "eid": "4d8c7767-981c-4347-8e5e-5d5fffe38534",
+      "pids": "749cb2b7-e57e-4453-a794-f6230e4d0226,ea084e63-c0cb-4e11-8440-302de8fc76ee",
+      "subject": "SWC_038",
+      "n_units": 135,
+      "n_trials_table": 562
+    },
+    {
+      "eid": "1e45d992-c356-40e1-9be1-a506d944896f",
+      "pids": "2b3c3126-11f3-4a8e-aa44-2f965bf8ab9c",
+      "subject": "SWC_038",
+      "n_units": 46,
+      "n_trials_table": 413
+    },
+    {
+      "eid": "f3ce3197-d534-4618-bf81-b687555d1883",
+      "pids": "2a7caaa4-1710-49a1-ade4-db0a986ae6f5",
+      "subject": "SWC_043",
+      "n_units": 26,
+      "n_trials_table": 700
+    },
+    {
+      "eid": "ff4187b5-4176-4e39-8894-53a24b7cf36b",
+      "pids": "ebd18510-c263-4d5b-a736-a588862a6972",
+      "subject": "ZM_2241",
+      "n_units": 69,
+      "n_trials_table": 559
+    },
+    {
+      "eid": "cb2ad999-a6cb-42ff-bf71-1774c57e5308",
+      "pids": "8f4fd564-7e34-4113-a6e4-ae40faa64f7a",
+      "subject": "ZM_2245",
+      "n_units": 36,
+      "n_trials_table": 680
+    }
+  ],
+  "checkpoint": [
+    "8207abc6-6b23-4762-92b4-82e05bed5143",
+    "2e6e179c-fccc-4e8f-9448-ce5b6858a183",
+    "d2918f52-8280-43c0-924b-029b2317e62c",
+    "aad23144-0e52-4eac-80c5-c4ee2decb198",
+    "ee8b36de-779f-4dea-901f-e0141c95722b",
+    "ae8787b1-4229-4d56-b0c2-566b61a25b77",
+    "fb70ebf7-8175-42b0-9b7a-7c6e8612226e",
+    "f3ce3197-d534-4618-bf81-b687555d1883",
+    "ff4187b5-4176-4e39-8894-53a24b7cf36b",
+    "dfbe628d-365b-461c-a07f-8b9911ba83aa"
+  ]
+}

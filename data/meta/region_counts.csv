@@ -1,0 +1,5 @@
+region,n_sessions,n_subjects,median_units,findling_prior_r2,eligible
+ACAd,4,4,32.5,0.0469221578322657,False
+MOp,14,12,49.0,0.0607789653443083,False
+MOs,16,13,49.0,0.0523267469191827,True
+VISp,10,8,38.0,0.0193965887768556,False
