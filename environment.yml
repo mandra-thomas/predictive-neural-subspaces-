@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12          # 3.10 is EOL (Oct 2026); fall back to 3.11 if the IBL stack fails to install
+  - numba            # from conda-forge: pip has no llvmlite wheel for Intel macOS and fails to build it
   - pip
   - pip:
       - ONE-api==3.6.2
