@@ -17,3 +17,13 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-16 09:10 | 3d808e1-dirty | 3d83323a46 | 04_fit_subspaces | d=5; 16/16 ok |
 | 2026-11-16 09:12 | 3d808e1-dirty | 3d83323a46 | 05_decode | d=5; n_pseudo=200; 16/16 ok |
 | 2026-11-16 09:12 | 3d808e1-dirty | 3d83323a46 | 06_stats | d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00256; P2 prior p_holm=0.892; P3 cur_side p_holm=0.0061 |
+| 2026-11-16 09:15 | e8a277f | 3d83323a46 | 02_preprocess | 16 sessions requested; 16 included |
+| 2026-11-16 09:17 | e8a277f-dirty | 3d83323a46 | 04_fit_subspaces | d=5; 16/16 ok |
+| 2026-11-16 09:25 | e8a277f-dirty | 3d83323a46 | 05_decode | d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-16 09:25 | e8a277f-dirty | 3d83323a46 | 06_stats | d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0479; P2 prior p_holm=0.999; P3 cur_side p_holm=0.0121 |
+| 2026-11-16 09:27 | e8a277f-dirty | 3d83323a46 | 04_fit_subspaces | d=3; 16/16 ok |
+| 2026-11-16 09:31 | e8a277f-dirty | 3d83323a46 | 05_decode | d=3; n_pseudo=200; 16/16 ok |
+| 2026-11-16 09:31 | e8a277f-dirty | 3d83323a46 | 06_stats | d=3; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0491; P2 prior p_holm=0.227; P3 cur_side p_holm=0.11 |
+| 2026-11-16 09:33 | e8a277f-dirty | 3d83323a46 | 04_fit_subspaces | d=10; 16/16 ok |
+| 2026-11-16 09:36 | e8a277f-dirty | 3d83323a46 | 05_decode | d=10; n_pseudo=200; 16/16 ok |
+| 2026-11-16 09:36 | e8a277f-dirty | 3d83323a46 | 06_stats | d=10; 12 sessions/10 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00293; P2 prior p_holm=0.812; P3 cur_side p_holm=0.00586 |
