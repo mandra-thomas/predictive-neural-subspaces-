@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pns"
+version = "0.1.0"
+description = "Prediction horizon and the content of neural population subspaces (IBL Brain-Wide Map)"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "scikit-learn", "pandas", "pyarrow", "matplotlib", "joblib", "pyyaml"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

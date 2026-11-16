@@ -1,0 +1,14 @@
+data/one_cache/
+data/interim/
+results/
+figures/
+paper-brain-wide-map/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# the proposal PDF is kept out of the repository
+/*.pdf
+slurm/logs/

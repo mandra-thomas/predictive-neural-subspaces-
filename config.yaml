@@ -1,0 +1,63 @@
+# Frozen analysis constants.
+# Change a value only through a logged amendment (AMENDMENTS.md + ANALYSIS_LOG.md).
+# The region and session list are NOT set here: scripts/01_census.py freezes them in data/meta/frozen.json.
+
+candidate_regions: [MOp, MOs, ACAd, VISp]
+
+data:
+  agg_tag: 2024_Q2_IBL_et_al_BWM   # the only aggregate tag with a trials-table hash in brainwidemap
+  spike_revision: "2024-05-06"     # hard-coded inside brainwidemap.load_good_units (recorded, not passed)
+  trials_revision: "2024-07-10"
+  one_base_url: https://openalyx.internationalbrainlab.org
+  one_username: intbrainlab        # required since ONE 3.6.0 (default login is now blank)
+  one_password: international
+
+paths:                             # relative to the repo root; each overridable by env var
+  one_cache: data/one_cache        # PNS_ONE_CACHE
+  data: data                       # PNS_DATA
+  results: results                 # PNS_RESULTS
+  figures: figures                 # PNS_FIGURES
+
+binning:
+  bin_s: 0.5
+  min_rate_hz: 0.1                 # units below this rate over the task epoch are dropped (guards z-scoring)
+
+lags_bins: [1, 4, 16, 60]          # 0.5, 2, 8, 30 s
+
+model:
+  d: 5
+  d_sens: [3, 10]
+  d10_min_units: 41                # d = 10 only when p > 40
+  alpha_log10: [-3, 3, 13]         # np.logspace(start, stop, num); lambda = alpha * tr(X'X) / p
+
+cv:
+  n_folds: 5
+  embargo_bins: 10
+  half_gap_bins: 60
+  n_chunks_continuous: 20
+
+inclusion:
+  min_units: 20
+  min_trials: 400                  # counted after the BWM trial mask
+  min_animals: 8
+  n_checkpoint: 10
+
+windows:                           # seconds, [start, end) relative to the event
+  pre_stim:  {event: stimOn_times,        win: [-0.6, -0.1]}
+  post_stim: {event: stimOn_times,        win: [0.0, 0.5]}
+  choice:    {event: firstMovement_times, win: [-0.5, 0.0]}
+  feedback:  {event: feedback_times,      win: [0.0, 0.5]}
+
+decode:
+  C: 1.0                           # logistic regression, fixed across lags / real / null
+  ridge_alpha: 1.0                 # ridge for continuous targets
+
+null:
+  n_pseudo: 200
+
+gate:                              # Findling-style replication on the full population
+  n_folds: 5
+  n_pseudo: 200
+
+n_jobs: 6
+seed: 0
