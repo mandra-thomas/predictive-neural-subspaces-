@@ -15,6 +15,13 @@ pip install -e .
 pytest -q                      # unit tests + synthetic end-to-end controls (about 2 min)
 ```
 
+One-time IBL login with your own account (https://openalyx.internationalbrainlab.org/signup). Run this in your own terminal; the password is typed at a prompt and only a token is cached in `~/.one`:
+
+```bash
+python -c "import one.params as p; p.setup('https://openalyx.internationalbrainlab.org', silent=True, username='YOUR_USERNAME')"
+python -c "from one.api import ONE; ONE(base_url='https://openalyx.internationalbrainlab.org', silent=False)"
+```
+
 ## Pipeline
 
 Each script caches its outputs per session and skips sessions that are already done. Pass `--force` to recompute.

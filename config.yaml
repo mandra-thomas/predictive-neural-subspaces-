@@ -9,8 +9,10 @@ data:
   spike_revision: "2024-05-06"     # hard-coded inside brainwidemap.load_good_units (recorded, not passed)
   trials_revision: "2024-07-10"
   one_base_url: https://openalyx.internationalbrainlab.org
-  one_username: intbrainlab        # required since ONE 3.6.0 (default login is now blank)
-  one_password: international
+  # Login: use your own openalyx account. Credentials are NOT stored here. Run once (see README):
+  #   ONE.setup(username=...) then ONE(silent=False) to enter the password; ONE caches the token in ~/.one.
+  # Optional override: env var PNS_ONE_USERNAME. The shared intbrainlab account is being retired.
+  one_username: null
 
 paths:                             # relative to the repo root; each overridable by env var
   one_cache: data/one_cache        # PNS_ONE_CACHE

@@ -17,11 +17,18 @@ from .pipeline import TRIAL_KEYS
 
 
 def get_one(cfg: dict):
+    """Connect with the user's own account: username from $PNS_ONE_USERNAME, config, or ONE's saved params;
+    the password is never stored in the repo (ONE caches a token after one interactive login)."""
+    import os
+
     from one.api import ONE
     cache = Path(cfg["paths"]["one_cache"])
     cache.mkdir(parents=True, exist_ok=True)
-    return ONE(base_url=cfg["data"]["one_base_url"], username=cfg["data"]["one_username"],
-               password=cfg["data"]["one_password"], silent=True, cache_dir=cache)
+    kw = {}
+    username = os.environ.get("PNS_ONE_USERNAME") or cfg["data"].get("one_username")
+    if username:
+        kw["username"] = username
+    return ONE(base_url=cfg["data"]["one_base_url"], silent=True, cache_dir=cache, **kw)
 
 
 def aggregate_tables(one, cfg: dict) -> tuple[Path, Path]:
