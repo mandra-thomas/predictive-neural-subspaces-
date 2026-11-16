@@ -12,3 +12,4 @@ __pycache__/
 # the proposal PDF is kept out of the repository
 /*.pdf
 slurm/logs/
+logs/

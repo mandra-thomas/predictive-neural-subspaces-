@@ -20,7 +20,7 @@ def extra(p):
 def main():
     args, cfg, n_jobs = setup(__doc__, extra)
     d = args.d or cfg["model"]["d"]
-    n_pseudo = args.n_pseudo if args.n_pseudo is not None else cfg["null"]["n_pseudo"]
+    n_pseudo = args.n_pseudo if args.n_pseudo is not None else cfg["pseudo_null"]["n_pseudo"]
     sd, dd, nd = out_dir(cfg, "subspaces"), out_dir(cfg, "decoding"), out_dir(cfg, "null")
     eids = select_eids(cfg, args)
 

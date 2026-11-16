@@ -54,7 +54,7 @@ decode:
   C: 1.0                           # logistic regression, fixed across lags / real / null
   ridge_alpha: 1.0                 # ridge for continuous targets
 
-null:
+pseudo_null:
   n_pseudo: 200
 
 gate:                              # Findling-style replication on the full population
