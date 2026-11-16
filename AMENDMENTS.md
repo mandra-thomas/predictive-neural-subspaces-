@@ -58,3 +58,13 @@ All are one-sided paired Wilcoxon tests across animals, with sessions averaged w
 - **P3 Current side.** [AUC(0.5 s) − AUC(30 s)], corrected by the paired-difference null on nonzero-contrast trials, is greater than 0.
 
 **Expected-outcome note.** If there is one shared slow mode, the expected result is nesting, and P2 may be null. The secondary measures A3 and A4 distinguish "nested" from "no slow content".
+
+## Post-registration amendments (after the first full run)
+
+These were made after results were seen. Each is a bug fix or a clearly labelled post hoc check, and the
+results from before the change are kept and reported alongside the corrected ones.
+
+| # | When | Change | Why |
+|---|---|---|---|
+| D10 | 2026-11-16, after the d=3/5/10 and residual runs | z-score SD floor raised from 1e-3 to 0.218, the SD of sqrt(Poisson counts) for a unit at the 0.1 Hz inclusion rate in 0.5 s bins | **Bug.** Found while diagnosing two sessions (CSHL049, ZM_2245) with held-out R² ≈ 0 for *every* method, full-rank ridge included. A unit that is silent across a training fold but fires in the test fold got a 1e-3 SD, so its held-out z-variance reached ~10⁵ and made up > 99% of the pooled test variance. That corrupted the CV R² and, through it, the session α. Whole-session z-scoring (which defines the geometry and decoding subspaces) is unaffected, since every session's smallest whole-session SD is already ≥ 0.22. The fix changes fold-wise and half-wise z-scoring only. Pre-fix outputs are kept in `results/prefix_D10/` and `results_residual/prefix_D10/`. |
+| P1h | 2026-11-16 | `scripts/08_robustness.py`: leave-one-animal-out refits of the three primary tests, and removal of flagged sessions | **Post hoc**, not pre-registered. Reported as a robustness check only. |
