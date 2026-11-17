@@ -45,3 +45,5 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-16 11:07 | c6893b1-dirty | 3d83323a46 | 06_stats | [results: results_residual] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0134; P2 prior p_holm=0.996; P3 cur_side p_holm=0.00513 |
 | 2026-11-16 11:08 | c6893b1-dirty | 3d83323a46 | 08_robustness | [results: results_residual] POST HOC d=5; LOAO max p_holm P1=0.0269, P2=0.998, P3=0.0103 |
 | 2026-11-16 | - | - | note | Rows from 10:47 to 11:08 are the full rerun after amendment D10 (z-score SD floor; commit c6893b1). The "-dirty" flag on those rows is only the in-progress Fig 1b label fix in scripts/07_figures.py; no analysis code was uncommitted. Raw d=5 primary p-values are unchanged. Residual P1 Holm p went from 0.048 to 0.013. d=3 P1 went from 0.049 to 0.032. Earlier 08_robustness rows (before 10:47) are pre-fix. Pre-fix outputs are in results*/prefix_D10/. |
+| 2026-11-17 03:03 | e965b42-dirty | 3d83323a46 | 09_fetch_state_signals | A12 pilot inputs; 1/1 ok |
+| 2026-11-17 03:06 | e965b42-dirty | 3d83323a46 | 09_fetch_state_signals | A12 pilot inputs; 16/16 ok |

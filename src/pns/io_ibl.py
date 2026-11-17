@@ -104,3 +104,45 @@ def load_session(one, cfg: dict, eid: str, pids: list[str], region: str) -> dict
     return {"spike_times": t[order], "spike_clusters": c[order], "n_units": offset, "trials": trials,
             "mask": np.asarray(mask, dtype=bool), "wheel_t": sl.wheel["times"].to_numpy(),
             "wheel_v": sl.wheel["velocity"].to_numpy(), "units": pd.concat(unit_info, ignore_index=True)}
+
+
+def probe_unit_counts(one, cfg: dict, eid: str, region: str) -> dict:
+    """Good units in `region` per probe insertion (from the aggregate clusters table), for weighting probe motion."""
+    from brainwidemap.bwm_loading import filter_units_region
+    _, clusters_path = aggregate_tables(one, cfg)
+    u = filter_units_region([eid], clusters_table=clusters_path, mapping="Beryl", min_qc=1.0,
+                            min_units_sessions=(1, 1))
+    u = u[u["Beryl"] == region]
+    return u.groupby("pid").size().to_dict() if "pid" in u.columns else {}
+
+
+def load_state_signals(one, eid: str, pids: list[str], weights: dict, drift_revision: str) -> dict:
+    """Probe-motion estimate (pykilosort drift registration, mean over depth points, unit-weighted across probes)
+    and left-camera pupil diameter (smoothed) for one session (amendment A12)."""
+    traces, ws, t_ref = [], [], None
+    for pid in pids:
+        _, pname = one.pid2eid(pid)
+        coll = f"alf/{pname}/pykilosort"
+        dt = np.asarray(one.load_dataset(eid, "drift.times.npy", collection=coll, revision=drift_revision))
+        dm = np.asarray(one.load_dataset(eid, "drift.um.npy", collection=coll, revision=drift_revision))
+        tr = dm.mean(axis=1) if dm.ndim == 2 else dm
+        if t_ref is None:
+            t_ref = dt
+        traces.append(np.interp(t_ref, dt, tr))
+        ws.append(float(weights.get(pid, 0)))
+    ws = np.asarray(ws)
+    if ws.sum() == 0:
+        ws = np.ones(len(ws))
+    motion = np.average(np.vstack(traces), axis=0, weights=ws)
+    out = {"motion_t": t_ref, "motion_um": motion, "probe_weights": ws}
+    try:
+        feats = one.load_dataset(eid, "_ibl_leftCamera.features.pqt", collection="alf")
+        cam_t = np.asarray(one.load_dataset(eid, "_ibl_leftCamera.times.npy", collection="alf"))
+        pup = feats["pupilDiameter_smooth"].to_numpy(dtype=float)
+        n = min(len(pup), len(cam_t))
+        out.update({"pupil_t": cam_t[:n], "pupil": pup[:n], "pupil_len_mismatch": int(len(pup) != len(cam_t))})
+        recs = [d for d in one.list_datasets(eid) if d.endswith("_ibl_leftCamera.features.pqt")]
+        out["pupil_datasets"] = np.array(recs)
+    except Exception as e:                                         # missing video: recorded, session excluded
+        out["pupil_error"] = np.array(str(e)[:300])
+    return out
