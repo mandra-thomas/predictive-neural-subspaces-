@@ -219,13 +219,52 @@ mode an artifact or a behavioural state? A small follow-up could answer that (se
   by construction.
 - One analysis decision (D10) was made after results were seen. It is a bug fix and is reported transparently.
 
+## Pilot: is the slow mode recording drift or brain state? (amendment A12, run on PACE ICE)
+
+The slow mode is the leading direction of the 30 s subspace, followed through the session in 30 s windows. Three
+tests were written down before any probe-motion or pupil data was downloaded, along with the rule for reading them.
+
+**Test 1: remove drifting units.** I kept only units firing at least 0.1 Hz in every fifth of the session. That left
+13 of 16 sessions from 12 mice; three sessions fell below 20 stable units. Refitting from scratch, the 30 s subspace
+still decodes elapsed time with an R-squared of 0.77 (originally 0.84; PCA 0.72, random 0.50). The drift flag still
+fires in 12 of 13 sessions, and the 0.5 s subspace still contains 91% of the slow direction. The primary results are
+unchanged:
+
+| Primary test | Holm p, stable units | Holm p, original |
+|---|---|---|
+| Geometry | 0.002 | 0.003 |
+| Prior | 0.97 | 0.89 |
+| Current side | 0.027 | 0.006 |
+
+Units entering and leaving the recording do not create the slow mode. By the pre-registered rule, it "survives".
+
+**Test 2: probe motion.** IBL's spike-sorting motion estimate for these insertions is small: the median range across
+a session is 7.9 micrometres, from 1 to 19 at the extremes. The slow mode correlates strongly with each session's own
+motion trace (mean absolute correlation 0.74). But it correlates just as strongly with *other* sessions' motion
+traces, so the session-permutation correction is −0.006 (p = 0.39). After removing linear trends from both, the
+correction is +0.062 (p = 0.14). The slow mode follows probe motion no more than any slowly trending signal would.
+
+**Test 3: pupil.** 15 sessions had usable pupil traces. The real correlation (mean absolute 0.35) is again no larger
+than with other sessions' pupil traces: correction −0.001 (p = 0.42), and −0.004 (p = 0.55) after detrending.
+
+**Reading.** The pre-registered overall reading is "mixed or undetermined". The mode survives removal of drifting
+units, but neither probe motion nor pupil explains its session-specific shape. There is an important limitation,
+visible only now. In most sessions the slow mode is close to a straight ramp: its correlation with elapsed time has
+a median of 0.96. Any two slowly trending signals correlate about equally well with a ramp, so a session-permutation
+test has little power to tell candidate causes apart unless they produce different *shapes*. What the pilot does rule
+out is the simplest artifact story, units dropping out. Recording-side causes that the motion estimate misses remain
+possible, as do slow state changes that pupil doesn't capture, such as satiety or task engagement. Telling these
+apart needs signals that sometimes reverse within a session, for example engagement states, or sessions where the
+mode is not a ramp. The literature review (`reports/Slow neural modes literature review.md`) lays out those analyses.
+
 ## Possible next steps
 
-1. **Stationarity control** (about 15 min of compute). Refit with only units active in every fifth of the session. If
-   the slow mode and elapsed-time decoding largely vanish, drift is an artifact. If they remain, it is a population
-   state.
-2. **Behavioural relevance of the slow mode** (about half a day). Test whether the slow-mode projection predicts
-   reaction time, lapse rate or engagement after detrending session time. This parallels Cowley et al. 2020.
+1. **Stationarity control.** Done (amendment A12, above). The slow mode survives.
+2. **Engagement and satiety as competing explanations.** IBL publishes a per-trial engagement probability
+   (`int-brain-lab/engage`). Sessions where engagement rises and falls rather than declining steadily are the only
+   ones that can separate state from a generic ramp. Cumulative reward is a proxy for satiety.
+2b. **Artifact checks the motion estimate cannot make.** Per-unit spike amplitude over time, and the slow mode
+   recomputed from sorting-free multi-unit activity per depth bin.
 3. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
 
 ## Suggested slide outline (Nov 30)
