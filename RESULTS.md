@@ -263,9 +263,9 @@ mode is not a ramp. The literature review (`reports/Slow neural modes literature
 2. **Engagement and satiety as competing explanations.** IBL publishes a per-trial engagement probability
    (`int-brain-lab/engage`). Sessions where engagement rises and falls rather than declining steadily are the only
    ones that can separate state from a generic ramp. Cumulative reward is a proxy for satiety.
-2b. **Artifact checks the motion estimate cannot make.** Per-unit spike amplitude over time, and the slow mode
+3. **Artifact checks the motion estimate cannot make.** Per-unit spike amplitude over time, and the slow mode
    recomputed from sorting-free multi-unit activity per depth bin.
-3. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
+4. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
 
 ## Suggested slide outline (Nov 30)
 
