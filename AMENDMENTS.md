@@ -124,3 +124,78 @@ can co-vary (movement can shift the brain), and that limitation is stated in adv
 
 **Compute.** Runs as a Slurm job on PACE ICE. Data downloads that need the IBL login are done locally, and only the
 derived arrays are copied to ICE.
+
+## A13: second pilot, separating causes of the slow mode (pre-registered 2026-11-21, before the engagement table or the full spike files were downloaded)
+
+**Why.** The first pilot (A12) showed the slow mode survives removal of drifting units, and is not specifically tied
+to the session's probe-motion estimate or pupil. But it is close to a straight ramp in most sessions, so correlations
+with other slowly trending signals cannot discriminate. This pilot uses three kinds of evidence that do not rely on
+matching one ramp to another. Everything here is exploratory and does not touch the primary tests.
+
+**Slow mode.** Defined exactly as in A12: the first basis column of the full-session 30 s-lag readout subspace from the
+original fits, projected activity averaged in 30 s windows, sign fixed to increase with elapsed time.
+
+**Part 1: engagement and satiety beyond the ramp.**
+- Engagement: per-trial posterior probability of the engaged state, `p_state1`, from IBL's public GLM-HMM output
+  (`int-brain-lab/engage`, file `merged_behavioral_and_states.pqt`; Schartner's adaptation of Ashwood et al. 2022).
+  The window value is the mean over trials whose stimulus onset falls in the window.
+- Alignment: rows are matched to our trial table by session and order. A session is used only if `contrastLeft`,
+  `contrastRight` and reward agree on at least 99% of trials; otherwise it is excluded and reported.
+- Satiety proxy: cumulative number of rewarded trials up to the end of each window.
+- Statistic: regress the slow mode, engagement and cumulative reward each on a quadratic in window index (removing
+  the ramp and simple curvature), then take the absolute correlation between residuals. This is done separately for
+  engagement and for satiety.
+- Null and test: session permutation, as in A12, with other sessions' residualized signal aligned from task start.
+  Corrected score = real minus median cross-session value. One-sided Wilcoxon across animals.
+- Secondary:
+  - sign consistency of the signed residual correlation (two-sided Wilcoxon);
+  - the same test restricted to sessions whose engagement varies beyond the trend (residual SD at least 0.1).
+
+**Part 2: spike-amplitude signature of recording artifact.**
+- For each analysed unit: median spike amplitude per 30 s window (windows with fewer than 5 spikes are NaN), using
+  the cached `passingSpikes` table. Amplitude trend = Spearman correlation of window amplitude with time.
+- 2a: within each session, Spearman correlation across units between the unit's slow-mode loading (same sign
+  convention) and its amplitude trend. A recording artifact (units shrinking toward the detection threshold lose
+  detected spikes) predicts a positive correlation. Test: Fisher z averaged within animal, one-sided Wilcoxon > 0.
+- 2b: an amplitude-stable copy of the data keeps units that pass the A12 rate-stability rule and whose absolute
+  amplitude trend is below 0.5. Scripts 04 to 06 are refit unchanged (at least 20 units per session). The reading
+  rules are those of A12 test 1:
+  - "survives" if the 30 s subspace still decodes elapsed time with at least 75% of the original R-squared (0.63);
+  - "turnover-driven" if it falls below 50% (0.42) and the drift flag fires in at most 25% of sessions;
+  - "intermediate" otherwise.
+
+**Part 3: sorting-independent multi-unit activity.**
+- Every detected spike (`spikes.times` and `spikes.depths`, spike-sorting revision 2024-05-06), whatever its cluster
+  or quality label, at depths within the span of that probe's MOs channels.
+- These spikes are binned into 50 µm depth bins, which act as "channels"; channels below 0.1 Hz are dropped, and
+  sessions with fewer than 10 channels are excluded. The original session's bins and trial windows are reused, and
+  scripts 04 to 06 run unchanged at d = 5.
+- 3a, the multi-unit slow mode: the 30 s subspace's elapsed-time R-squared (animal mean), and "match", the absolute
+  correlation between the multi-unit slow mode and the unit-based slow mode in the same windows (median over
+  sessions).
+- 3b, the probe-motion signature: within each session, Spearman correlation between the multi-unit slow-mode
+  loadings and the depth derivative of the mean multi-unit rate profile. A physical shift of the probe moves the
+  whole profile, which predicts loadings that follow the profile's slope. Null: loadings shuffled across channels
+  2,000 times, giving a per-session p; sessions are combined with Fisher's method.
+
+**Overall reading.**
+- "Sorting artifact": the multi-unit elapsed-time R-squared is below 0.42, or the amplitude-stable reading is not
+  "survives" while 2a is significant.
+- "Probe motion": the multi-unit mode reproduces the unit mode (R-squared at least 0.63 and median match at least
+  0.7) and the depth-gradient test is significant (combined p below 0.05).
+- "Brain state": the multi-unit mode reproduces the unit mode, the depth-gradient test is not significant, 2a is not
+  significant, the amplitude-stable copy survives, and the engagement or satiety test is significant (p below 0.05).
+- "Mixed or undetermined": anything else.
+
+There is no multiplicity correction (exploratory); all statistics are reported.
+
+**Caveats stated in advance:**
+- Amplitude can fall for biological reasons, such as adaptation at high rates.
+- `spikes.depths` may be in drift-registered coordinates, which would weaken the depth-gradient test. That is checked
+  from the IBL documentation and reported.
+- Engagement is itself a slow behavioural variable, so residual correlations carry only the part not shared with a
+  quadratic trend.
+
+**Compute.** Downloads (engagement table from GitHub, full spike files about 12.8 GB) run locally, where the IBL
+login is. Only compact derived arrays (MOs-depth spike times and depth bins, per-unit spike times and amplitudes) go
+to PACE ICE, where all binning, fitting and testing runs.
