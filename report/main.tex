@@ -74,7 +74,10 @@ Neural population activity mixes processes on many timescales, from sub-second s
 states that drift over minutes. A natural way to separate them is by predictability: a direction in population space
 that still predicts activity 30\,s later must carry a slow process, whereas one that predicts only 0.5\,s ahead can
 be fast. This project asked whether the \emph{prediction horizon} of a linear predictive objective selects what the
-resulting population subspace encodes.
+resulting population subspace encodes. If it does, horizon-specific subspaces would offer an unsupervised route to
+latent cognitive variables, such as beliefs about hidden task state, that are otherwise found only by supervised
+decoding; if it does not, it matters to know what long-horizon objectives, increasingly used in neural data analysis,
+recover instead.
 
 The International Brain Laboratory (IBL) visual decision task is well suited to the question
 \citep{ibl2021task,ibl2025bwm}. On each trial a grating appears on the left or right, and the probability that it
@@ -96,8 +99,8 @@ other two pre-registered predictions held, but weakly: long-lag subspaces carry 
 more than their split-half floors (mostly because short-lag subspaces are reproducible and long-lag ones are not).
 What the long-lag subspaces contain is one slow mode that tracks time in the session. Three exploratory pilots then
 tested, one by one, the recording artifacts that would most simply produce it, and the available behavioural
-covariates; none accounts for it. The result is a controlled negative finding plus a characterized but unexplained
-slow mode.
+covariates; none accounts for it. The proposal's risk table anticipated this branch (``the slow subspace is drift'':
+report a negative result on long-lag objectives and characterize the shared slow mode), and the report follows it.
 
 % =====================================================================================================
 \section{Related work}
@@ -118,7 +121,8 @@ principal components \citep{antognini2018}, and PCA can produce oscillation-like
 activity across the Brain-Wide Map \citep{ibl2025bwm}, using pseudo-sessions (block sequences resampled from the task's
 generative process) to control for slow drift. That null follows \citet{harris2020}, who showed that
 cross-validation, circular shifts and detrending can all give high false-positive rates when slowly drifting signals
-are correlated, whereas tests built from the experimenter's own randomization remain valid.
+are correlated, whereas tests built from the experimenter's own randomization remain valid. In the same dataset,
+\citet{shi2025} mapped intrinsic timescales of single neurons across the brain, but not of population subspaces.
 
 \paragraph{Slow drift, arousal and movement.} \citet{cowley2020} described a one-dimensional ``slow drift'' of
 macaque V4 and prefrontal activity that covaried with impulsivity-like behaviour and pupil size; their evidence for
@@ -245,11 +249,10 @@ null-corrected change in prior $R^2$ from 0.5\,s to 30\,s is positive; and \text
 null-corrected drop in current-side AUC from 0.5\,s to 30\,s is positive.
 
 The amendment file, committed before any real-data fit, records nine deviations from the proposal and eleven additions
-(Appendix~\ref{app:prereg}). The most consequential are the single shared $\alpha$, one-sided tests, the paired-difference
-null summarized by its median, and a pre-registered expectation that a shared slow mode would make P2 null; the nesting
-index and complement decoding were added to tell ``nested'' apart from ``no slow content''. A trial-locked residual
-rerun (event-locked responses to stimulus, movement and feedback removed with a raised-cosine regression before
-refitting) was pre-registered as a sensitivity analysis.
+(Appendix~\ref{app:prereg}). It also recorded the expectation that a shared slow mode would make P2 null, and added the nesting index and
+complement decoding to tell ``nested'' apart from ``no slow content''. A trial-locked residual rerun (responses to stimulus, movement and feedback removed with a linear GLM of
+raised-cosine event kernels before refitting) was pre-registered as a sensitivity analysis; with the GLM-HMM
+engagement probe of Section~\ref{sec:slowmode}, it implements two of the proposal's planned extensions.
 
 \paragraph{One post-registration change (D10, a bug fix).} While diagnosing two sessions in which every method had
 held-out $R^2\approx 0$, I found that the z-scoring floor on the standard deviation ($10^{-3}$) let a unit silent
@@ -261,8 +264,9 @@ $p$-values were unchanged, the residual P1 moved from 0.048 to 0.013, and an ear
 (reduced-rank beating full-rank ridge at 30\,s) proved to be an artifact of the bug. All numbers here are post-fix.
 
 Leave-one-mouse-out refits and removal of an outlier mouse were added afterwards and are labelled post hoc. The three
-follow-up pilots in Section~\ref{sec:slowmode} were each pre-registered, with a reading rule, before their data were
-downloaded or computed; they are exploratory and uncorrected for multiplicity.
+follow-up pilots in Section~\ref{sec:slowmode} are separate exploratory extensions that do not change the main
+analysis; each was pre-registered with a reading rule before its data were downloaded or computed, and none is
+corrected for multiplicity.
 
 % =====================================================================================================
 \section{Results}
@@ -272,8 +276,7 @@ downloaded or computed; they are exploratory and uncorrected for multiplicity.
 \label{sec:gate}
 
 The prior gate passed. The median null-corrected prior $R^2$ from the full population was 0.064, 5 of 16 sessions were
-individually significant, and the Fisher-combined $p$ was $1.2\times10^{-5}$. So the block prior is decodable from MOs,
-as \citet{findling2025} reported, and a failure to find it in subspaces is not a failure to find it at all.
+individually significant, and the Fisher-combined $p$ was $1.2\times10^{-5}$. The prior is decodable from MOs, as \citet{findling2025} reported.
 
 The estimator behaved as intended (Appendix Table~\ref{tab:estimator} and Figure~\ref{fig:estimator}). Lagged RRR
 predicted future activity better than PCA at every lag, by 0.011 at 0.5\,s up to 0.022 at 30\,s ($p\le0.005$,
@@ -448,20 +451,20 @@ almost exactly, so it is not created by cluster assignment, and the multi-unit l
 signature. Spike amplitudes, however, are far from stable (about 59\% of units have a consistent, mostly declining
 trend), and units whose amplitude shrinks tend slightly to be those whose rate falls along the mode. Only 5 sessions
 kept 20 or more units stable in both rate and amplitude; there, elapsed-time $R^2$ fell to 0.49, ``intermediate'' and
-suggestive at best. Engagement and satiety were not tied to the mode beyond the trend; in the 11 sessions where
+suggestive at best. Engagement (the per-trial engaged-state probability from IBL's GLM-HMM fits, after \citealp{ashwood2022}) and
+satiety (cumulative reward) were not tied to the mode beyond the trend; in the 11 sessions where
 engagement genuinely fluctuates $p=0.049$ (uncorrected), but the sign was inconsistent across mice ($p=0.95$).
 
 The pre-registered rule output the label ``sorting artifact'', through its second branch (amplitude-stable refit not
 ``survives'' and the amplitude-loading test significant). The label is a misnomer: the most direct sorting test, the
-multi-unit refit, says the mode is \emph{not} a sorting artifact. The rule had not anticipated that amplitude loss
-could act through spike \emph{detection} rather than cluster assignment. I initially read the evidence as detection
-loss at the electrode-tissue interface; the third pilot tested that reading directly, and it did not hold up.
+multi-unit refit, says the mode is \emph{not} a sorting artifact. The rule had not anticipated amplitude loss acting through spike \emph{detection}; I initially read the evidence that
+way, and the third pilot tested that reading directly. It did not hold up.
 
 \paragraph{Pilot 3 (A14): can amplitude loss account for the mode?} Regressing each unit's rate on its amplitude over
 time cannot fail as a test, because both are near-ramps. The pilot instead estimated the coupling only from
 co-fluctuations around the time trend, bracketed the answer with a conservative and a maximal correction, and tested
 whether amplitude change is concentrated early, as settling after insertion would predict. Each unit's spike count
-per 30\,s window was modelled by a Poisson regression on its relative amplitude $\tilde a_u(t)$ with a quadratic in
+per 30\,s window was modelled by a Poisson GLM on its relative amplitude $\tilde a_u(t)$ with a quadratic in
 time as nuisance terms. Detection loss predicts a positive coefficient; it was negative (mean $-1.54$): a unit fires
 about 16\% \emph{more} in windows where its spikes are 10\% smaller, the known effect of fast firing on spike
 amplitude, and this held for isolated spikes (post hoc). The corrected copies rescaled each unit's counts by
@@ -480,50 +483,43 @@ ended before the task began would be invisible.
 
 \begin{figure}[t]
   \centering
-  \maybefig{fig4_slowmode_controls.pdf}{width=0.62\linewidth}{2.2in}
-  \caption{Held-out elapsed-time $R^2$ of the 30\,s subspace after refitting on each modified version of the data
-  (dots: mice; bars: mean and 95\% CI; solid: original 0.84; dashed: pre-registered 75\% ``survives'' and 50\%
-  ``removed'' thresholds; orange: post hoc). Only the 5-session amplitude-stable subset falls below 75\%
-  (``intermediate'', suggestive at best).}
+  \maybefig{fig4_slowmode_controls.pdf}{width=0.6\linewidth}{2.1in}
+  \caption{Held-out elapsed-time $R^2$ of the 30\,s subspace after refitting on each modified data version (dots:
+  mice; bars: mean, 95\% CI; dashed: pre-registered 75\% and 50\% thresholds; orange: post hoc). Only the 5-session
+  amplitude-stable subset is below 75\% (``intermediate'').}
   \label{fig:controls}
 \end{figure}
 
-\paragraph{Where this leaves the slow mode.} What remains is a slow,
-close-to-linear change in MOs firing that tracks time in the session and survives every recording control applied,
-apart from the inconclusive five-session amplitude-stable subset. That makes a neural origin (slow arousal or
-neuromodulatory drift, fatigue, or elapsed-time coding) more plausible than before, but it is not established:
-behavioural comparisons are limited by the ramp shape, the step-like sessions suggest that some instances are discrete
-events of unknown cause, and unmeasured recording factors remain possible.
+\paragraph{Where this leaves the slow mode.} What remains is a slow, near-linear change in MOs firing that tracks
+session time and survives every recording control applied, apart from the inconclusive amplitude-stable subset. A
+neural origin (slow arousal or neuromodulatory drift, fatigue, elapsed-time coding) is now more plausible but not
+established: the ramp shape limits behavioural comparisons, the step-like sessions suggest discrete events of unknown
+cause, and unmeasured recording factors remain possible.
 
 % =====================================================================================================
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What the results say about the question.} The prediction horizon does change which directions are
-selected, but not as hypothesized. At 0.5\,s the predictive subspace is reproducible and carries within-trial variables
-about as well as a random covariance-matched subspace; at 30\,s it collapses onto a slow mode, shared with the
-short-lag subspace, whose direction is not reproducible across halves and which indexes time in the session rather
-than the latent variable the mouse must track. The prior is decodable from the population but not part of its
-predictable dynamics at any horizon tested. One reading is that the prior is a small, event-updated modulation rather
-than a slow dynamical mode, which variance- or predictability-ranked methods would miss; this is untested here, since
-absence from a rank-5 subspace filled by a stronger slow signal does not show that the prior is non-dynamical.
+\paragraph{What the results say about the question.} The horizon does change which directions are selected, but
+not as hypothesized: at 0.5\,s the subspace is reproducible and carries within-trial variables about as well as a
+random covariance-matched subspace, while at 30\,s it collapses onto a slow mode that is shared with the short-lag
+subspace, not reproducible across halves, and indexes time rather than the latent variable the mouse must track. The
+prior is decodable but not part of the population's predictable dynamics. One reading is that it is a small,
+event-updated modulation in quiet directions, which variance- or predictability-ranked methods would miss; this is
+untested, since absence from a rank-5 subspace filled by a stronger slow signal does not show that the prior is
+non-dynamical.
 
-\paragraph{A methodological lesson.} Long-horizon predictive objectives detect the slowest variance in a session
-\citep{boxtiao1977}, which in hour-long recordings is confounded with time; elapsed-time decoding, pseudo-session nulls,
-covariance-matched split-half baselines and care with fold-wise normalization (the D10 bug) are needed before reading
-such subspaces as cognition.
+\paragraph{A methodological lesson.} Long-horizon objectives detect a session's slowest variance
+\citep{boxtiao1977}, which is confounded with time; they need elapsed-time decoding, pseudo-session nulls,
+covariance-matched baselines and careful fold-wise normalization before their subspaces are read as cognition.
 
-\paragraph{Strength of the claims and limitations.} The negative prior result is the strongest: it survives
-residualization, every $d$ and every leave-one-mouse-out refit; but the prior is weak in MOs (corrected $R^2$ about
-0.06), so a subtle redistribution would be missed. P3 is sensitive to $d$, P1 is significant but thin, and the
-slow-mode results rest on exploratory, uncorrected pilots. This is one region and 13 mice; split halves confound
-reproducibility with nonstationarity; a 30\,s lag leaves only about 120 non-overlapping windows per session; and one
-decision (D10) was made after results were seen, as a documented bug fix.
+\paragraph{Limitations.} The prior is weak in MOs (corrected $R^2$ about 0.06); P3 is sensitive to $d$ and P1 is thin;
+the pilots are exploratory and uncorrected; this is one region and 13 mice; split halves confound reproducibility with
+nonstationarity; and a 30\,s lag leaves about 120 independent windows per session.
 
-\paragraph{Future work.} The spontaneous periods outside the task could show whether the slow mode is task-linked. A
-pre-registered replication in a second region recorded on the same probes is in progress, with tests of whether the
-slow mode is shared across regions and tracks reaction time and accuracy beyond the trend; its results are not
-reported here. Scaling up would need two-probe sessions and sessions where the mode or covariates reverse.
+\paragraph{Future work.} Spontaneous periods outside the task could show whether the slow mode is task-linked. A
+pre-registered replication in a second region on the same probes is in progress, testing also whether the slow mode
+is shared across regions and tracks reaction time and accuracy beyond the trend; its results are not reported here.
 
 % TODO(A15): Once A15 is complete, add 2-3 sentences here: whether the core pattern replicated in the second region
 % (pre-registered criteria), whether the two regions' slow modes co-fluctuate beyond the trend (Part 2), and whether
@@ -531,6 +527,24 @@ reported here. Scaling up would need two-probe sessions and sessions where the m
 
 \paragraph{Conclusion.} Predicting MOs activity further ahead did not isolate the block prior; it isolated a slow,
 time-tracking mode that none of the recording controls tested here could explain.
+
+\section*{Code and data availability}
+All recordings are from the public IBL Brain-Wide Map release \citep{ibl2025bwm} (aggregate tag
+\texttt{2024\_Q2\_IBL\_et\_al\_BWM}, spike-sorting revision 2024-05-06), accessed with the IBL ONE interface. The
+project repository holds the analysis library (\texttt{src/pns}), the numbered pipeline and pilot scripts
+(\texttt{scripts/}), frozen constants (\texttt{config.yaml}), unit tests with synthetic positive and negative controls
+(\texttt{tests/}), the pre-registration and every amendment (\texttt{AMENDMENTS.md}), a run-by-run log with commit
+hashes (\texttt{ANALYSIS\_LOG.md}) and a results summary (\texttt{RESULTS.md}). Every number in this report is
+traceable to a result file produced by that pipeline.
+
+% AI-use statement drafted for the author's review; edit to reflect your own contribution before submission.
+\section*{AI use}
+Claude (Anthropic), run as Claude Code, was used extensively in this project: to plan the analysis and adversarially
+review the plan; to write the analysis code and tests; to run the analyses, locally and on the PACE ICE cluster; to
+carry out the literature review; and to draft this report, the presentation slides and the figures, with further AI
+agents reviewing the drafts. The author set the research question and wrote the proposal, made the design decisions
+and amendments, and checked the results. All numbers reported here are traceable to result files in the project
+repository.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
@@ -567,7 +581,7 @@ were seen.
     A2 & Covariance-matched random baseline & Chance level for angles and estimator & pre-reg. \\
     A3--A4 & Nesting index; orthogonal-complement and single-dimension decoding & Distinguish nested from absent & pre-reg. \\
     A5 & Side variables as AUC gain over a prior-only model & Side variables are confounded with the block & pre-reg. \\
-    A6 & Pseudo-session null shared across lags; paired-difference null; median summary & Valid lag contrasts & pre-reg. \\
+    A6 & Pseudo-session null shared across lags; paired-difference null; real minus null median (proposal: mean) & Valid lag contrasts; as Findling et al. & pre-reg. \\
     A7 & Bootstrap CIs; Fisher-combined session $p$; Spearman trend over lags & Secondary summaries & pre-reg. \\
     A8 & Purge, 10-bin embargo; 60-bin gap between halves & Leakage hygiene & pre-reg. \\
     A9 & Choice and feedback probe windows & Unspecified in proposal & pre-reg. \\
@@ -585,6 +599,15 @@ were seen.
 
 \section{Additional results}
 \label{app:extra}
+
+\paragraph{Relation to the proposal.} The proposal promised three figures (geometry, the variables-by-lags decoding
+matrix and the estimator check); these are Figures~\ref{fig:geometry} and~\ref{fig:content} and Appendix
+Figure~\ref{fig:estimator}. Its risk table pre-specified the two fallbacks this project followed: if the slow subspace
+encodes elapsed time and prior decoding fails the null, report a negative result on long-lag objectives; if the lags
+share a slow mode, report it and characterize what it encodes (Section~\ref{sec:slowmode}). Of its ordered extensions,
+the second region is in progress (A15), and the GLM residual rerun (A11) and GLM-HMM engagement probe (A13) were
+carried out. The main analysis, including the rerun after D10, was completed on 16 November 2026; the pilots do not
+alter it.
 
 \paragraph{Geometry details.} Table~\ref{tab:angles} gives mean and first principal angles (means over mice).
 
