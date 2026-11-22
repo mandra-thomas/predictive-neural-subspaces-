@@ -93,7 +93,7 @@ def fig_nesting():
                    color=MUTED, s=12, zorder=1)
         ax.plot([j - 0.25, j + 0.25], [nest[c].mean()] * 2, color=SERIES[0], lw=3, zorder=2)
     ax.axhline(iso, color=INK_2, ls="--", lw=1)
-    ax.text(1.5, iso + 0.03, "isotropic chance", fontsize=9, color=INK_2, ha="right", va="bottom")
+    ax.text(-0.45, iso + 0.03, "isotropic chance", fontsize=10, color=INK_2, ha="left", va="bottom")
     ax.set_xticks(range(2), [l for _, l in cols])
     ax.set_xlim(-0.5, 1.5)
     ax.set_ylim(0, 1.05)
@@ -115,7 +115,8 @@ def fig_nesting():
     ax.set_xticks(range(2), ["stimulus side\n(corrected AUC)", "prior\n(corrected R²)"])
     ax.set_ylim(-0.2, 0.64)
     ax.set_yticks([-0.2, 0, 0.2, 0.4])
-    ax.legend(loc="upper right", ncol=2, fontsize=9, handlelength=1.0, borderaxespad=0.1, columnspacing=0.8)
+    ax.legend(loc="upper right", ncol=2, fontsize=10, handlelength=0.8, borderaxespad=0.1, columnspacing=0.6,
+              handletextpad=0.4)
     ax.set_title("b  decoding, full vs projected", loc="left", fontsize=10)
     fig.tight_layout(pad=0.3, w_pad=0.8)
     fig.savefig(FIG_DIR / "slide_figS1.pdf")
