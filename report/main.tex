@@ -62,8 +62,8 @@ evidence for it was in the 0.5\,s subspace. Current-stimulus information fell wi
 differed by more than their split-half floors, but both effects are modest. Every five-dimensional summary was
 dominated by a slow, near-linear mode that tracks time in the session: elapsed-time $R^2$ was 0.84 for the 30\,s
 subspace, 0.82 at 0.5\,s, 0.80 for PCA and 0.64 for covariance-matched random subspaces. The pattern generalized to
-neighbouring areas recorded on the same probes (15 sessions, 12 mice). Exploratory pre-registered follow-ups found no
-evidence that unit turnover, spike sorting, rigid probe motion or spike-amplitude loss accounts for the slow mode, and
+neighbouring areas recorded on the same probes (15 sessions, 12 mice). Exploratory pre-registered follow-ups found no evidence that unit turnover, spike sorting, rigid probe motion or
+spike-amplitude loss accounts for the slow mode (beyond an inconclusive five-session amplitude-stable subset), and
 its fluctuations around the trend were neither shared across areas nor related to pupil, engagement, satiety,
 reaction time or accuracy. Its origin remains open. In these recordings, long horizons recover session-scale drift
 only slightly more than other low-dimensional summaries do, and such subspaces need elapsed-time diagnostics and
@@ -103,7 +103,8 @@ and 30\,s subspaces differ by more than their split-half floors (mostly because 
 and long-lag ones are not). Every low-dimensional summary, and the long-lag subspaces most of all, is dominated by one
 slow mode that tracks time in the session. The same pattern appeared in neighbouring areas on the same probes.
 Exploratory follow-ups found no evidence that the recording artifacts most likely to produce the mode account for it,
-and no behavioural covariate explained its fluctuations. The proposal's risk table listed this outcome (``the slow
+beyond an inconclusive five-session subset of amplitude-stable units, and no behavioural covariate explained its
+fluctuations. The proposal's risk table listed this outcome (``the slow
 subspace is drift: it encodes elapsed time, and prior decoding does not survive the null''), with the response
 ``report it as a negative result on long-lag objectives''; this report follows that row.
 
@@ -141,8 +142,7 @@ highest-variance dimensions of mouse cortical activity are dominated by spontane
 \citep{stringer2019,musall2019}, and behavioural-state changes can masquerade as time-dependent drift \citep{sadeh2022}.
 
 \paragraph{Recording nonstationarity.} Neuropixels probes \citep{jun2017} move relative to the brain, and IBL's spike
-sorting corrects for this motion \citep{iblsort2022}; residual motion and amplitude change can make units fade in and
-out \citep{iblrepro2025}, putting a slow, time-locked component into any population analysis. I found no prior work
+sorting corrects for this motion \citep{iblsort2022}; residual motion and amplitude change can make units fade in and out \citep{iblsort2022,iblrepro2025}, putting a slow, time-locked component into any population analysis. I found no prior work
 reporting that the leading component of a long-horizon predictive subspace tracks session time.
 
 % =====================================================================================================
@@ -326,7 +326,7 @@ subspaces are biased toward high-variance ones. ``Above chance'' should not be r
   \centering
   \maybefig{rfig_geometry.pdf}{width=\linewidth}{1.9in}
   \caption{Subspace geometry ($d=5$; mouse means, as in the tests). \textbf{a}, readout basis: per-mouse (grey) and
-  mean (blue) angles between fits on opposite halves; dashed, covariance-matched chance. The low grey trace is DY\_014
+  mean (blue; values in parentheses) angles between fits on opposite halves; dashed, covariance-matched chance. The low grey trace is DY\_014
   (Section~\ref{sec:robust}). \textbf{b}, all five principal angles, readout basis. \textbf{c}, the same comparisons in
   the loading basis, where the cross-lag angle does not exceed the 30\,s floor.}
   \label{fig:geometry}
@@ -478,7 +478,8 @@ amplitudes are template scalings, not voltages; and settling before the task beg
   \maybefig{rfig_controls.pdf}{width=0.92\linewidth}{2.3in}
   \caption{Held-out elapsed-time $R^2$ of the 30\,s subspace after refitting the full pipeline on each modified data
   copy. Grey: mice; filled marker and bar: mean over mice and 95\% bootstrap CI (orange: post hoc variant); open
-  circle: the original value for the same sessions (post hoc comparison); solid line: original 0.84; dashed: the
+  circle: the original value for the same sessions (post hoc comparison). The registered conservative amplitude
+correction is omitted because it corrects in the wrong direction ($\beta<0$); solid line: original 0.84; dashed: the
   pre-registered 75\% (``survives'') and 50\% (``removed'') thresholds, defined relative to 0.84. Right: copy versus
   same-session original, with sessions/mice.}
   \label{fig:controls}
@@ -513,7 +514,7 @@ prior effect is weak in MOs and almost absent in the neighbouring areas, and abs
 stronger slow signal does not show that the prior is non-dynamical.
 
 \paragraph{A methodological lesson, specific to these data.} In these recordings every low-dimensional summary is
-dominated by session-scale drift (PCA 0.80, random 0.64), and long horizons only slightly more so (0.84). Long-horizon
+dominated by session-scale drift (PCA 0.80, random 0.64), and long horizons only slightly more so (0.84 at 30\,s, 0.82 at 0.5\,s). Long-horizon
 objectives inherit the slowest variance of a session \citep{boxtiao1977}; elapsed-time decoding next to PCA and
 covariance-matched baselines, pseudo-session nulls and care with fold-wise normalization are needed before reading
 such subspaces as cognition.
@@ -692,7 +693,7 @@ Section~\ref{sec:slowmode} were recomputed from the binned data with these defin
     Amplitude, stable (A13) & Refit on rate- and amplitude-stable units & $R^2$ 0.49 (5 sessions, 5 mice); ``intermediate'' \\
     Engagement, satiety (A13) & Residual correlation beyond a quadratic trend, session-permutation null & $p=0.19$ and $p=0.12$; fluctuating-engagement subset $p=0.049$, signs inconsistent \\
     Detection coupling (A14) & Sign of amplitude-rate coupling beyond the trend & Negative: mean $-1.54$, $p=0.99$; degree-5 trend $-1.92$; isolated spikes (post hoc) $-1.32$, $p=0.98$ \\
-    Amplitude correction (A14) & Refit after removing each unit's amplitude-linked rate & $R^2$ 0.85 / 0.80 / 0.78 (conservative / maximal / slow-maximal, post hoc); all ``survive'' \\
+    Amplitude correction (A14) & Refit after removing each unit's amplitude-linked rate & $R^2$ 0.80 / 0.78 (maximal / slow-maximal, post hoc), both ``survive''; the registered conservative arm (0.85) corrects in the wrong direction ($\beta<0$) and is not a test of detection loss \\
     Settling (A14) & Is amplitude change concentrated early? & Index $-0.12$ ($p=0.75$); if anything, later \\
     Shared across areas (A15) & Do MOs and neighbouring-area slow modes co-fluctuate beyond a quadratic trend? & Raw match 0.94; detrended corrected 0.006, $p=0.48$ (12 mice) \\
     Behaviour (A15) & Residual correlation with log reaction time and accuracy & $p=0.12$ and $p=0.34$; signs inconsistent \\
@@ -760,10 +761,11 @@ Section~\ref{sec:slowmode} were recomputed from the binned data with these defin
 Current-side decoding from the 0.5\,s-only complement exceeded that from the 30\,s-only complement (0.259 versus 0.220;
 $p=0.016$, uncorrected); prior decoding from the two complements did not differ ($p=0.39$). After residualization, the
 nesting indices were 0.94 (0.5\,s containing 30\,s) and 0.89 (reverse), and RRR's margin over PCA was 0.005 to 0.008
-with confidence intervals including zero at every lag. The A14 corrected copies left the primary tests unchanged
-(geometry $\holm$ 0.0004 to 0.004, prior 0.63 to 0.73, current side 0.006 to 0.013); the drift flag fired in 13 of 16
-sessions (conservative) and 14 of 16 (maximal and slow-maximal); and the corrected data kept 1.00, 0.86 and 0.85 of
-the original slow-direction slope.
+with confidence intervals including zero at every lag. All three A14 corrected copies left the primary tests unchanged (geometry $\holm$ 0.0004 to 0.004, prior 0.63 to
+0.73, current side 0.006 to 0.013). In the maximal and slow-maximal copies the drift flag fired in 14 of 16 sessions
+and the corrected data kept 0.86 and 0.85 of the original slow-direction slope. The registered conservative copy
+(13 of 16 flags, slope fraction 1.00) corrects in the wrong direction ($\beta<0$) and is not a test of detection
+loss.
 
 \clearpage
 \section{Additional figures}
@@ -774,8 +776,7 @@ the original slow-direction slope.
   \maybefig{fig5_slowmode_examples.pdf}{width=0.85\linewidth}{2.1in}
   \caption{Slow-mode time courses (30\,s windows, z-scored, sign-aligned) in six sessions chosen by a fixed rule
   (first session of each of the first six mice in the frozen list), with straight-line fits and correlation $r$ with
-  time. CSHL058, CSHL060 and KS023 are near-linear ramps; CSH\_ZAD\_024 rises in several steps (near 23, 55 and
-  83 minutes); CSHL049 and DY\_014 are flat with a single abrupt step (near 49 and 43 minutes).}
+  time. CSHL058, CSHL060 and KS023 are near-linear ramps; CSH\_ZAD\_024 rises in several steps (near 22--23, 55 and 80--82 minutes); CSHL049 and DY\_014 are flat with a single abrupt step (near 49 and 43 minutes).}
   \label{fig:examples}
 \end{figure}
 

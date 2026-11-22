@@ -65,21 +65,20 @@ def fig_geometry():
         for _, r in df.iterrows():
             ax.plot([0, 1, 2], r.values, color=MUTED, lw=0.8, marker="o", ms=2.5, zorder=1)
         ax.plot([0, 1, 2], df.mean().values, color=SERIES[0], lw=2, marker="o", ms=5, zorder=3)
-        for i, v in enumerate(df.mean().values):
-            ax.annotate(f"{v:.1f}", (i, v), textcoords="offset points", xytext=(-6, 7), ha="right" if i == 0 else "center",
-                        fontsize=7, color=SERIES[0], fontweight="bold")
         if basis == "Vin":
             ax.axhline(chance.mean(), color=INK_2, ls="--", lw=0.9)
-            ax.text(2.55, chance.mean() - 1.5, f"chance {chance.mean():.1f}", fontsize=6.5, color=INK_2, va="top", ha="right")
-        ax.set_xticks([0, 1, 2], labels)
-        ax.set_xlim(-0.3, 2.6)
+            ax.text(-0.25, 86, f"dashed: chance {chance.mean():.1f}", fontsize=6.5, color=INK_2, va="center", ha="left")
+        means = df.mean().values
+        ax.set_xticks([0, 1, 2], [f"{l}\n({m:.1f})" for l, m in zip(labels, means)])
+        ax.set_xlim(-0.3, 2.3)
+        ax.set_ylim(22, 90)
         ax.set_ylabel("mean principal angle (deg)" if k == 0 else "")
         ax.set_title(title, loc="left")
     # b: all principal angles, readout basis, mouse means
     ax = axs[1]
     angle_cols = [f"angle{i}_deg" for i in range(1, 6)]
-    for (a, b), name, c in [((1, 1), "same lag 0.5 s", SERIES[0]), ((1, 60), "cross lag", SERIES[1]),
-                             ((60, 60), "same lag 30 s", SERIES[2])]:
+    for (a, b), name, c in [((1, 1), "0.5 s vs 0.5 s", SERIES[0]), ((1, 60), "cross lag", SERIES[1]),
+                             ((60, 60), "30 s vs 30 s", SERIES[2])]:
         vals = [comp("Vin", a, b, col).mean() for col in angle_cols]
         ax.plot(range(1, 6), vals, marker="o", color=c, label=name)
     ax.set_xticks(range(1, 6))
@@ -87,7 +86,7 @@ def fig_geometry():
     ax.set_ylim(25, 100)
     ax.set_ylabel("angle (deg)")
     ax.set_title("b  All five angles", loc="left")
-    ax.legend(loc="upper left", handlelength=1.2, borderaxespad=0.2)
+    ax.legend(loc="lower right", handlelength=0.9, borderaxespad=0.1, fontsize=6.5, labelspacing=0.25, handletextpad=0.4)
     fig.tight_layout(w_pad=0.6)
     fig.savefig(OUT / "rfig_geometry.pdf")
     plt.close(fig)
@@ -137,7 +136,6 @@ def fig_controls():
     orig = pd.read_csv(ROOT / "results/stats/d5/drift.csv").set_index("eid")
     versions = [("results", "Original units"), ("results_stable", "Stable units only"),
                 ("results_mua", "Sorting-free multi-unit"), ("results_ampstable", "Rate- and amplitude-stable units"),
-                ("results_ampcorr_low", "Amplitude-corrected, conservative"),
                 ("results_ampcorr_high", "Amplitude-corrected, maximal"),
                 ("results_ampcorr_slow", "Amplitude-corrected, slow-maximal (post hoc)")]
     fig, ax = plt.subplots(figsize=(5.5, 2.45))
