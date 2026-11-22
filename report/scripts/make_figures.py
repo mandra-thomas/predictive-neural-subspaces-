@@ -124,7 +124,7 @@ def fig_content():
             a16 = pd.read_csv(ROOT / "results/a16/sessions_d5.csv")
             full = a16.groupby("subject").ridge_full_corr.mean().mean()
             ax.axhline(full, color=SERIES[2], lw=1.0, ls=":")
-            ax.text(5.75, full + 0.015, f"full population {full:.3f}", fontsize=6.3, color=SERIES[2], ha="right", va="bottom")
+            ax.text(5.75, full + 0.012, f"full pop. {full:.3f}", fontsize=6.0, color=SERIES[2], ha="right", va="bottom")
             out["full_population"] = {"mouse_mean": full}
         ax.set_xticks(xs, xt, rotation=0)
         ax.tick_params(axis="x", labelsize=6.8)
@@ -168,7 +168,7 @@ def fig_controls():
     ax.axvline(o, color=INK_2, lw=0.9)
     for f, lab in [(0.75, "75%"), (0.5, "50%")]:
         ax.axvline(f * o, color=INK_2, lw=0.8, ls="--")
-        ax.text(f * o, len(versions) - 0.45, lab, ha="center", fontsize=6.8, color=INK_2)
+        ax.text(f * o + 0.012, len(versions) - 0.45, lab, ha="left", fontsize=6.8, color=INK_2)
     ax.set_yticks(range(len(versions)), [v[1] for v in versions][::-1])
     ax.set_xlim(0, 1)
     ax.set_ylim(-0.6, len(versions) - 0.2)
@@ -182,9 +182,73 @@ def fig_controls():
     return rows
 
 
+# ----------------------------------------------------------------------------- appendix: estimator, nesting
+def fig_estimator():
+    e = pd.concat([pd.read_parquet(f).assign(eid=Path(f).name[:36]) for f in glob.glob(str(ROOT / "results/estimator/*_d5.pqt"))])
+    e["subject"] = e.eid.map(SUBJ)
+    lags, xl = [1, 4, 16, 60], ["0.5 s", "2 s", "8 s", "30 s"]
+    spec = [("ridge", "r2_best", "full-rank ridge", SERIES[3]), ("rrr", "r2_session_alpha", "lagged RRR", SERIES[0]),
+            ("pca", "r2_best", "PCA + ridge", SERIES[1]), ("random", "r2_best", "covariance-matched random", SERIES[2])]
+    fig, ax = plt.subplots(figsize=(4.2, 2.4))
+    for m, col, name, c in spec:
+        mu, se = [], []
+        for lag in lags:
+            a = e[(e.lag == lag) & (e.method == m)].groupby("subject")[col].mean()
+            mu.append(a.mean()); se.append(a.std(ddof=1) / np.sqrt(len(a)))
+        mu, se = np.array(mu), np.array(se)
+        ax.plot(range(4), mu, marker="o", color=c, label=name)
+        ax.fill_between(range(4), mu - se, mu + se, color=c, alpha=0.15, lw=0)
+    ax.set_xticks(range(4), xl)
+    ax.set_xlabel("prediction lag")
+    ax.set_ylabel("held-out $R^2$ of future activity")
+    ax.set_ylim(0, 0.42)
+    ax.legend(loc="upper right")
+    fig.tight_layout()
+    fig.savefig(OUT / "rfig_estimator.pdf")
+    plt.close(fig)
+
+
+def fig_nesting():
+    meta = pd.DataFrame([{"eid": Path(f).name[:36], **json.load(open(f))} for f in glob.glob(str(ROOT / "results/subspaces/*_d5.json"))])
+    meta["subject"] = meta.eid.map(SUBJ)
+    mx = pd.read_csv(ROOT / "results/stats/d5/matrix.csv").set_index(["feature_set", "variable"])
+    fig, axs = plt.subplots(1, 2, figsize=(5.5, 2.2))
+    ax = axs[0]
+    for k, (col, lab) in enumerate([("nest_short_contains_long_k1", "30 s direction\nin 0.5 s subspace"),
+                                    ("nest_long_contains_short_k1", "0.5 s direction\nin 30 s subspace")]):
+        a = meta.groupby("subject")[col].mean()
+        ax.scatter(np.full(len(a), k) + RNG.uniform(-0.12, 0.12, len(a)), a.values, color=MUTED, s=8, zorder=1)
+        lo, hi = boot_ci(a.values)
+        ax.errorbar(k, a.mean(), yerr=[[a.mean() - lo], [hi - a.mean()]], color=SERIES[0], marker="o", ms=5, capsize=3, zorder=3)
+    iso = (5 / meta.p).groupby(meta.subject).mean().mean()
+    ax.axhline(iso, color=INK_2, ls="--", lw=0.8)
+    ax.text(1.45, iso + 0.02, f"isotropic {iso:.2f}", fontsize=6.5, color=INK_2, ha="right", va="bottom")
+    ax.set_xticks([0, 1], ["30 s direction\nin 0.5 s subspace", "0.5 s direction\nin 30 s subspace"])
+    ax.set_xlim(-0.5, 1.5)
+    ax.set_ylim(0, 1.05)
+    ax.set_ylabel("nesting index")
+    ax.set_title("a  Nesting (13 mice)", loc="left")
+    ax = axs[1]
+    for k, (var, lab) in enumerate([("cur_side", "current side\n(AUC, corr.)"), ("prior", "prior\n($R^2$, corr.)")]):
+        for j, (fs, c, nm) in enumerate([("orth_short_not_long", SERIES[0], "0.5 s only"), ("orth_long_not_short", SERIES[1], "30 s only")]):
+            m, lo, hi = mx.loc[(fs, var), ["mean", "ci_lo", "ci_hi"]]
+            x = k + (j - 0.5) * 0.35
+            ax.bar(x, m, width=0.33, color=c, label=nm if k == 0 else None)
+            ax.errorbar(x, m, yerr=[[m - lo], [hi - m]], color=INK, capsize=2, lw=1)
+    ax.axhline(0, color=INK_2, lw=0.8)
+    ax.set_xticks([0, 1], ["current side\n(AUC, corr.)", "prior\n($R^2$, corr.)"])
+    ax.set_title("b  Orthogonal complements", loc="left")
+    ax.legend(loc="upper right")
+    fig.tight_layout()
+    fig.savefig(OUT / "rfig_nesting.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     rc()
     print(json.dumps(fig_geometry(), indent=1))
     print(json.dumps({k: {s: round(v, 3) for s, v in d.items()} for k, d in fig_content().items()}, indent=1))
     for r in fig_controls():
         print(r)
+    fig_estimator()
+    fig_nesting()
