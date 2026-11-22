@@ -460,6 +460,75 @@ MOs slow mode only.
 - Combined with A12-A14, the controls rule out the specific recording artifacts tested. They do not identify a brain
   state either.
 
+## Post hoc follow-ups from external review (amendment A16, run locally)
+
+Two external reviews asked four questions the project had not tested. Each was written into AMENDMENTS.md
+(`246fddb`) before it ran. All four are post hoc and exploratory.
+
+**1. Remove the drift and refit: was the prior masked by the ramp?**
+- Each unit's activity was detrended, then the whole pipeline was refit. Two versions:
+  - a quadratic in time, which removes a median 21% of binned variance;
+  - a cosine basis with periods of at least 20 minutes, which removes 26%.
+- The trend is gone afterwards: elapsed-time R² is negative for every subspace, and no session is drift-flagged.
+- With the quadratic detrend, the prior is near zero in every subspace, including 0.5 s (−0.002; 30 s −0.015).
+- With the cosine detrend, the prior is weakly present in every subspace at about the same size:
+  - 0.5 s 0.031, 2 s 0.043, 8 s 0.037, 30 s 0.051 [−0.000, 0.101];
+  - PCA 0.028 [0.004, 0.053], random 0.020.
+- The change from 0.5 s to 30 s is +0.021 [−0.025, 0.068] (Holm p = 0.29) with the cosine detrend, and −0.015 with
+  the quadratic (p = 0.58).
+- Pre-registered reading for both: **not masked**. Removing the ramp does not make the prior rise with horizon. With
+  the gentler detrend, a small prior signal becomes visible about equally in every low-dimensional summary, which fits
+  the variance-ranking reading: once the ramp is gone, the prior is a small signal spread across directions rather
+  than one concentrated by long-horizon prediction.
+- The geometry test stays significant (Holm p = 0.0026 and 0.0007). The stimulus test holds with the cosine detrend
+  (0.0061) but not the quadratic one (0.22).
+
+**2. A same-scale reference for the prior.**
+- With the subspace decoder (ridge, contiguous folds, the identical pseudo-sessions), the full population gives a
+  corrected prior R² of 0.159 (mouse mean; session median 0.108).
+- On that scale the subspaces capture:
+  - the 0.5 s subspace, 0.054 (about a third);
+  - PCA, 0.013 (8%);
+  - the 30 s subspace, −0.046 (none).
+- With the IBL/Findling decoder (Lasso, interleaved nested CV), the picture is flat rather than falling: 0.5 s 0.026,
+  30 s 0.038, PCA 0.019. The 30 s minus 0.5 s difference is above zero in 7 of 13 mice, median 0.001, two-sided p =
+  0.34; the same comparison under the ridge decoder is 4 of 13 mice, median −0.042, p = 0.22.
+- So **"no rise with horizon" holds under both decoders, but the apparent fall is decoder-dependent.** The claim
+  should be "no rise", never "falls".
+
+**3. Is the leading 30 s direction spatially reproducible?** No. Comparing the leading 30 s direction fit on each
+session half, the absolute cosine is at chance in every representation:
+
+| Representation | Mean absolute cosine | Chance | p (above chance) |
+|---|---|---|---|
+| Readout (filter) weights | 0.21 | 0.15 | 0.32 |
+| Loading weights | 0.19 | 0.15 | 0.37 |
+| Activation patterns (Haufe) | 0.19 | 0.27 | 0.97 |
+| Capture by the other half's 5-D subspace (descriptive, order-independent) | 0.21 | 0.15 | 0.21 |
+
+The slow mode's time course is a consistent ramp, but which units carry it is not stable within a session. This fits
+unit-level nonstationarity better than one coherent population state, and it explains why the 30 s split-half floor
+sat at chance.
+
+**4. The step sessions.** By the pre-registered rule (a single 30 s jump of at least 30% of the mode's range), only
+DY_014 is a step session; CSHL049's largest jump is 20%. At DY_014's step (43 min):
+- IBL's motion estimate barely changes (0.13 µm, 65th percentile of that session's changes);
+- the three units contributing most carry 48% of the jump;
+- one of them shows its largest window-to-window amplitude change of the session at exactly that time (100th
+  percentile).
+
+Reading: **artifact-consistent**. The step coincides with an abrupt spike-amplitude change in a contributing unit,
+not with probe motion.
+
+**What changes.**
+- The prior result is calibrated further: no rise with horizon under two decoders and after detrending, but not
+  "falls".
+- The slow mode looks less like a single coherent population state: its spatial pattern is unstable across halves,
+  and its most abrupt step coincides with an amplitude event in one unit.
+- No single artifact explains the smooth ramp, but unit-level nonstationarity is now the leading description.
+- The step to watch next is a matched-unit-count analysis of the amplitude-stable subset, plus the spontaneous-epoch
+  test.
+
 ## Possible next steps
 
 1. **Stationarity control.** Done (amendment A12, above). The slow mode survives.

@@ -80,3 +80,11 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-22 11:02 | 9385d5a | 3d83323a46 | 06_stats | [results: results_region2] d=5; 15 sessions/12 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00366; P2 prior p_holm=0.515; P3 cur_side p_holm=0.0122 |
 | 2026-11-22 11:25 | 0d4b1a0 | 3d83323a46 | 03_prior_gate | [results: results_region2] GO: {'n_sessions': 15, 'median_corrected_r2': 0.0010954173393297184, 'frac_sessions_p05': 0.4, 'fisher_p': 0.0019458608951450434, 'n_pseudo': 200, 'decision': 'GO'} |
 | 2026-11-22 | - | - | note | Rows above marked [results: results_region2] and the 18_pilot_A15 row ran locally on cached data (A15). 17_build_region2 ran locally before them (15/16 sessions, 12 animals; ZM_2245 has no non-MOs region with >= 20 good units). The first 03_prior_gate call failed on an unsupported --d flag and was rerun without it. |
+| 2026-11-22 18:03 | a1b2efc | 3d83323a46 | 22_pilot_A16 | A16 d=5: detrend q=not masked by a smooth trend, c=not masked by a smooth trend; step sessions=1 |
+| 2026-11-22 17:30 | 2cc9386-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_detrend_q] d=5; 16/16 ok |
+| 2026-11-22 17:33 | 73ffa82-dirty | 3d83323a46 | 05_decode | [results: results_detrend_q] d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-22 17:33 | 73ffa82-dirty | 3d83323a46 | 06_stats | [results: results_detrend_q] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00256; P2 prior p_holm=0.58; P3 cur_side p_holm=0.216 |
+| 2026-11-22 17:34 | 73ffa82-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_detrend_c] d=5; 16/16 ok |
+| 2026-11-22 17:43 | 73ffa82-dirty | 3d83323a46 | 05_decode | [results: results_detrend_c] d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-22 17:43 | 73ffa82-dirty | 3d83323a46 | 06_stats | [results: results_detrend_c] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.000732; P2 prior p_holm=0.294; P3 cur_side p_holm=0.0061 |
+| 2026-11-22 | - | - | note | A16 (post hoc) ran locally: 21_build_detrend then 04-06 on data_detrend_q / data_detrend_c (rows marked [results: results_detrend_*]); 22_pilot_A16 above. A --skip-lasso smoke run preceded the full run (its log row was discarded). |
