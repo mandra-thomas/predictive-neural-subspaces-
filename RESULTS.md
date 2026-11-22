@@ -74,7 +74,9 @@ of predicted activity), where p = 0.96.
 ### P2: prior
 
 The paired, null-corrected change in prior R-squared from 0.5 s to 30 s was −0.099 (95% CI −0.218 to +0.002). After
-removing trial-locked responses it was −0.093 (−0.154 to −0.038), which runs significantly the *wrong* way.
+removing trial-locked responses it was −0.093 (−0.154 to −0.038). That interval excludes zero on the negative side,
+but the decrease only reflects the 0.5 s subspace keeping a little prior that the 30 s subspace lacks. With the
+Findling decoder the change is flat (A16), so the claim is "no rise", not "falls".
 
 Per subspace, the null-corrected prior R-squared was:
 
@@ -172,9 +174,10 @@ While diagnosing two sessions with held-out R-squared ≈ 0 for every method, I 
 ## How strong is this, and is it interesting?
 
 **Strongest result: the negative one.** "The block prior does not move into long-horizon subspaces" survives every
-check: residualization, all three values of d, and every leave-one-mouse-out refit. Its upper confidence bound
-(+0.002) is about 3% of the full-population prior effect, so a meaningful rise is ruled out, not just undetected. The
-power caveat is that the prior is weak in MOs to begin with (R-squared about 0.06). The study could detect a lag
+check: residualization, all three values of d, and every leave-one-mouse-out refit. Its upper confidence bound is
++0.002. (An earlier version compared this with the full-population gate as "3%", but that compared different
+decoders; see A16 for a same-scale reference of 0.159.) No rise appears under two decoders or after detrending (A16).
+The power caveat is that the prior is weak in MOs to begin with (R-squared about 0.06). The study could detect a lag
 effect of that size, but not a subtle redistribution.
 
 **Moderately strong: P3.** It is robust to residualization and leave-one-out, but sensitive to d (fails at d = 3), and
@@ -188,19 +191,20 @@ long-lag side of the contrast is only 2 to 4°.
 
 **What is interesting.**
 
-1. **Predictable structure on 2 to 30 s horizons in MOs is about one-dimensional, shared across horizons, and indexes
-   time in session rather than the latent variable the mouse must track.** The block prior is decodable from the
-   population, yet it is not part of the population's predictable dynamics. One reading is that the prior is carried
-   as a small, static modulation rather than as a slow dynamical mode. Methods that rank dimensions by variance or by
-   predictability (PCA, lagged RRR, slow-feature or dynamical-components analysis) would then systematically miss it.
+1. **At 30 s, predictable structure in MOs is dominated by one direction tracking time in session, which PCA and
+   0.5 s RRR also carry, rather than the latent variable the mouse must track.** The block prior is decodable from
+   the population but does not rise with horizon. The leading explanation (superseding an earlier "static code"
+   reading, which the method cannot test) is variance ranking: RRR keeps the directions that predict the most variance,
+   and the prior is a small signal, so with d = 5 the large session-time ramp wins first.
 2. **The long-horizon readout is not stable across the session.** The 30 s subspaces from the two halves are only as
    aligned as random covariance-matched subspaces, and the cross-lag angle is no smaller. A stable slow cognitive
    variable (for example the engagement or impulsivity "slow drift" of Cowley et al. 2020) would be expected to have a
-   reproducible readout. A drift whose direction depends on which units are turning over would not. Together with the
-   unit turnover in 14 of 16 sessions, this favours probe or sorting drift over a stable internal state, though it does
-   not prove it.
-3. **A methodological lesson for predictive-subspace methods on chronic recordings.** Long-horizon objectives
-   preferentially recover nonstationarity. Elapsed-time decoding, pseudo-session nulls, split-half reliability against
+   reproducible readout. A drift whose direction depends on which units are turning over would not. A16 confirms
+   that the leading 30 s direction is not spatially reproducible across halves in any representation, pointing to
+   unit-level nonstationarity. No single recording cause tested explains most of the ramp (A12–A14), so its origin
+   remains open.
+3. **A methodological lesson, specific to these acute recordings.** Every low-dimensional summary (30 s RRR 0.84,
+   0.5 s RRR 0.82, PCA 0.80, random 0.64) is dominated by session-scale variation; long horizons only slightly more. Elapsed-time decoding, pseudo-session nulls, split-half reliability against
    a covariance-matched chance level, and care with fold-wise normalization (the D10 bug) are all needed to avoid
    reading drift as cognition.
 
@@ -477,7 +481,7 @@ Two external reviews asked four questions the project had not tested. Each was w
 - The change from 0.5 s to 30 s is +0.021 [−0.025, 0.068] (Holm p = 0.29) with the cosine detrend, and −0.015 with
   the quadratic (p = 0.58).
 - Pre-registered reading for both: **not masked**. Removing the ramp does not make the prior rise with horizon. With
-  the gentler detrend, a small prior signal becomes visible about equally in every low-dimensional summary, which fits
+  the slow-cosine detrend (which removes more variance than the quadratic), a small prior signal becomes visible about equally in every low-dimensional summary, which fits
   the variance-ranking reading: once the ramp is gone, the prior is a small signal spread across directions rather
   than one concentrated by long-horizon prediction.
 - The geometry test stays significant (Holm p = 0.0026 and 0.0007). The stimulus test holds with the cosine detrend
@@ -542,7 +546,7 @@ not with probe motion.
    step is independent sessions and other regions, which needs downloads. MOp has 14 sessions from 12 mice under
    the census rule.
 
-## Suggested slide outline (Nov 30)
+## Suggested slide outline (Nov 30; superseded by slides/ — kept for history)
 
 1. Question: does prediction horizon select what a neural subspace encodes?
 2. Data and design: IBL BWM, MOs, lagged RRR at four horizons, pseudo-session nulls, pre-registration.
@@ -552,5 +556,5 @@ not with probe motion.
 6. Content (Fig 2): stimulus fades with lag; the prior never rises; elapsed time dominates.
 7. Nesting and orthogonal complements (Fig S1): one shared slow mode.
 8. Controls: trial-locked residuals, d sensitivity, leave-one-mouse-out.
-9. Interpretation: predictable dynamics reflect drift, not latent task state; the prior is a small static code.
+9. Interpretation: superseded; see slides/slides.tex for the presented version (variance ranking, session-time mode).
 10. Limitations and next steps.
