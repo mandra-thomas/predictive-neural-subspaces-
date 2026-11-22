@@ -257,14 +257,72 @@ possible, as do slow state changes that pupil doesn't capture, such as satiety o
 apart needs signals that sometimes reverse within a session, for example engagement states, or sessions where the
 mode is not a ramp. The literature review (`reports/Slow neural modes literature review.md`) lays out those analyses.
 
+## Second pilot: what produces the slow mode? (amendment A13, run on PACE ICE)
+
+This pilot used three lines of evidence that do not depend on matching one ramp to another. The tests and the rule for
+reading them were committed before the engagement table or the full spike files were downloaded.
+
+**Multi-unit activity, independent of spike sorting.** Every detected spike in the MOs depth span, whatever cluster or
+quality label it was given, was binned into 50 µm depth channels. The unchanged pipeline was then refit with those
+channels in place of units (15 sessions, 12 mice; one session had too few channels).
+- The slow mode reappears almost exactly. The median correlation between the multi-unit slow mode and the unit-based
+  one, over 30 s windows, is 0.96.
+- The 30 s subspace decodes elapsed time with an R-squared of 0.74 (0.84 for units), and the drift flag fires in all
+  15 sessions.
+- So the mode is not created by how spikes were assigned to clusters.
+- In this representation the stimulus-side effect disappears (Holm p = 1.0), which is expected when each channel mixes
+  neurons with opposite preferences. The geometry effect remains (p = 0.010).
+
+**No signature of a rigid probe shift.** If the probe moved as a whole, the multi-unit loadings should follow the
+slope of the depth profile. They don't: the mean absolute rank correlation is 0.19, and the combined p over 15
+sessions is 0.25. This agrees with IBL's small motion estimates (median about 8 µm).
+
+**Spike amplitudes change, in step with the mode.** Spike amplitudes are far from stable over a session:
+- 59% of units have a consistent amplitude trend (absolute rank correlation with time of at least 0.5);
+- the median unit's amplitude changes by 15.6% in absolute value between the first and last fifth of the session
+  (a descriptive measure, not pre-registered);
+- the change is more often a decline (median trend −0.26; a quarter of units lose 21% or more).
+
+The pre-registered test asked whether units whose amplitude shrinks are the units whose rate falls along the slow
+mode. They are: across units within a session, the loading and the amplitude trend are positively correlated (mean
+Fisher z 0.15, one-sided p = 0.029 across 13 mice). Adaptation at high rates would produce the opposite sign. This is
+the signature of spikes dropping below the detection threshold as their amplitude falls.
+
+Only 5 sessions (5 mice) kept 20 or more units that are stable in both rate and amplitude. In those, elapsed-time
+R-squared falls to 0.49 and the drift flag fires in 3 of 5 sessions, which the rule reads as "intermediate". With 5
+sessions this is suggestive at best.
+
+**Engagement and satiety beyond the trend.** After removing a quadratic trend in time from each signal, the slow mode
+is not tied to IBL's per-trial engagement probability (session-permutation p = 0.19) or to cumulative rewards
+(p = 0.12). Two secondary hints are weak and inconsistent:
+- In the 11 sessions where engagement genuinely fluctuates, p = 0.049 (uncorrected), but the sign of the relationship
+  is not consistent across mice (p = 0.95).
+- The satiety relationship leans positive (sign-consistency p = 0.068).
+
+**Reading.** The pre-registered rule outputs "sorting artifact". It reaches that label through its second branch (the
+amplitude-stable refit is not "survives", and the amplitude-loading test is significant). The label fits the evidence
+poorly, though, because the most direct sorting test, multi-unit activity, says the mode is *not* a sorting
+artifact. The rule did not anticipate that amplitude loss could act through spike *detection* rather than cluster
+assignment.
+
+What the three lines of evidence support together:
+- the slow mode is a real, recording-level change in detected spiking;
+- it is not a cluster-assignment error and not a rigid shift of the probe;
+- it goes with gradually shrinking spike amplitudes in the units that carry it;
+- the most consistent explanation is a slow change at the electrode–tissue interface, such as tissue settling after
+  an acute insertion or local non-rigid movement, which costs spikes at the detection threshold;
+- evidence for engagement or satiety is weak.
+
+This is a recording-side explanation, but not the "spike-sorting artifact" the label suggests. It cannot fully
+exclude a physiological contribution to amplitude change.
+
 ## Possible next steps
 
 1. **Stationarity control.** Done (amendment A12, above). The slow mode survives.
-2. **Engagement and satiety as competing explanations.** IBL publishes a per-trial engagement probability
-   (`int-brain-lab/engage`). Sessions where engagement rises and falls rather than declining steadily are the only
-   ones that can separate state from a generic ramp. Cumulative reward is a proxy for satiety.
-3. **Artifact checks the motion estimate cannot make.** Per-unit spike amplitude over time, and the slow mode
-   recomputed from sorting-free multi-unit activity per depth bin.
+2. **Engagement, satiety, amplitude and multi-unit checks.** Done (amendment A13, above).
+3. **Amplitude-corrected slow mode** (not yet pre-registered). Regress each unit's windowed rate on its own amplitude
+   time course and recompute the slow mode from the residual rates. Also test whether amplitude change is concentrated
+   early in the session, as tissue settling after insertion would predict.
 4. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
 
 ## Suggested slide outline (Nov 30)

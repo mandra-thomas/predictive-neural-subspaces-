@@ -53,3 +53,13 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-17 03:33 | 540be37 | 3d83323a46 | 11_pilot_state | A12 pilot d=5: motion p=0.3934326171875, pupil p=0.419677734375, test1=survives, overall=mixed or undetermined |
 | 2026-11-17 | - | - | note | Rows above marked [results: results_stable] and the 11_pilot_state row ran on PACE ICE (Slurm job 7133088, coc-cpu, 3 min; 45 tests passed there first). Stable-units copy: 13/16 sessions, 12 animals (KS023 22-unit session, SWC_038 46-unit session, SWC_043 excluded with < 20 stable units). |
 | 2026-11-21 17:07 | fd5f3d4 | 3d83323a46 | 12_fetch_A13 | A13 inputs; 1/1 ok |
+| 2026-11-22 06:21 | 3bc25d1 | 3d83323a46 | 12_fetch_A13 | A13 inputs; 16/16 ok |
+| 2026-11-22 07:27 | 3bc25d1-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_mua] d=5; 15/15 ok |
+| 2026-11-22 07:28 | 3bc25d1-dirty | 3d83323a46 | 05_decode | [results: results_mua] d=5; n_pseudo=200; 15/15 ok |
+| 2026-11-22 07:28 | 3bc25d1-dirty | 3d83323a46 | 06_stats | [results: results_mua] d=5; 15 sessions/12 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0103; P2 prior p_holm=1; P3 cur_side p_holm=1 |
+| 2026-11-22 07:28 | 3bc25d1-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_ampstable] d=5; 5/5 ok |
+| 2026-11-22 07:29 | 3bc25d1-dirty | 3d83323a46 | 05_decode | [results: results_ampstable] d=5; n_pseudo=200; 5/5 ok |
+| 2026-11-22 07:29 | 3bc25d1-dirty | 3d83323a46 | 06_stats | [results: results_ampstable] d=5; 5 sessions/5 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.188; P2 prior p_holm=1; P3 cur_side p_holm=1 |
+| 2026-11-22 07:29 | 3bc25d1-dirty | 3d83323a46 | 14_pilot_A13 | A13 pilot d=5: overall=sorting artifact |
+| 2026-11-22 | - | - | note | Rows above marked [results: results_mua] / [results: results_ampstable] and the 14_pilot_A13 row ran on PACE ICE (Slurm job 7240337, coc-cpu, 5.5 min; 45 tests passed first). Multi-unit copy: 15/16 sessions, 12 animals (DY_014 had 8 channels < 10). Amplitude-stable copy: 5/16 sessions, 5 animals (most units have |amplitude trend| >= 0.5). |
+| 2026-11-22 | - | - | note | The "-dirty" flag on the ICE rows reflects only files not synced to ICE (literature-review notes) and the log itself; the ICE code tree matched commit 3bc25d1. |
