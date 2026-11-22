@@ -21,3 +21,9 @@ results_mua/
 data_ampstable/
 results_ampstable/
 data/external/
+data_ampcorr_low/
+results_ampcorr_low/
+data_ampcorr_high/
+results_ampcorr_high/
+data_ampcorr_slow/
+results_ampcorr_slow/

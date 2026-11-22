@@ -284,3 +284,24 @@ reported.
 
 **Compute.** PACE ICE (coc-cpu), from the A13 arrays already there. A unit test checks that the GLM recovers a known
 coupling in simulated detection loss before the job runs.
+
+### A14 post hoc additions (written 2026-11-22 after a local smoke run of the build, before the ICE run)
+
+The smoke run computed the A14 build on all 16 sessions. Two numbers in it exposed design weaknesses, so two checks
+are added. They are labelled post hoc, do not enter the pre-registered overall reading, and are reported alongside it.
+The two numbers were:
+- The Part 1 fluctuation coupling came out negative in 15 of 16 sessions.
+- Without any refit, the maximal correction removed only about 15% of the slow-mode ramp along the original
+  direction.
+
+- **Post hoc 1b, coupling from isolated spikes.** Spike amplitude is known to fall within bursts, so windows with more
+  firing have smaller median amplitudes. This is an effect of rate on amplitude, and it can mask detection coupling.
+  The check repeats the Part 1 fluctuation coupling (quadratic nuisance), with window amplitude computed only from
+  spikes at least 50 ms after the same unit's previous spike. Same test: one-sided Wilcoxon greater than 0 across
+  animals.
+- **Post hoc slow-maximal correction (`data_ampcorr_slow`).** The pre-registered total coupling is fitted on raw window
+  amplitudes, so measurement noise and the negative fast coupling bias it toward 0, and the "maximal" correction is
+  not fully maximal. This variant fits each unit's coupling, with no time terms, on a heavily smoothed amplitude
+  trajectory (filled as above, then a centred running median over 11 windows, about 5.5 min). It applies the factor
+  with that same trajectory, clipped to the range 0.5 to 2, and refits scripts 04 to 06. It is read with the same
+  survives / intermediate / removed rule, and its residual ramp fraction is also reported.
