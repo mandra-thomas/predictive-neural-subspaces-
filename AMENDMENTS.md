@@ -356,3 +356,57 @@ d = 5. These criteria are fixed in advance:
 **Overall.** No multiplicity correction; exploratory; all statistics reported. Part 1 is the main evidence for
 whether scaling is worthwhile. Parts 2 and 3 indicate whether the slow mode is a candidate brain-wide, behaviourally
 relevant signal.
+
+## A16: post hoc follow-ups prompted by external review (written 2026-11-22, before any of these analyses was run)
+
+**Why.** Two external reviews of the report and slides raised four questions the project had not tested. All four
+are post hoc: designed after all primary and pilot results were known. They are reported as exploratory, do not
+change any earlier reading, and have no multiplicity correction. They use only cached data and run locally.
+
+**Part 1: remove the drift and refit ("is the prior masked by the ramp?").**
+- Each unit's sqrt-transformed binned activity is detrended:
+  - primary: least-squares quadratic in time, fit on valid bins;
+  - secondary: a cosine basis with periods of at least 20 min, about three times the mean block duration.
+- Trial-window values get the trend evaluated at their alignment time.
+- The pipeline's residual hook is used: `S_resid` and `Swin_resid_*`, the same mechanism as the trial-locked
+  residual rerun. Copies are `data_detrend_q/` and `data_detrend_c/`.
+- Scripts 04 to 06 are refit unchanged at d = 5. The pseudo-session null remains valid because only the neural data
+  change, not the targets.
+- Reported:
+  - P2 (prior rises with lag) and the per-lag corrected prior R²;
+  - P1 and P3;
+  - elapsed-time R² of the 30 s subspace, for RRR, PCA and random.
+- Reading: "masked" if P2 is significant (one-sided Holm p < 0.05 within the rerun) and the 30 s corrected prior is
+  above zero with its 95% CI excluding zero. Otherwise "not masked by a smooth trend".
+
+**Part 2: a same-scale reference for the prior.** The full-population gate used a different decoder (Lasso,
+interleaved nested CV), so subspace prior scores had no reference on their own scale.
+- (a) Decode the prior from the full z-scored population in the pre-stimulus window with the subspace decoder: ridge
+  alpha 1, contiguous folds, the same pseudo-session draws as script 05 (`session_seed(eid, seed, "null")`, 200
+  draws). This gives the corrected R² of the full population on the subspace scale. Report each subspace's corrected
+  prior relative to it.
+- (b) Sensitivity check: decode the prior from the 0.5 s and 30 s subspaces, and from PCA, with the gate's decoder
+  (Lasso, interleaved nested CV) against 200 pseudo-sessions.
+- Reported: session medians and mouse means, with no new hypothesis test.
+
+**Part 3: spatial reproducibility of the leading slow direction.** For each session, compare the leading 30 s
+direction fit on the two session halves (the saved half fits) in three representations:
+- the readout (filter) weights;
+- the loading weights;
+- the activation pattern, the half's covariance times the filter (Haufe et al. 2014).
+
+The statistic is the absolute cosine between halves. Chance is the median absolute cosine between pairs of random
+directions drawn in proportion to the session covariance (1,000 pairs). Reported: mouse means and a one-sided
+Wilcoxon of (cosine minus chance) > 0 for each representation.
+
+**Part 4: the step sessions.**
+- A step session is one whose sign-aligned 30 s-window slow mode has a single window-to-window jump of at least 30%
+  of its total range. The step time is that jump.
+- At each step time:
+  - (i) the change in IBL motion estimate (median over 2 min after minus 2 min before), as a percentile of the same
+    statistic at every other window;
+  - (ii) how concentrated the jump is across units: the share of the projected jump contributed by the top 3 units;
+  - (iii) for those top units, the abrupt change in median spike amplitude across the step, as a percentile of their
+    own window-to-window changes.
+- Reading per session: "artifact-consistent" if (i) or (iii) is at the 95th percentile or above, "no recording
+  signature" otherwise. Descriptive only.
