@@ -337,9 +337,11 @@ covariance-matched random subspaces (Elsayed et al.\ 2016), already near 68 degr
 about 59 degrees. Thirty-second subspaces do not: 68 degrees, at chance, even for their closest direction. The cross-lag
 angle beats both, so the test passes, mostly through the short lag; it is the weakest result.
 \qa{If one slow mode dominates, why can't the 30 s halves agree on one direction?}{The readout basis acts like filter
-weights: with small penalties (all $\le 0.32$) it is near a whitened, CCA-like solution, and filters are unstable,
-unlike activity patterns (Haufe et al.\ 2014). The ramp's pattern also changes within a session.}
-\qa{Does it depend on the basis?}{Yes: in the loading basis the geometry test fails ($p = 0.96$).}}
+weights, near a whitened, CCA-like solution with these small penalties ($\le 0.32$); filters are unstable, unlike
+patterns (Haufe et al.\ 2014). And the ramp's pattern changes within a session.}
+{\footnotesize\textbf{Post hoc, exploratory:} leading 30 s direction, half vs.\ half, $|\cos|$ vs.\ chance: filters
+0.21/0.15, loadings 0.19/0.15, patterns 0.19/0.27, capture 0.21/0.15 (all n.s.). Same time course, but which units
+carry it changes: unit-level nonstationarity.\par}}
 \end{frame}
 
 % =====================================================================================
@@ -427,14 +429,17 @@ Weak evidence only at 0.5 s (0.054 [0.006, 0.105]; Fisher $p = 0.15$); not detec
 \note{%
 Same layout for the prior, where the hypothesis predicted bars rising from left to right. They don't. On the right,
 each dot is one mouse's change from 0.5 to 30 seconds, already corrected against its own pseudo-sessions: most sit at or
-below zero, and the mean is negative. The 2 to 30 second bars have intervals that include zero, so they are noise around
-the null median, not real negative information. So predicting further ahead recovers no more of the prior. This was the central prediction of the project, and it
-fails cleanly: the average change is negative, not positive. Remember that the prior is real in the population; it
-is just a small signal.
-\qa{Isn't 0.054 a tiny $R^2$?}{It is not 5\% of variance: it is how far the real score sits above the median of the
-pseudo-session scores.}
+below zero: there is no rise. The 2 to 30 second bars have intervals that include zero, so they are noise around the
+null median, not real negative information. So predicting further ahead recovers no more of the prior. This was the
+central prediction of the project, and it fails: no rise with horizon. The prior is real in the population; it is just
+a small signal.
+\qa{Isn't 0.054 a tiny $R^2$?}{It is not 5\% of variance; it is the distance above the pseudo-session median.}
 \qa{What happens after removing trial-locked responses?}{The 0.5 s subspace keeps a little prior and the 30 s subspace
-has none, so the long-minus-short change is negative.}}
+has none: still no rise.}
+{\footnotesize\textbf{Post hoc, exploratory.} Same decoder and pseudo-sessions on the full population: corrected
+$R^2$ 0.159 (mouse mean). The 0.5 s subspace captures about a third (0.054), PCA 8\% (0.013), 30 s none ($-0.046$).
+With the Findling decoder (Lasso, interleaved folds) the picture is flat, not falling: 0.5 s 0.026, 30 s 0.038; 7 of 13
+mice rise, median change 0.001, two-sided $p = 0.34$. So: no rise with horizon, never ``falls''.\par}}
 \end{frame}
 
 % =====================================================================================
@@ -452,7 +457,10 @@ well it follows time: in 12 of 16 the correlation with time is at least 0.9; a f
 the subspace gives 0.84, but the 0.5 second subspace, PCA and even random subspaces are close behind. So every
 low-dimensional summary of these recordings is dominated by the session ramp, and long horizons only slightly more.
 \qa{How is elapsed time decoded?}{Ridge on the latents, with contiguous chunks of the session assigned to folds in turn,
-so it interpolates within a session.}}
+so it interpolates within a session.}
+\qa{What about the step sessions?}{Post hoc, exploratory: by a fixed rule only DY\_014 qualifies (CSHL049's jump is 20\%,
+under the 30\% threshold). At its step, probe motion barely changes (0.13 \textmu m), but a unit carrying the step shows
+its largest amplitude change of the session at that moment: artifact-consistent.}}
 \end{frame}
 
 % =====================================================================================
@@ -497,9 +505,12 @@ original on the same sessions, and the dashed lines are pre-registered threshold
 dropping units that fade, bypassing spike sorting and correcting for shrinking spikes each leave most of the ramp. The
 exception, and the biggest open challenge, is the strictest filter, units stable in both rate and amplitude: only 5 sessions pass, and it falls by a
 third, though PCA falls too, so part of that is simply fewer units.
-\qa{Why not remove the drift and refit?}{That's the key next test; I'm running it now as a post hoc check.}
-% TODO: insert the remove-drift-and-refit result here (notes only) when the coordinator sends it.
-\qa{So it is not drift?}{No single recording cause I tested explains most of it; untested ones remain possible.}}
+\qa{Why not remove the drift and refit?}{I did, post hoc (exploratory). I detrended each unit's activity (quadratic, or
+slow cosines with periods of 20 min or more) and refit everything. The prior still doesn't rise with horizon ($p = 0.58$
+and 0.29). With the gentler detrend, a small prior signal (about 0.03--0.05) becomes visible about equally in every
+subspace, PCA included. That fits variance ranking: once the ramp is gone, the prior is a small signal spread
+everywhere, not one that long horizons concentrate.}
+}
 \end{frame}
 
 % =====================================================================================
@@ -550,34 +561,36 @@ not shared even on the same probe, which is weak evidence against a probe-level 
 \begin{frame}{What the data show, possible mechanisms, and the main limits}
 \small
 \begin{columns}[T,onlytextwidth]
-\column{0.48\textwidth}
+\column{0.43\textwidth}
 \textbf{What the data show}
-\begin{itemize}\setlength{\itemsep}{1pt}
+\begin{itemize}\setlength{\itemsep}{0pt}
 \item Prior decoding does not rise with horizon; not detected in long-lag subspaces.
 \item At 30 s, predictable structure is one direction tracking session time; PCA and 0.5 s RRR carry it too.
-\item No single recording cause tested explains most of it; it repeats in other areas.
+\item No single recording cause tested explains most of it.
 \end{itemize}
 
-\column{0.48\textwidth}
+\column{0.54\textwidth}
 \textbf{Possible mechanisms (speculative)}
-\begin{itemize}\setlength{\itemsep}{1pt}
-\item \hl{Variance ranking}: RRR keeps the directions that predict the most future variance. A small prior signal
-loses to a large ramp, even if perfectly predictable.
-\item The ramp: arousal or neuromodulation, fatigue, satiety, elapsed-time coding, or an untested probe-wide factor.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item \hl{Variance ranking}: RRR keeps the directions that predict the most future variance; a small prior signal
+loses to a large ramp.
+\item The ramp: arousal, neuromodulation, fatigue, satiety, timing, or an untested probe-wide factor.
+\item \emph{Post hoc:} its spatial pattern is unstable across halves (unit-level nonstationarity).
 \end{itemize}
 \end{columns}
 
 \smallskip
-\textbf{Main limits.} (1) Strictest unit filter: 0.73 $\to$ 0.49 on 5 sessions (PCA 0.68 $\to$ 0.43); next,
-matched-unit-count resampling. (2) 13 mice; other areas share probes. (3) Follow-ups exploratory, after the analysis
-freeze.
+\textbf{Main limits.} (1) Strictest unit filter: 0.73 $\to$ 0.49, 5 sessions (PCA 0.68 $\to$ 0.43); next: matched
+unit counts. (2) 13 mice; other areas share probes. (3) Follow-ups exploratory, post-freeze.
 \note{%
 On the left is what the data show; on the right, what might explain it, which is speculation. The most likely reason the
 prior is missing is variance ranking: these methods keep the directions that predict the most future variance. A 30
 second lag spans only a few trials and blocks last minutes, so a persistent prior would be predictable at any of these
 horizons; but it is a small signal, and with five dimensions the large session ramp wins first. The main limit is the
 strictest unit filter, which weakens the ramp; matched-unit-count resampling would tell whether that is just fewer
-units. The other two limits are sample size and the shared probes.}
+units. The other two limits are sample size and the shared probes. A post hoc check, exploratory, found the ramp's spatial
+pattern unstable across halves, and the sharpest step, DY\_014 at 43 minutes, coincides with an abrupt spike-amplitude
+change in a contributing unit: unit-level nonstationarity.}
 \end{frame}
 
 % =====================================================================================
@@ -700,23 +713,24 @@ the margin is 0.005--0.008 and its CIs include 0.
 I chose lagged reduced-rank regression because it makes the horizon an explicit parameter while everything else stays
 fixed, and it is closed form. The honest empirical answer is that it beats PCA only modestly, and much of that edge is
 task structure that recurs every trial, since it nearly vanishes on residuals. That fits the main finding: most
-predictable structure here is either trial-locked or the one slow mode, which PCA also finds.}
+predictable structure here is either trial-locked or the one slow mode, which PCA also finds.
+\qa{Does the geometry result depend on the basis?}{Yes: in the loading basis the geometry test fails ($p = 0.96$).}}
 \end{frame}
 
 % -------------------------------------------------------------------------------------
 \begin{frame}{Backup: how strong is the prior result?}
 \small
-\begin{itemize}\setlength{\itemsep}{4pt}
-\item \textbf{Positive controls pass.} The prior is decodable from the full population (Fisher $p = 1.2\times10^{-5}$),
-and stimulus decoding and its fall with lag are detected (P3).
-\item \textbf{The pre-registered contrast.} Change from 0.5 s to 30 s: $-0.099$ [$-0.218$, $+0.002$] (\Rsq{} units).
-The population gate uses a different decoder (Lasso on all units, interleaved folds), so no ratio is taken.
-\item \textbf{No rise in any variant.} Residuals: the 0.5 s subspace keeps a little prior (0.053), the 30 s none
-($-0.038$), so the change is negative: $-0.093$ [$-0.154$, $-0.038$].
-$d = 3$ and 10: Holm $p = 0.21$, 0.88. Leave-one-mouse-out: all Holm $p \ge 0.80$. Pilot refits: 0.63--1.0. Other
-areas: 0.52.
-\item \textbf{Limit.} Per-lag CIs are wide: at 30 s [$-0.156$, $+0.061$], so a full-size prior there is not excluded.
-The claim is about the change with horizon.
+\begin{itemize}\setlength{\itemsep}{2pt}
+\item \textbf{Positive controls pass.} Prior decodable from the full population (Fisher $p = 1.2\times10^{-5}$);
+stimulus decoding and its fall with lag detected (P3).
+\item \textbf{Pre-registered contrast.} Change 0.5 s $\to$ 30 s: $-0.099$ [$-0.218$, $+0.002$] (\Rsq{} units).
+\item \textbf{No rise in any variant.} Residuals: 0.5 s keeps a little prior (0.053), 30 s none ($-0.038$); change
+$-0.093$ [$-0.154$, $-0.038$]. $d = 3$, 10: Holm $p = 0.21$, 0.88. Leave-one-mouse-out: all $p \ge 0.80$. Pilot
+refits: 0.63--1.0. Other areas: 0.52.
+\item \textbf{Post hoc, exploratory.} Same decoder on the full population: 0.159; 0.5 s captures about a third, PCA 8\%,
+30 s none. Findling decoder: flat (0.026 vs.\ 0.038; 7 of 13 rise; $p = 0.34$). After detrending: no rise ($p = 0.58$,
+0.29). The claim is ``no rise'', not ``falls''.
+\item \textbf{Limit.} Per-lag CIs are wide (30 s: [$-0.156$, $+0.061$]); a full-size prior there is not excluded.
 \end{itemize}
 \note{%
 The pipeline detects things when they are there: the prior from the full population, and the stimulus in the
