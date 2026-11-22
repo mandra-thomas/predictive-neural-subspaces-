@@ -199,3 +199,88 @@ There is no multiplicity correction (exploratory); all statistics are reported.
 **Compute.** Downloads (engagement table from GitHub, full spike files about 12.8 GB) run locally, where the IBL
 login is. Only compact derived arrays (MOs-depth spike times and depth bins, per-unit spike times and amplitudes) go
 to PACE ICE, where all binning, fitting and testing runs.
+
+## A14: third pilot, does amplitude loss account for the slow mode? (pre-registered 2026-11-22, before any amplitude-rate coupling or corrected refit was computed)
+
+**Why.** A13 found that the slow mode reappears in sorting-free multi-unit activity, has no rigid-shift signature, and
+is carried by units whose spike amplitudes shrink (2a, p = 0.029). That points to spikes being lost at the detection
+threshold. A13 cannot say whether amplitude loss is *enough* to produce the mode. A naive correction (regress each
+unit's rate on its amplitude trajectory) cannot answer this either. Both amplitude and rate are near-ramps, so such a
+regression removes any ramp in any unit whose amplitude drifts, whatever the cause. This pilot therefore estimates the
+amplitude-rate coupling only from fluctuations around the time trend, and brackets the answer between a conservative
+and a maximal correction. Everything is exploratory and does not touch the primary tests. Inputs are the cached A13
+per-unit spike times and amplitudes (`data/interim/a13`); no new downloads.
+
+**Common definitions.**
+- Windows: the A13 30 s windows. Per unit and window: spike count over valid bins, exposure (number of valid bins
+  times 0.5 s; windows with fewer than 30 valid bins dropped), and median spike amplitude (NaN with fewer than 5
+  spikes).
+- Relative amplitude: window median amplitude divided by the unit's median over windows, minus 1.
+- Smoothed amplitude trajectory: relative amplitude with NaN windows filled by linear interpolation (nearest value at
+  the ends), then a centred running median over 5 windows.
+- Coupling model: a Poisson GLM (log link, log exposure offset) of window spike count on relative amplitude, fit per
+  unit by iteratively reweighted least squares. Units need at least 20 windows with a finite amplitude.
+  - Fluctuation coupling: the amplitude coefficient with a quadratic in scaled window time as nuisance terms.
+  - Total coupling: the amplitude coefficient with no time terms.
+- Spike detection loss predicts a positive coefficient: a unit's detected rate falls when its spikes get smaller.
+  Adaptation, where spikes shrink at high rates, predicts a negative one.
+
+**Part 1: is there amplitude-rate coupling beyond the trend?**
+- Session statistic: the median fluctuation coupling over units. Animal means. One-sided Wilcoxon greater than 0.
+- Secondary: the same with a degree-5 polynomial time nuisance, which is more stringent about slow co-trends. Also the
+  fraction of units with a positive coefficient.
+
+**Part 2: amplitude-corrected refits (bracketing).**
+Each unit's binned counts are multiplied, window by window, by the factor below, clipped to the range 0.5 to 2:
+
+$$ f_u(t) = \exp\!\left(-\beta\,\tilde x_u(t)\right), $$
+
+where $\tilde x_u(t)$ is the unit's smoothed amplitude trajectory and $\beta$ is a coupling coefficient. Trial-window
+counts get the factor of the window containing their alignment event. Units without an estimate keep a factor of 1.
+Scripts 04 to 06 are refit unchanged at d = 5 on each corrected copy.
+- Conservative correction (`data_ampcorr_low`): $\beta$ is the session median of the fluctuation coupling, shared by
+  all units. It under-corrects if detection loss is real, because measurement noise in window amplitudes attenuates
+  the estimate and the time nuisance absorbs any amplitude-driven ramp.
+- Maximal correction (`data_ampcorr_high`): $\beta$ is each unit's own total coupling. It removes every part of each
+  unit's log-rate that is collinear with its amplitude trajectory, so it over-corrects when amplitude and rate
+  co-trend for unrelated reasons.
+- Reading of each copy, by the elapsed-time R-squared of the 30 s subspace relative to the original (0.84):
+  - "survives" if at least 75%;
+  - "removed" if below 50%;
+  - "intermediate" otherwise.
+- Secondary, with no refit: project the corrected data onto the *original* slow direction, using the original
+  z-scoring. Report the ratio of the projection's linear slope over time to the uncorrected slope ("residual ramp
+  fraction", session median).
+
+**Part 3: is amplitude change concentrated early in the session?**
+- Tissue settling after an acute insertion is a relaxation, so it should be fastest early. Satiety or disengagement
+  build late.
+- For units with absolute amplitude trend at least 0.5 (A13 definition), the session's windows are split into thirds.
+  In each third, the change is the Theil-Sen slope of relative amplitude times the number of windows, signed in the
+  direction of the unit's overall trend.
+- Early-concentration index: first-third change minus last-third change, divided by the sum of their absolute values.
+  It ranges from -1 to 1, with positive meaning early. Units need at least 5 finite windows in each third.
+- Session median, animal means, one-sided Wilcoxon greater than 0.
+- Secondary: the same index on the slow-mode window series itself.
+
+**Overall reading (evaluated in this order).**
+1. "Amplitude cannot account for the mode": the maximal correction reads "survives".
+2. "Detection loss sufficient": Part 1 significant (p < 0.05) and the conservative correction reads "removed".
+3. "Detection loss contributes": Part 1 significant and the conservative correction reads "intermediate".
+4. "Coupling without sufficiency": Part 1 significant and the conservative correction reads "survives".
+5. "Undetermined": anything else. This includes no fluctuation coupling with a maximal correction that removes the
+   mode, which is the collinear case that cannot be separated.
+
+Part 3 is reported alongside and does not enter the rule. There is no multiplicity correction; all statistics are
+reported.
+
+**Caveats stated in advance.**
+- Kilosort amplitudes are template-scaling amplitudes, not raw voltages, and the detection threshold acts on whitened
+  data. The coupling is therefore an empirical relation, not a calibrated detection curve.
+- Positive coupling can also arise if a brain-state change raises rates and amplitudes together. No known mechanism
+  makes this large; it is named as an alternative.
+- The task starts some minutes after insertion, and that delay is not in the cached data. Settling that finished
+  before the task began would not show as early concentration.
+
+**Compute.** PACE ICE (coc-cpu), from the A13 arrays already there. A unit test checks that the GLM recovers a known
+coupling in simulated detection loss before the job runs.
