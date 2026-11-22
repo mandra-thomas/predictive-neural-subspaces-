@@ -104,7 +104,12 @@ def main():
         # ---- amplitude-stable copy and per-unit trends
         p = pre["counts"].shape[1]
         ew = window_edges(pre)
-        at, _ = amp_trends(a["unit_t"], a["unit_idx"].astype(np.int64), a["unit_amp"], p, ew)
+        at, med = amp_trends(a["unit_t"], a["unit_idx"].astype(np.int64), a["unit_amp"], p, ew)
+        # descriptive (not pre-registered): size of the amplitude change, last fifth vs first fifth of windows, %
+        fifth = max(1, med.shape[0] // 5)
+        with np.errstate(all="ignore"):
+            first, last = np.nanmedian(med[:fifth], 0), np.nanmedian(med[-fifth:], 0)
+            amp_change = 100 * (last - first) / first
         rw = window_means(bin_centres(pre), pre["counts"] / bin_s, valid, ew)
         tw = np.arange(len(ew) - 1, dtype=float)
         rt = np.array([spearman(rw[:, u], tw) for u in range(p)])
@@ -112,7 +117,7 @@ def main():
         amp_ok = np.isfinite(at) & (np.abs(at) < AMP_TREND_MAX)
         sel = stable & amp_ok
         pd.DataFrame({"unit": np.arange(p), "amp_trend": at, "rate_trend": rt, "rate_stable": stable,
-                      "amp_stable": amp_ok}).to_csv(res_dir / f"units_{eid}.csv", index=False)
+                      "amp_stable": amp_ok, "amp_change_pct_descriptive": amp_change}).to_csv(res_dir / f"units_{eid}.csv", index=False)
         arow = {"eid": eid, "subject": s["subject"], "n_units": int(p), "n_rate_stable": int(stable.sum()),
                 "n_amp_and_rate_stable": int(sel.sum()), "included": bool(sel.sum() >= cfg["inclusion"]["min_units"])}
         amp_rows.append(arow)
