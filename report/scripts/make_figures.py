@@ -103,7 +103,7 @@ def fig_content():
     xt = ["0.5 s", "2 s", "8 s", "30 s", "PCA", "rand."]
     xs = [0, 1, 2, 3, 4.4, 5.4]
     panels = [("prior", "a  Block prior\n(corrected $R^2$)"), ("cur_side", "b  Current stimulus side\n(corrected AUC)"),
-              ("elapsed_time", "c  Elapsed time\n(held-out $R^2$)")]
+              ("elapsed_time", "c  Elapsed time\n(interpolated $R^2$)")]
     fig, axs = plt.subplots(1, 3, figsize=(5.5, 2.05))
     out = {}
     for ax, (var, title) in zip(axs, panels):
@@ -120,10 +120,16 @@ def fig_content():
                     color=SERIES[1], marker="s", ms=4, lw=0, elinewidth=1.4, capsize=2, zorder=3)
         if var != "elapsed_time":
             ax.axhline(0, color=INK_2, lw=0.8)
+        if var == "prior":
+            a16 = pd.read_csv(ROOT / "results/a16/sessions_d5.csv")
+            full = a16.groupby("subject").ridge_full_corr.mean().mean()
+            ax.axhline(full, color=SERIES[2], lw=1.0, ls=":")
+            ax.text(5.75, full + 0.015, f"full population {full:.3f}", fontsize=6.3, color=SERIES[2], ha="right", va="bottom")
+            out["full_population"] = {"mouse_mean": full}
         ax.set_xticks(xs, xt, rotation=0)
         ax.tick_params(axis="x", labelsize=6.8)
         ax.set_title(title, loc="left")
-        out[var] = dict(zip(sets, mean))
+        out.setdefault(var, {}).update(dict(zip(sets, mean)))
     axs[0].set_xlabel("RRR lag", fontsize=7.5, loc="left")
     fig.tight_layout(w_pad=0.5)
     fig.savefig(OUT / "rfig_content.pdf")
@@ -166,7 +172,7 @@ def fig_controls():
     ax.set_yticks(range(len(versions)), [v[1] for v in versions][::-1])
     ax.set_xlim(0, 1)
     ax.set_ylim(-0.6, len(versions) - 0.2)
-    ax.set_xlabel("held-out elapsed-time $R^2$ of the 30 s subspace")
+    ax.set_xlabel("elapsed-time $R^2$ of the 30 s subspace (interpolated)")
     ax.text(1.02, len(versions) - 0.45, "copy vs original,\nsame sessions (sess./mice)", fontsize=6.5, color=INK_2,
             transform=ax.get_yaxis_transform(), va="bottom")
     fig.tight_layout()
