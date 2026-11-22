@@ -16,6 +16,7 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage{caption}
+\usepackage{float}
 \captionsetup{font=small,labelfont=bf}
 
 \hypersetup{pdfauthor={Gunnar Andra-Thomas},pdftitle={Long-Horizon Predictive Subspaces in Mouse Secondary Motor Cortex Track Time in the Session, Not the Block Prior},colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
@@ -59,10 +60,11 @@ decodable from the full population but does not rise with lag in the predictive 
 excludes any rise larger than about 3\% of the full-population effect. Current-stimulus information does fall with
 lag, and the cross-lag principal angle exceeds both split-half floors, but both effects are modest. What the long-lag
 subspaces carry is a single slow mode, shared across horizons and close to a linear ramp, that decodes elapsed time in
-the session with held-out $R^2=0.84$. Three exploratory, pre-registered pilots found that none of the recording-side
-explanations tested (unit turnover, spike sorting, rigid probe motion, spike-amplitude loss) accounts for this mode,
-and that pupil, engagement and satiety explain little of it beyond the shared trend. A neural origin is more
-plausible than before but not established. Long-horizon predictive objectives preferentially recover session-scale
+the session with held-out $R^2=0.84$. A pre-registered replication in a second region recorded on the same probes
+(15 sessions, 12 mice) reproduced this pattern. Exploratory, pre-registered pilots found that none of the
+recording-side explanations tested (unit turnover, spike sorting, rigid probe motion, spike-amplitude loss) accounts
+for the mode, and that its fluctuations around the ramp are not shared across regions and not tied to pupil,
+engagement, satiety, reaction time or accuracy. Its origin remains open. Long-horizon predictive objectives preferentially recover session-scale
 nonstationarity and need elapsed-time diagnostics and covariance-matched baselines before being read as task-related.
 \end{abstract}
 
@@ -97,9 +99,9 @@ yet it is not reliably decodable from any five-dimensional predictive subspace a
 other two pre-registered predictions held, but weakly: long-lag subspaces carry less current-stimulus information
 (because they lose it, not because short-lag subspaces specialize in it), and the 0.5\,s and 30\,s subspaces differ by
 more than their split-half floors (mostly because short-lag subspaces are reproducible and long-lag ones are not).
-What the long-lag subspaces contain is one slow mode that tracks time in the session. Three exploratory pilots then
-tested, one by one, the recording artifacts that would most simply produce it, and the available behavioural
-covariates; none accounts for it. The proposal's risk table anticipated this branch (``the slow subspace is drift'':
+What the long-lag subspaces contain is one slow mode that tracks time in the session. The same pattern replicated in
+a second region recorded on the same probes. Exploratory pilots then tested, one by one, the recording artifacts that
+would most simply produce the mode, and the available behavioural covariates; none accounts for it. The proposal's risk table anticipated this branch (``the slow subspace is drift'':
 report a negative result on long-lag objectives and characterize the shared slow mode), and the report follows it.
 
 % =====================================================================================================
@@ -263,8 +265,7 @@ unit's whole-session z-score changed; the chosen $\alpha$ changed in 2 sessions 
 $p$-values were unchanged, the residual P1 moved from 0.048 to 0.013, and an earlier estimator-check result
 (reduced-rank beating full-rank ridge at 30\,s) proved to be an artifact of the bug. All numbers here are post-fix.
 
-Leave-one-mouse-out refits and removal of an outlier mouse were added afterwards and are labelled post hoc. The three
-follow-up pilots in Section~\ref{sec:slowmode} are separate exploratory extensions that do not change the main
+Leave-one-mouse-out refits and removal of an outlier mouse were added afterwards and are labelled post hoc. The four follow-up pilots (A12--A15; Sections~\ref{sec:region2} and~\ref{sec:slowmode}) are separate exploratory extensions that do not change the main
 analysis; each was pre-registered with a reading rule before its data were downloaded or computed, and none is
 corrected for multiplicity.
 
@@ -370,18 +371,10 @@ $R^2$ 0.12 raw, 0.03 residual). The most predictable direction at every horizon 
 pre-registered expectation note anticipated, and this is why P2 is null: the mode fills the five 30\,s dimensions,
 and it is not the prior. I call the leading direction of the full-session 30\,s readout subspace the \emph{slow mode}.
 Averaged in 30\,s windows and sign-aligned to increase with time, it is close to a straight line in most sessions
-(median correlation with time 0.96; above 0.9 in 12 of 16 sessions; Figure~\ref{fig:examples}). In two of the six
+(median correlation with time 0.96; above 0.9 in 12 of 16 sessions; Appendix Figure~\ref{fig:examples}). In two of the six
 example sessions it is instead flat with an abrupt step 45 to 50 minutes in, which looks more like a discrete event
 than a gradual process.
 
-\begin{figure}[t]
-  \centering
-  \maybefig{fig5_slowmode_examples.pdf}{width=0.66\linewidth}{2.1in}
-  \caption{Slow-mode time courses (30\,s windows, z-scored, sign-aligned) in six sessions chosen by a fixed rule
-  (first session of each of the first six mice in the frozen list), with straight-line fits and correlation $r$ with
-  time. Four are near-linear ramps; CSHL049 and DY\_014 are flat with an abrupt step.}
-  \label{fig:examples}
-\end{figure}
 
 \subsection{Robustness}
 \label{sec:robust}
@@ -394,9 +387,41 @@ one cluster firing at 141\,Hz with a lag-1 autocorrelation of 0.95 (session medi
 rate in the last quarter of the session, which looks like a multi-unit or noise cluster plus a drift event. Its
 effects point the same way as every other mouse's, and dropping it (post hoc) changes nothing material.
 
-% TODO(A15): Part 1 of A15 (second-region replication within the same 16 sessions: gate, P1-P3, 30 s elapsed-time R^2,
-% pre-registered "replicates / partial / does not replicate" reading) goes here, as a short paragraph plus one row per
-% criterion. Report only once the A15 run is complete and logged.
+\subsection{Generalization to a second region}
+\label{sec:region2}
+
+The MOs probes pass through other regions too. In a pre-registered extension (A15), for each session I took the
+non-MOs region with the most good units on the same probes and reran the unchanged pipeline, with replication criteria
+fixed before any of these data were binned. This gave 15 sessions from 12 mice (one mouse had no second region with 20
+or more units), mostly frontal: anterior cingulate (ACAd), infralimbic (ILA, 2), prelimbic (PL), orbital (ORBl;
+ORBvl, 3), agranular insular (AIv) and primary motor (MOp) cortex, plus lateral septum (LSr, 3) and caudoputamen
+(CP, 2). All four pre-registered criteria held (Table~\ref{tab:region2}), so the reading is ``replicates''. One
+difference matters for interpretation: the prior is only barely present in the second-region populations (median
+corrected $R^2$ 0.001, though the combined gate is significant), and per-lag Fisher-combined prior $p$-values in the
+subspaces ranged from 0.03 (2\,s) to 0.24 (30\,s), uncorrected. The second region therefore supports ``predictive
+subspaces do not carry more prior at long lags'' but adds little to ``the prior is present but in quiet directions''.
+
+\begin{table}[t]
+  \caption{Pre-registered replication in a second region from the same probes (A15), against MOs. Holm-corrected
+  $p$ for the primary tests; the first four rows after the gate are the replication criteria.}
+  \label{tab:region2}
+  \centering\small
+  \begin{tabular}{lcc}
+    \toprule
+     & MOs & Second region \\
+    \midrule
+    Sessions / mice                                          & 16 / 13 & 15 / 12 \\
+    Prior gate: median corrected $R^2$ (Fisher $p$)          & 0.064 ($1.2\times10^{-5}$) & 0.001 (0.002) \\
+    P1 geometry ($\holm$)                                    & 0.0026 & 0.0037 \\
+    P2 prior rises with lag ($\holm$; criterion: not significant) & 0.89 & 0.52 \\
+    P3 current side falls with lag ($\holm$)                 & 0.0061 & 0.012 \\
+    Elapsed-time $R^2$, 30\,s subspace (criterion: $\ge 0.5$) & 0.84 & 0.82 \\
+    Cross-lag minus floor, 0.5\,s / 30\,s (degrees)          & 12.7 / 3.6 & 15.0 / 3.7 \\
+    Drift flags                                              & 14 / 16 & 14 / 15 \\
+    Nesting of 30\,s leading direction in 0.5\,s subspace    & 0.92 & 0.92 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 % =====================================================================================================
 \section{What is the slow mode?}
@@ -408,36 +433,14 @@ spike-\emph{sorting} drift, that it vanishes in sorting-free activity; rigid \em
 session's own motion trace and that multi-unit loadings follow the slope of the depth profile; \emph{detection loss},
 that units whose spikes shrink lose rate and that amplitude correction removes the mode; and arousal, engagement or
 satiety, that it follows pupil size, GLM-HMM engagement or cumulative reward beyond what any two trending signals
-share. Three pilots tested these in sequence (Table~\ref{tab:pilots}), each pre-registered with a reading rule before
-its data were downloaded or computed. They are exploratory: no multiplicity correction, one region, 13 mice.
+share. Four pilots tested these in sequence (summary in Appendix Table~\ref{tab:pilots}), each pre-registered with a reading rule before
+its data were downloaded or computed. They are exploratory, with no multiplicity correction.
 
-\begin{table}[t]
-  \caption{Follow-up pilots (exploratory; uncorrected one-sided Wilcoxon across mice). ``$R^2$'': elapsed-time
-  decoding by the 30\,s subspace after refitting on the modified data (original 0.84).}
-  \label{tab:pilots}
-  \centering\footnotesize
-  \begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}p{0.36\linewidth}>{\raggedright\arraybackslash}X@{}}
-    \toprule
-    Candidate & Test & Result \\
-    \midrule
-    Unit turnover (A12) & Refit on units active in every fifth of the session & $R^2$ 0.77 (13 sessions, 12 mice); flag 12/13; reads ``survives'' \\
-    Probe motion (A12) & Correlation with own vs.\ other sessions' IBL motion trace & Corrected $-0.006$ ($p=0.39$); detrended $+0.062$ ($p=0.14$) \\
-    Pupil (A12) & Same, with pupil diameter (15 sessions) & Corrected $-0.001$ ($p=0.42$); detrended $-0.004$ ($p=0.55$) \\
-    Spike sorting (A13) & Refit on sorting-free multi-unit activity in 50\,$\mu$m depth channels & $R^2$ 0.74 (15 sessions, 12 mice); match with unit-based mode 0.96 \\
-    Rigid shift (A13) & Do multi-unit loadings follow the depth-profile slope? & Mean $|\rho|$ 0.19; Fisher $p=0.25$ \\
-    Amplitude, loading (A13) & Do units whose amplitude shrinks carry the mode? & Mean Fisher $z$ 0.15, $p=0.029$ \\
-    Amplitude, stable (A13) & Refit on rate- and amplitude-stable units & $R^2$ 0.49 (5 sessions, 5 mice); ``intermediate'' \\
-    Engagement, satiety (A13) & Residual correlation beyond a quadratic trend, session-permutation null & $p=0.19$ and $p=0.12$ \\
-    Detection coupling (A14) & Sign of amplitude-rate coupling beyond the trend & Negative: mean $-1.54$, $p=0.99$; isolated spikes (post hoc) $-1.32$, $p=0.98$ \\
-    Amplitude correction (A14) & Refit after removing each unit's amplitude-linked rate & $R^2$ 0.85 / 0.80 / 0.78 (conservative / maximal / slow-maximal, post hoc); all ``survive'' \\
-    Settling (A14) & Is amplitude change concentrated early? & Index $-0.12$ ($p=0.75$); if anything, later \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
 
 \paragraph{Pilot 1 (A12): turnover, probe motion and pupil.} Units effectively silent for an entire fifth of the
 session occur in 14 of 16 sessions (118 of 842 units), the classic signature of probe drift or sorting instability.
-Yet refitting on units active throughout left the mode intact (Table~\ref{tab:pilots}; PCA 0.72, random 0.50), and
+Yet refitting on units active throughout left the mode intact (elapsed-time $R^2$ 0.77, against 0.72 for PCA and
+0.50 for random subspaces), and
 the primary results were unchanged (Holm $p$ 0.002, 0.97, 0.027). IBL's motion estimate for these insertions is small
 (median range 7.9\,$\mu$m, 1 to 19). The slow mode correlates strongly with each session's own motion trace (mean
 absolute correlation 0.74), but just as strongly with \emph{other} sessions' traces, and the same holds for pupil. The
@@ -490,10 +493,18 @@ ended before the task began would be invisible.
   \label{fig:controls}
 \end{figure}
 
-\paragraph{Where this leaves the slow mode.} What remains is a slow, near-linear change in MOs firing that tracks
-session time and survives every recording control applied, apart from the inconclusive amplitude-stable subset. A
-neural origin (slow arousal or neuromodulatory drift, fatigue, elapsed-time coding) is now more plausible but not
-established: the ramp shape limits behavioural comparisons, the step-like sessions suggest discrete events of unknown
+\paragraph{Pilot 4 (A15): shared across regions, or tied to behaviour?} Before detrending, the MOs and
+second-region slow modes correlate strongly (median 0.94), as any two ramps do. After a quadratic trend is removed from
+each, their fluctuations are not shared beyond the cross-session null (median detrended $r$ 0.07). All second regions
+were on the same probe as the MOs units, so shared fluctuations would not have proven a brain-wide state, but their
+absence does not support one. Beyond the trend, the MOs slow mode tracked neither log reaction time nor accuracy.
+
+\paragraph{Where this leaves the slow mode.} What remains is a slow, near-linear change in firing that tracks session
+time in both regions and survives every recording control applied, apart from the inconclusive amplitude-stable
+subset. The controls rule out the specific artifacts tested, but they do not identify a brain state either: the
+fluctuations around the ramp are not shared between regions and do not track any behavioural measure available. A
+neural origin (slow arousal or neuromodulatory drift, fatigue, elapsed-time coding) remains possible but not
+established; the ramp shape limits correlational tests, the step-like sessions suggest discrete events of unknown
 cause, and unmeasured recording factors remain possible.
 
 % =====================================================================================================
@@ -503,8 +514,8 @@ cause, and unmeasured recording factors remain possible.
 \paragraph{What the results say about the question.} The horizon does change which directions are selected, but
 not as hypothesized: at 0.5\,s the subspace is reproducible and carries within-trial variables about as well as a
 random covariance-matched subspace, while at 30\,s it collapses onto a slow mode that is shared with the short-lag
-subspace, not reproducible across halves, and indexes time rather than the latent variable the mouse must track. The
-prior is decodable but not part of the population's predictable dynamics. One reading is that it is a small,
+subspace, not reproducible across halves, and indexes time rather than the latent variable the mouse must track. The same holds in a second, mostly frontal set
+of regions. In MOs the prior is decodable but not part of the population's predictable dynamics. One reading is that it is a small,
 event-updated modulation in quiet directions, which variance- or predictability-ranked methods would miss; this is
 untested, since absence from a rank-5 subspace filled by a stronger slow signal does not show that the prior is
 non-dynamical.
@@ -514,19 +525,15 @@ non-dynamical.
 covariance-matched baselines and careful fold-wise normalization before their subspaces are read as cognition.
 
 \paragraph{Limitations.} The prior is weak in MOs (corrected $R^2$ about 0.06); P3 is sensitive to $d$ and P1 is thin;
-the pilots are exploratory and uncorrected; this is one region and 13 mice; split halves confound reproducibility with
+the pilots are exploratory and uncorrected; both regions come from the same 13 mice and probes; split halves confound reproducibility with
 nonstationarity; and a 30\,s lag leaves about 120 independent windows per session.
 
-\paragraph{Future work.} Spontaneous periods outside the task could show whether the slow mode is task-linked. A
-pre-registered replication in a second region on the same probes is in progress, testing also whether the slow mode
-is shared across regions and tracks reaction time and accuracy beyond the trend; its results are not reported here.
+\paragraph{Future work.} Because the core pattern generalizes without pipeline changes, the next step is independent
+sessions and regions, which needs new downloads (MOp, for example, has 14 sessions from 12 mice under the census rule).
+Spontaneous periods outside the task could show whether the slow mode is task-linked.
 
-% TODO(A15): Once A15 is complete, add 2-3 sentences here: whether the core pattern replicated in the second region
-% (pre-registered criteria), whether the two regions' slow modes co-fluctuate beyond the trend (Part 2), and whether
-% the MOs slow mode tracks reaction time or accuracy beyond the trend (Part 3); then revise "Future work" accordingly.
-
-\paragraph{Conclusion.} Predicting MOs activity further ahead did not isolate the block prior; it isolated a slow,
-time-tracking mode that none of the recording controls tested here could explain.
+\paragraph{Conclusion.} Predicting population activity further ahead did not isolate the block prior, in MOs or in a
+second region; it isolated a slow, time-tracking mode that none of the recording controls tested here could explain.
 
 \section*{Code and data availability}
 All recordings are from the public IBL Brain-Wide Map release \citep{ibl2025bwm} (aggregate tag
@@ -560,7 +567,7 @@ The amendment file was committed before any real-data fit. Table~\ref{tab:amend}
 labels: \emph{pre-reg.} means written before the relevant data were analysed; \emph{post hoc} means added after results
 were seen.
 
-\begin{table}[h]
+\begin{table}[H]
   \caption{Deviations from the proposal (D), additions (A), and later amendments.}
   \label{tab:amend}
   \centering\footnotesize
@@ -592,7 +599,7 @@ were seen.
     A12 & Pilot: stable units, probe motion, pupil & What is the slow mode? & pre-reg. (exploratory) \\
     A13 & Pilot: engagement, satiety, amplitude, multi-unit & Ramp-independent evidence & pre-reg. (exploratory) \\
     A14 & Pilot: amplitude-rate coupling, corrected refits, timing & Is amplitude loss sufficient? & pre-reg. (exploratory); two post hoc checks \\
-    A15 & Second region, cross-region slow mode, behaviour & Does it generalize? & pre-reg.; results pending \\
+    A15 & Second region, cross-region slow mode, behaviour & Does it generalize? & pre-reg. (exploratory); done \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -604,14 +611,39 @@ were seen.
 matrix and the estimator check); these are Figures~\ref{fig:geometry} and~\ref{fig:content} and Appendix
 Figure~\ref{fig:estimator}. Its risk table pre-specified the two fallbacks this project followed: if the slow subspace
 encodes elapsed time and prior decoding fails the null, report a negative result on long-lag objectives; if the lags
-share a slow mode, report it and characterize what it encodes (Section~\ref{sec:slowmode}). Of its ordered extensions,
-the second region is in progress (A15), and the GLM residual rerun (A11) and GLM-HMM engagement probe (A13) were
-carried out. The main analysis, including the rerun after D10, was completed on 16 November 2026; the pilots do not
+share a slow mode, report it and characterize what it encodes (Section~\ref{sec:slowmode}). Of its ordered extensions, the second region (A15, within the same sessions), the GLM residual rerun (A11) and the
+GLM-HMM engagement probe (A13) were carried out. The main analysis, including the rerun after D10, was completed on 16 November 2026; the pilots do not
 alter it.
+
+\begin{table}[H]
+  \caption{Follow-up pilots (exploratory; uncorrected one-sided Wilcoxon across mice). ``$R^2$'': elapsed-time
+  decoding by the 30\,s subspace after refitting on the modified data (original 0.84).}
+  \label{tab:pilots}
+  \centering\footnotesize
+  \begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}p{0.36\linewidth}>{\raggedright\arraybackslash}X@{}}
+    \toprule
+    Candidate & Test & Result \\
+    \midrule
+    Unit turnover (A12) & Refit on units active in every fifth of the session & $R^2$ 0.77 (13 sessions, 12 mice); flag 12/13; reads ``survives'' \\
+    Probe motion (A12) & Correlation with own vs.\ other sessions' IBL motion trace & Corrected $-0.006$ ($p=0.39$); detrended $+0.062$ ($p=0.14$) \\
+    Pupil (A12) & Same, with pupil diameter (15 sessions) & Corrected $-0.001$ ($p=0.42$); detrended $-0.004$ ($p=0.55$) \\
+    Spike sorting (A13) & Refit on sorting-free multi-unit activity in 50\,$\mu$m depth channels & $R^2$ 0.74 (15 sessions, 12 mice); match with unit-based mode 0.96 \\
+    Rigid shift (A13) & Do multi-unit loadings follow the depth-profile slope? & Mean $|\rho|$ 0.19; Fisher $p=0.25$ \\
+    Amplitude, loading (A13) & Do units whose amplitude shrinks carry the mode? & Mean Fisher $z$ 0.15, $p=0.029$ \\
+    Amplitude, stable (A13) & Refit on rate- and amplitude-stable units & $R^2$ 0.49 (5 sessions, 5 mice); ``intermediate'' \\
+    Engagement, satiety (A13) & Residual correlation beyond a quadratic trend, session-permutation null & $p=0.19$ and $p=0.12$ \\
+    Detection coupling (A14) & Sign of amplitude-rate coupling beyond the trend & Negative: mean $-1.54$, $p=0.99$; isolated spikes (post hoc) $-1.32$, $p=0.98$ \\
+    Amplitude correction (A14) & Refit after removing each unit's amplitude-linked rate & $R^2$ 0.85 / 0.80 / 0.78 (conservative / maximal / slow-maximal, post hoc); all ``survive'' \\
+        Settling (A14) & Is amplitude change concentrated early? & Index $-0.12$ ($p=0.75$); if anything, later \\
+    Shared across regions (A15) & Do MOs and second-region slow modes co-fluctuate beyond a quadratic trend? & Raw match 0.94; detrended corrected 0.006, $p=0.48$ (12 mice) \\
+    Behaviour (A15) & Residual correlation with log reaction time and accuracy & $p=0.12$ and $p=0.34$; signs inconsistent \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \paragraph{Geometry details.} Table~\ref{tab:angles} gives mean and first principal angles (means over mice).
 
-\begin{table}[h]
+\begin{table}[H]
   \caption{Principal angles between session halves (degrees; means over 13 mice).}
   \label{tab:angles}
   \centering\small
@@ -634,7 +666,7 @@ $p=0.016$, uncorrected); prior decoding from the two complements did not differ 
 nesting indices were 0.94 (0.5\,s containing 30\,s) and 0.89 (reverse), and RRR's margin over PCA was 0.005 to 0.008
 ($p$ between 0.03 and 0.15, uncorrected).
 
-\begin{table}[h]
+\begin{table}[H]
   \caption{Robustness of the primary tests (Holm-corrected $p$). The $d$ variants and the residual rerun were
   pre-registered sensitivity analyses; leave-one-mouse-out and dropping DY\_014 are post hoc.}
   \label{tab:robust}
@@ -660,7 +692,7 @@ sessions (conservative) and 14 of 16 (maximal and slow-maximal). The residual-ra
 corrected data onto the original slow direction without refitting, were 1.00 (conservative), 0.86 (maximal) and 0.85
 (slow-maximal).
 
-\begin{table}[h]
+\begin{table}[H]
   \caption{Estimator check: held-out $R^2$ for predicting population activity $\Delta$ ahead ($d=5$; means over
   13 mice). RRR uses the session's shared penalty; the other methods use their best penalty.}
   \label{tab:estimator}
@@ -683,14 +715,23 @@ corrected data onto the original slow direction without refitting, were 1.00 (co
 \section{Additional figures}
 \label{app:figs}
 
-\begin{figure}[h]
+\begin{figure}[H]
+  \centering
+  \maybefig{fig5_slowmode_examples.pdf}{width=0.85\linewidth}{2.1in}
+  \caption{Slow-mode time courses (30\,s windows, z-scored, sign-aligned) in six sessions chosen by a fixed rule
+  (first session of each of the first six mice in the frozen list), with straight-line fits and correlation $r$ with
+  time. Four are near-linear ramps; CSHL049 and DY\_014 are flat with an abrupt step.}
+  \label{fig:examples}
+\end{figure}
+
+\begin{figure}[H]
   \centering
   \maybefig{fig3_estimator_d5.pdf}{width=0.62\linewidth}{2.2in}
   \caption{Estimator check: held-out $R^2$ of future activity against lag (mean $\pm$ s.e.m.\ over 13 mice).}
   \label{fig:estimator}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \maybefig{figS1_nesting_d5.pdf}{width=0.9\linewidth}{2in}
   \caption{\textbf{a}, nesting index of each subspace's leading direction in the other (dots: sessions; bar: mean;
@@ -699,14 +740,14 @@ corrected data onto the original slow direction without refitting, were 1.00 (co
   \label{fig:nesting}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \maybefig{fig1_geometry_d5_residual.pdf}{width=\linewidth}{1.6in}
   \caption{As Figure~\ref{fig:geometry}, after removing trial-locked responses.}
   \label{fig:geometry_resid}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \maybefig{fig2_content_d5_residual.pdf}{width=0.82\linewidth}{3in}
   \caption{As Figure~\ref{fig:content}, after removing trial-locked responses.}
