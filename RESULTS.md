@@ -92,7 +92,7 @@ part of the 30 s subspace orthogonal to the 0.5 s subspace carries a prior R-squ
 
 ### P3: current stimulus side
 
-On nonzero-contrast trials, the null-corrected AUC drops by 0.061 (0.028 to 0.095) from 0.5 s to 30 s. The drop is
+On nonzero-contrast trials, the null-corrected AUC drops by 0.061 (0.028 to 0.094) from 0.5 s to 30 s. The drop is
 0.063 (0.032 to 0.097) after residualization. This holds at d = 10 but not at d = 3 (Holm p = 0.11).
 
 Important nuance: the 0.5 s subspace is not *specialized* for the stimulus. Its corrected AUC (0.218) equals that of
@@ -441,9 +441,16 @@ support one either.
 **Part 3: no behavioural link beyond the trend.** Beyond a quadratic trend, the MOs slow mode does not track log
 reaction time (p = 0.12) or accuracy (p = 0.34), and the signs are not consistent across mice (p = 0.50 and 0.38).
 
+**Caveat on "second region".** It is nine areas, not one: ACAd 1, ILA 2, PL 1, ORBl 1, ORBvl 3, AIv 1, MOp 1, LSr 3
+and CP 2 sessions, so a third of the sessions are subcortical. All 15 were recorded on the same probes as the MOs
+units. This is therefore not an independent replication. A probe-level slow change would produce the ramp in both
+places, so finding the slow mode again does not count against an artifact. One of the four criteria (P2 not
+significant) is uninformative here, because the population prior is near zero. The Part 3 behaviour tests used the
+MOs slow mode only.
+
 **Reading.**
-- The project's main findings are not specific to MOs. In a second, mostly frontal set of regions in the same mice,
-  three things hold again:
+- The project's main findings are not specific to MOs. In other areas on the same probes in the same mice, three
+  things hold again:
   - long- and short-lag subspaces differ;
   - the long-lag subspace is no better for the prior and worse for the current stimulus;
   - a slow session-time mode dominates, nested inside the short-lag subspace.
