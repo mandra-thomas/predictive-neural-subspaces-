@@ -52,3 +52,4 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-17 03:33 | 540be37 | 3d83323a46 | 06_stats | [results: results_stable] d=5; 13 sessions/12 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.0022; P2 prior p_holm=0.974; P3 cur_side p_holm=0.0269 |
 | 2026-11-17 03:33 | 540be37 | 3d83323a46 | 11_pilot_state | A12 pilot d=5: motion p=0.3934326171875, pupil p=0.419677734375, test1=survives, overall=mixed or undetermined |
 | 2026-11-17 | - | - | note | Rows above marked [results: results_stable] and the 11_pilot_state row ran on PACE ICE (Slurm job 7133088, coc-cpu, 3 min; 45 tests passed there first). Stable-units copy: 13/16 sessions, 12 animals (KS023 22-unit session, SWC_038 46-unit session, SWC_043 excluded with < 20 stable units). |
+| 2026-11-21 17:07 | fd5f3d4 | 3d83323a46 | 12_fetch_A13 | A13 inputs; 1/1 ok |

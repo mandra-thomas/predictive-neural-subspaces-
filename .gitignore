@@ -16,3 +16,8 @@ logs/
 results_residual/
 data_stable/
 results_stable/
+data_mua/
+results_mua/
+data_ampstable/
+results_ampstable/
+data/external/
