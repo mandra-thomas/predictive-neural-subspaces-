@@ -403,6 +403,56 @@ recording control applied. That makes a neural origin more plausible than before
 neuromodulatory drift, fatigue, or elapsed-time coding. It is not established. Behavioural comparisons are limited by
 the ramp shape, and unmeasured recording factors remain possible.
 
+## Fourth pilot: does it generalise beyond MOs, and is the slow mode a shared or behavioural signal? (amendment A15, run locally)
+
+**What was done.** Every frozen session's probes also pass through other brain regions, and their spikes were already
+cached. For each session, the non-MOs region with the most good units was taken, and the unchanged pipeline (prior
+gate, fits, decoding, statistics) was rerun on it. The regions were:
+- frontal: ACAd, ILA, PL, ORBl, ORBvl, AIv and MOp;
+- subcortical: lateral septum (LSr) and striatum (CP).
+
+That gave 15 sessions from 12 mice (ZM_2245 had no second region with 20 or more units). The criteria, the shared-mode
+test and the behaviour tests were pre-registered before any of this data was binned (`30d2c3f`).
+
+**Part 1: the core pattern replicates.** All four pre-registered criteria hold:
+
+| Test | MOs (16 sessions, 13 mice) | Second region (15 sessions, 12 mice) |
+|---|---|---|
+| P1 geometry, Holm p | 0.0026 | 0.0037 |
+| P1 cross-lag minus floor, 0.5 s / 30 s | 12.7° / 3.6° | 15.0° / 3.7° |
+| P2 prior rises with lag, Holm p | 0.89 | 0.52 |
+| P3 current side falls with lag, Holm p | 0.0061 | 0.012 |
+| Elapsed-time R² of the 30 s subspace | 0.84 | 0.82 |
+| Drift flags | 15/16 | 14/15 |
+| Nesting (30 s slow direction inside the 0.5 s subspace) | 0.92 | 0.92 |
+
+The prior is present in the full second-region populations (Fisher-combined gate p = 0.002, with 40% of sessions
+significant on their own). It is much weaker than in MOs, though: the median null-corrected R-squared is 0.001,
+against 0.064 in MOs. So the second region confirms "predictive subspaces do not carry the prior". It is weaker
+evidence for "the prior is present but in quiet directions".
+
+**Part 2: the slow modes ramp together but do not share fluctuations.** Before detrending, the MOs and second-region
+slow modes correlate strongly (median 0.94); two ramps always do. After a quadratic trend is removed from each, the
+remaining fluctuations are not shared beyond the cross-session null. The corrected score averages 0.006, one-sided
+p = 0.48 across 12 mice, and the median detrended r is 0.07. Every second region was recorded on the same probe as
+the MOs units. A shared fluctuation would therefore not have proven a brain-wide state, but its absence does not
+support one either.
+
+**Part 3: no behavioural link beyond the trend.** Beyond a quadratic trend, the MOs slow mode does not track log
+reaction time (p = 0.12) or accuracy (p = 0.34), and the signs are not consistent across mice (p = 0.50 and 0.38).
+
+**Reading.**
+- The project's main findings are not specific to MOs. In a second, mostly frontal set of regions in the same mice,
+  three things hold again:
+  - long- and short-lag subspaces differ;
+  - the long-lag subspace is no better for the prior and worse for the current stimulus;
+  - a slow session-time mode dominates, nested inside the short-lag subspace.
+- This is the evidence that scaling up is worthwhile: the pipeline generalises without changes.
+- What the slow mode is remains open. It is a smooth, mainly monotonic ramp present in both regions. Its fluctuations
+  around the ramp are not shared between regions and do not relate to reaction time, accuracy, engagement or satiety.
+- Combined with A12-A14, the controls rule out the specific recording artifacts tested. They do not identify a brain
+  state either.
+
 ## Possible next steps
 
 1. **Stationarity control.** Done (amendment A12, above). The slow mode survives.
@@ -412,7 +462,9 @@ the ramp shape, and unmeasured recording factors remain possible.
 4. **Spontaneous-activity epochs** (not yet registered). IBL sessions include spontaneous periods outside the task,
    which the current analysis excludes. Ask whether the slow mode continues through the post-task spontaneous period
    (not tied to doing the task) or resets or flattens there (task-linked).
-5. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
+5. **Second region.** Done within the same sessions (amendment A15, above): the core pattern replicates. The next
+   step is independent sessions and other regions, which needs downloads. MOp has 14 sessions from 12 mice under
+   the census rule.
 
 ## Suggested slide outline (Nov 30)
 
