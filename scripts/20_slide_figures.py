@@ -1,11 +1,9 @@
 """Slide-sized versions of two talk figures (text 10-11 pt at the size they are shown). Reads existing result files
 only: no new analyses, no refits. Does not touch the report figures from 07_figures.py or 19_talk_figures.py.
 
-slide_fig5 : the slow mode (pns.slowmode.slow_mode, as in fig5) for three sessions, chosen by a fixed rule:
-             (1) the session whose correlation with elapsed time is closest to the median over all 16 sessions
-                 (the "typical" session; ties -> frozen order), skipping the two named below;
-             (2) CSHL049, the step-like example in fig5;
-             (3) DY_014, the outlier session discussed in RESULTS.md.
+slide_fig5 : the slow mode (pns.slowmode.slow_mode, as in fig5) for ALL 16 sessions as small multiples, sorted by
+             its correlation with elapsed time (r, printed in each panel); a dashed straight-line fit per panel.
+             No session is selected, so the figure shows the full spread (12 of 16 have r >= 0.9).
 slide_figS1: (a) nesting index per animal (the 0.5 s subspace containing the 30 s leading direction, and the reverse),
              with the isotropic chance level d/p marked as a low bar (no covariance-matched chance was computed);
              (b) current-side and prior decoding (null-corrected, animal means, 95% CI, from stats/d5/matrix.csv)
@@ -30,7 +28,7 @@ D = 5
 LONG_LAG = 60                    # bins of 0.5 s = 30 s
 FIG_DIR = ROOT / "figures"
 W_IN = 5.6                       # final width on a 16:9 slide (full text width); heights per figure below
-H_FIG5, H_FIGS1 = 2.05, 1.85
+H_FIG5, H_FIGS1 = 2.3, 1.85
 
 
 def slide_style():
@@ -57,25 +55,24 @@ def fig_examples():
     traces = {eid: session_trace(eid) for eid, _ in sessions}
     rs = {eid: tr[3] for eid, tr in traces.items()}
     med = float(np.median(list(rs.values())))
-    named = {"CSHL049", "DY_014"}
-    typical = min(((eid, subj) for eid, subj in sessions if subj not in named), key=lambda es: abs(rs[es[0]] - med))
-    first = {subj: eid for eid, subj in reversed(sessions)}          # first session of each named mouse
-    picks = [(typical[0], typical[1], "typical"),
-             (first["CSHL049"], "CSHL049", "step"),
-             (first["DY_014"], "DY_014", "outlier")]
-    fig, axs = plt.subplots(1, 3, figsize=(W_IN, H_FIG5), sharey=True)
-    for ax, (eid, subj, what) in zip(axs, picks):
+    order = sorted(sessions, key=lambda es: -rs[es[0]])
+    fig, axs = plt.subplots(4, 4, figsize=(W_IN, H_FIG5), sharey=True)
+    for ax, (eid, subj) in zip(axs.flat, order):
         t, z, ok, r = traces[eid]
         b = np.polyfit(t[ok], z[ok], 1)
-        ax.plot(t[ok], np.polyval(b, t[ok]), color=INK_2, lw=1.2, ls="--", zorder=1)
-        ax.plot(t[ok], z[ok], color=SERIES[0], lw=1.6, zorder=2)
-        ax.set_title(f"{subj} ({what})", loc="left", fontsize=10)
-        ax.text(0.97, 0.04, f"r = {r:.2f}", transform=ax.transAxes, ha="right", va="bottom", fontsize=10, color=INK)
-        ax.set_xlabel("time in session (min)")
-    axs[0].set_ylabel("slow mode (z)")
-    fig.tight_layout(pad=0.3, w_pad=0.6)
+        ax.plot(t[ok], np.polyval(b, t[ok]), color=INK_2, lw=0.9, ls="--", zorder=1)
+        ax.plot(t[ok], z[ok], color=SERIES[0], lw=1.1, zorder=2)
+        ax.text(0.03, 0.97, f"r = {r:.2f}", transform=ax.transAxes, ha="left", va="top", fontsize=10, color=INK)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.grid(False)
+        ax.set_ylim(-3.2, 3.2)
+    fig.supxlabel("time in session (each panel: one session, start to end)", fontsize=10, color=INK_2, y=0.0)
+    fig.supylabel("slow mode", fontsize=10, color=INK_2, x=0.0)
+    fig.tight_layout(pad=0.4, h_pad=0.25, w_pad=0.25)
     fig.savefig(FIG_DIR / "slide_fig5.pdf")
     plt.close(fig)
+    picks = [(eid, subj, "") for eid, subj in order]
     return picks, rs, med
 
 
@@ -132,7 +129,7 @@ def main():
     picks, rs, med = fig_examples()
     print(f"median r over {len(rs)} sessions = {med:.3f}")
     for eid, subj, what in picks:
-        print(f"  {subj:12s} {what:28s} r = {rs[eid]:.3f}  {eid}")
+        print(f"  {subj:12s} r = {rs[eid]:.3f}  {eid}")
     nest, iso = fig_nesting()
     print(f"nesting short-contains-long mean {nest['nest_short_contains_long_k1'].mean():.3f}, "
           f"long-contains-short {nest['nest_long_contains_short_k1'].mean():.3f}, isotropic chance {iso:.3f}")
