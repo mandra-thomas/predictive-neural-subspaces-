@@ -11,7 +11,7 @@
 %   results{,_residual}/robustness/d5.csv       leave-one-mouse-out, drop DY_014 (post hoc)
 %   results/stats/d5/geometry_sessions.csv      per-session angles (animal means used on the geometry slide)
 %   results/subspaces/*_d5.json                 covariance-matched chance angle (floor_mean_deg_mean, session mean)
-%   results/estimator/*_d5.pqt                  estimator check (session means of r2_session_alpha, as in RESULTS.md)
+%   results/estimator/*_d5.pqt                  estimator check (mouse means; RRR r2_session_alpha, others r2_best; = report Table 8)
 %   results/pilot/summary_d5.json, sessions_d5.csv      A12 (stable units, probe motion, pupil)
 %   results/a13/summary_d5.json                 A13 (engagement, satiety, amplitude, multi-unit)
 %   results/a14/summary_d5.json                 A14 (amplitude coupling, corrected refits, timing)
@@ -281,11 +281,11 @@ Replicates Findling et al.\ 2025.
   xtick={0.5,2,8,30}, xticklabels={0.5 s,2 s,8 s,30 s}, xmin=0.4, xmax=220, enlarge x limits=0, clip=false,
   ymin=0, ymax=0.4, ytick={0,0.1,0.2,0.3,0.4}, yticklabel style={/pgf/number format/fixed},
   xlabel={prediction lag $\Delta$}, ylabel={held-out \Rsq{}, future activity}]
-% session means of r2_session_alpha, results/estimator/*_d5.pqt (= RESULTS.md estimator table at 0.5 s and 30 s)
-\addplot[cRidge, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.371) (2,0.225) (8,0.202) (30,0.178)};
-\addplot[cRRR, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.246) (2,0.194) (8,0.185) (30,0.176)};
-\addplot[cPCA, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.232) (2,0.172) (8,0.162) (30,0.152)};
-\addplot[cRand, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.163) (2,0.135) (8,0.123) (30,0.121)};
+% mouse means, results/estimator/*_d5.pqt: RRR r2_session_alpha, others r2_best (= report Table 8; 30 s ratio 0.96)
+\addplot[cRidge, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.373) (2,0.223) (8,0.200) (30,0.176)};
+\addplot[cRRR, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.246) (2,0.192) (8,0.183) (30,0.172)};
+\addplot[cPCA, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.235) (2,0.171) (8,0.161) (30,0.150)};
+\addplot[cRand, line width=1.4pt, mark=*, mark size=2pt] coordinates {(0.5,0.162) (2,0.133) (8,0.121) (30,0.118)};
 \node[font=\small, anchor=west, color=cInk] at (axis cs:0.62,0.372) {full-rank ridge};
 \node[font=\small, anchor=west, color=cInk] at (axis cs:34,0.186) {RRR, $d = 5$};
 \node[font=\small, anchor=west, color=cInk] at (axis cs:34,0.150) {PCA, $d = 5$};
@@ -321,9 +321,9 @@ modest and mostly trial-locked structure (backup).}}
   ymin=0, ymax=90, ytick={0,30,60,90}, ylabel={mean principal angle (deg)}]
 % animal means over 13 mice, results/stats/d5/geometry_sessions.csv
 \addplot[fill=cRRR, draw=none] coordinates {(s05,58.9) (cross,71.6) (s30,68.0)};
-% covariance-matched chance: session mean of floor_mean_deg_mean, results/subspaces/*_d5.json
+% covariance-matched chance: mouse mean of floor_mean_deg_mean, results/subspaces/*_d5.json (as in the report)
 \draw[cInk, dashed, line width=1pt] (rel axis cs:0,0.7533) -- (rel axis cs:1,0.7533);
-\node[font=\small, color=cInk, anchor=south west] at (rel axis cs:0.0,0.80) {chance 67.8\textdegree};
+\node[font=\small, color=cInk, anchor=south west] at (rel axis cs:0.0,0.80) {chance 67.9\textdegree};
 \end{axis}
 \end{tikzpicture}
 
@@ -345,7 +345,7 @@ lags are reproducible, about 59 degrees, below the 68-degree chance; 30 s subspa
 the weakest of the three results.
 The leading slow direction is shared across lags; the other four dimensions differ as much as random ones, and the
 30 s ones are not even reproducible between halves.
-\why{Chance: random subspaces drawn in proportion to the data covariance (Elsayed and Cunningham 2017).
+\why{Chance: random subspaces drawn in proportion to the data covariance (Elsayed et al.\ 2016, Nat Commun).
 ``Both required'' is an intersection--union test: $p$ = the larger of the two one-sided $p$-values.}
 \qa{Does it depend on the basis?}{Yes. In the loading basis (predicted activity) P1 fails, $p = 0.96$,
 with cross-lag minus the 30 s floor $-1.0^\circ$.}
@@ -420,7 +420,7 @@ Change from 0.5 s to 30 s:\\
 Holm $p = 0.89$; 4 of 13 mice rise.
 
 \medskip
-Weak at every lag: no lag significant across sessions (best Fisher $p = 0.12$).
+Weak evidence only at 0.5 s (0.054 [0.006, 0.105]; Fisher $p = 0.15$); not detected at 2--30 s.
 
 \medskip
 No rise on residuals (there significantly the \emph{wrong} way), at $d = 3$ or 10, or in any leave-one-mouse-out
@@ -429,7 +429,7 @@ refit.
 \note{%
 This is the result I find most interesting. Same layout, now for the Bayes-optimal prior, where the hypothesis
 predicted bars growing from left to right. They do not: the change from short to long goes the wrong way, in every
-variant I ran. Prior decoding from the subspaces is weak at every lag, while the full population carries it. So the
+variant I ran. Prior decoding is weak at 0.5 s and not detected at 2 to 30 s, while the full population carries it. So the
 prior is not concentrated in the predictable directions. Why can bars go below zero? Decoding uses contiguous
 cross-validation folds, which penalise ramp-dominated features, so the real decoder can score below the null median.
 \qa{The 0.5 s bar is above zero; isn't the prior there?}{Weakly: its CI [0.006, 0.105] excludes 0, but the session-level
@@ -454,8 +454,8 @@ ramp, long horizons only slightly more. The 0.5 s subspace contains 92\% of this
 \qa{How is elapsed time decoded?}{Ridge on the latents; contiguous chunks assigned round-robin to folds, so it
 interpolates; subspaces are fit on the whole session. Hence the PCA and random comparison.}
 \qa{Isn't this just a failed hypothesis?}{The proposal planned for it: ``slow subspace is drift'' $\to$ report a
-negative result on long-lag objectives; ``no dissociation across lags'' $\to$ report the shared slow mode and
-characterise it. The pilots do that.}}
+negative result on long-lag objectives. The ``no dissociation'' row was not triggered (P1 was significant), so only the
+drift row applies directly; the pilots characterise the mode.}}
 \end{frame}
 
 % =====================================================================================
@@ -526,13 +526,13 @@ a third to two-fifths.
 
 \medskip
 \muted{\small Also tested (backup): probe motion, pupil, GLM-HMM engagement, satiety; none tied to the mode beyond the
-trend. \% = of the same sessions' original. Pilots: exploratory, after the analysis freeze, each pre-registered.}
+trend. \% = of the same sessions' original. Pilots: exploratory, each pre-registered; A12 before, A13--A15 after the 20 Nov freeze.}
 \note{%
 The scorecard uses several tools from this course: a GLM to remove trial-locked responses, sorting-free multi-unit
 activity to bypass spike sorting, and a GLM-HMM engagement state. Amplitude was the interesting one: units whose spikes
 shrank were the ones whose rate fell, which looked like spikes slipping under the detection threshold. Tested directly,
 that failed: the amplitude--rate coupling has the wrong sign, and even a maximal correction leaves 85 to 86\% of the
-ramp. The A13 rule said ``sorting artifact''; the multi-unit result contradicts that label, and A14 refuted the
+ramp. The A13 rule said ``sorting artifact''; the multi-unit result contradicts that label, and A14 contradicted the
 detection-loss reading. Each test could have removed the mode; none did.
 \qa{Why not call it arousal or fatigue?}{The mode is mostly a near-straight ramp, so any slowly trending signal
 matches it about equally well; these tests have little power to tell causes apart.}}
@@ -544,16 +544,17 @@ matches it about equally well; these tests have little power to tell causes apar
 \column{0.54\textwidth}
 \small
 % results/a15/summary_d5.json; results_region2/stats/d5/{primary,secondary,drift}.csv; MOs from results/stats/d5
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lcc@{}}
 \toprule
- & MOs & Other area \\
+ & MOs & Other \\
 \midrule
 Sessions, mice & 16, 13 & 15, 12 \\
 P1 geometry, Holm $p$ \hl{*} & 0.0026 & 0.0037 \\
 P2 prior rises, Holm $p$ \hl{*} & 0.89 & 0.52 \\
 P3 stimulus falls, Holm $p$ \hl{*} & 0.0061 & 0.012 \\
-Elapsed-time \Rsq{}, 30 s \hl{*} & 0.84 & 0.82 \\
+Time \Rsq{}, 30 s \hl{*} & 0.84 & 0.82 \\
+Time \Rsq{}, PCA / random & 0.80/0.64 & 0.71/0.56 \\
 Drift flag & 14 / 16 & 14 / 15 \\
 Nested in 0.5 s subspace & 0.92 & 0.92 \\
 \midrule
@@ -562,7 +563,7 @@ Prior, population \Rsq{} & 0.064 & 0.001 \\
 \end{tabular}
 
 \smallskip
-\hl{*} Pre-registered: P1, P3 significant, P2 not, \Rsq{} $\ge 0.5$. \hl{All four hold.}
+\hl{*} Pre-registered: P1, P3 sig., P2 not, 30 s \Rsq{} $\ge 0.5$ (random passes too). \hl{All hold.}
 
 \column{0.42\textwidth}
 \small
@@ -585,7 +586,7 @@ replicate, and the same slow mode dominates, nested in the short-lag subspace. T
 these areas, so ``no rise'' there is uninformative. And after removing the ramp, the two areas' slow modes share no
 fluctuations, and the MOs mode tracks neither reaction time nor accuracy. Still, the pipeline transfers unchanged, which
 is the evidence that scaling up is worthwhile.
-\qa{Same probe: isn't this the same artifact twice?}{Yes, the ramp itself could be a probe-wide effect; this replication
+\qa{Same probe: isn't this the same artifact twice?}{Yes, the ramp itself could be a probe-wide effect; this generalisation
 shows the pattern is not specific to MOs, not that it is neural. But the fluctuations around the ramp are not shared
 even on the same probe (median detrended $r$ 0.07): weak evidence against a probe-level cause.}}
 \end{frame}
@@ -634,7 +635,7 @@ way, it has to be separated from any slow cognitive variable.}
 \column{0.48\textwidth}
 \textbf{Supported}
 \begin{itemize}\setlength{\itemsep}{3pt}
-\item Prior decoding does not rise with horizon; it is weak in every subspace.
+\item Prior decoding does not rise with horizon; it is not detected in long-lag subspaces.
 \item Predictable 2--30 s structure is one slow mode, shared across horizons, tracking time in session.
 \item No single recording cause tested accounts for most of it.
 \item The pattern repeats in other areas on the same probes.
@@ -662,8 +663,8 @@ would point to an artifact; the mode continuing through task-free periods would 
 % =====================================================================================
 \begin{frame}{Takeaways and next steps}
 \begin{enumerate}\setlength{\itemsep}{2pt}
-\item The block prior is decodable from MOs, but it \hl{does not rise with prediction horizon}; subspace prior decoding
-is weak at every lag (none significant across sessions).
+\item The block prior is decodable from MOs, but it \hl{does not rise with prediction horizon}; it is not detected
+in long-lag subspaces.
 \item Long horizons find \hl{one slow mode that tracks time in session}, shared with the short horizon.
 \item \hl{No single recording cause tested accounts for most of it}; its origin is open.
 \item The pattern \hl{repeats in other areas on the same probes} (mostly frontal).
@@ -951,8 +952,8 @@ reach a held-out z-variance of about $10^{5}$, over 99\% of pooled test variance
 \item \textbf{Fix.} Floor = SD of a unit firing exactly at the 0.1 Hz inclusion threshold (0.218). No whole-session
 z-score changes (0 of 842 units floored).
 \item \textbf{Effect.} Ridge penalty changed in 2 sessions (raw) and 4 (residual). Raw primary $p$-values unchanged.
-P1 moved: residual 0.048 to 0.013; residual leave-one-mouse-out worst case 0.092 (n.s.) to 0.027; $d = 3$ 0.049 to
-0.032. ``RRR beats full-rank ridge at 30 s'' was an artifact and was dropped.
+Residual: P1 0.048 to 0.013, P3 0.012 to 0.0051; leave-one-mouse-out worst P1 0.092 (n.s.) to 0.027, P3 0.024
+to 0.010; drop DY\_014 P1 0.077 to 0.021. $d = 3$ P1 0.049 to 0.032. ``RRR beats full-rank ridge at 30 s'' was an artifact and was dropped.
 \end{itemize}
 \note{%
 This is the one analysis decision made after seeing results, and it is a bug fix. It was exposed by unit turnover:
