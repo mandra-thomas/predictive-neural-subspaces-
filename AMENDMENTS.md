@@ -410,3 +410,7 @@ Wilcoxon of (cosine minus chance) > 0 for each representation.
     own window-to-window changes.
 - Reading per session: "artifact-consistent" if (i) or (iii) is at the 95th percentile or above, "no recording
   signature" otherwise. Descriptive only.
+- **A16 part 3 addendum.** Written after the part 3 leading-direction cosines were seen; descriptive only. Leading
+  directions can swap order between halves when singular values are close. So also report the fraction of each half's
+  leading 30 s readout direction that lies inside the other half's full 5-D 30 s readout subspace (the squared norm of
+  its projection, averaged over both directions), against the same quantity for covariance-matched random directions.
