@@ -39,7 +39,7 @@ def complement_basis(A: np.ndarray, B: np.ndarray, tol: float = 1e-6) -> np.ndar
 
 
 def cov_matched_random(C: np.ndarray, d: int, rng: np.random.Generator) -> np.ndarray:
-    """Random d-dim subspace drawn in proportion to the data covariance C (Elsayed & Cunningham 2017)."""
+    """Random d-dim subspace drawn in proportion to the data covariance C (Elsayed, Lara, Kaufman, Churchland & Cunningham 2016, Nat Commun 7:13239)."""
     evals, evecs = np.linalg.eigh(C)
     evals = np.clip(evals, 0, None)
     G = rng.standard_normal((C.shape[0], d))
