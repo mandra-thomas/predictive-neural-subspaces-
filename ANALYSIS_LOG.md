@@ -63,3 +63,14 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-22 07:29 | 3bc25d1-dirty | 3d83323a46 | 14_pilot_A13 | A13 pilot d=5: overall=sorting artifact |
 | 2026-11-22 | - | - | note | Rows above marked [results: results_mua] / [results: results_ampstable] and the 14_pilot_A13 row ran on PACE ICE (Slurm job 7240337, coc-cpu, 5.5 min; 45 tests passed first). Multi-unit copy: 15/16 sessions, 12 animals (DY_014 had 8 channels < 10). Amplitude-stable copy: 5/16 sessions, 5 animals (most units have |amplitude trend| >= 0.5). |
 | 2026-11-22 | - | - | note | The "-dirty" flag on the ICE rows reflects only files not synced to ICE (literature-review notes) and the log itself; the ICE code tree matched commit 3bc25d1. |
+| 2026-11-22 10:28 | 7d0172d-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_ampcorr_low] d=5; 16/16 ok |
+| 2026-11-22 10:29 | 7d0172d-dirty | 3d83323a46 | 05_decode | [results: results_ampcorr_low] d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-22 10:29 | 7d0172d-dirty | 3d83323a46 | 06_stats | [results: results_ampcorr_low] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.000366; P2 prior p_holm=0.729; P3 cur_side p_holm=0.0061 |
+| 2026-11-22 10:30 | 7d0172d-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_ampcorr_high] d=5; 16/16 ok |
+| 2026-11-22 10:31 | 7d0172d-dirty | 3d83323a46 | 05_decode | [results: results_ampcorr_high] d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-22 10:31 | 7d0172d-dirty | 3d83323a46 | 06_stats | [results: results_ampcorr_high] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00183; P2 prior p_holm=0.706; P3 cur_side p_holm=0.0134 |
+| 2026-11-22 10:31 | 7d0172d-dirty | 3d83323a46 | 04_fit_subspaces | [results: results_ampcorr_slow] d=5; 16/16 ok |
+| 2026-11-22 10:32 | 7d0172d-dirty | 3d83323a46 | 05_decode | [results: results_ampcorr_slow] d=5; n_pseudo=200; 16/16 ok |
+| 2026-11-22 10:32 | 7d0172d-dirty | 3d83323a46 | 06_stats | [results: results_ampcorr_slow] d=5; 16 sessions/13 animals; P1 geometry IUT (cross > same at both lags) p_holm=0.00366; P2 prior p_holm=0.632; P3 cur_side p_holm=0.0105 |
+| 2026-11-22 10:32 | 7d0172d-dirty | 3d83323a46 | 16_pilot_A14 | A14 pilot d=5: overall=amplitude cannot account for the mode |
+| 2026-11-22 | - | - | note | Rows above marked [results: results_ampcorr_*] and the 16_pilot_A14 row ran on PACE ICE (Slurm job 7241313, coc-cpu, 6 min; 50 tests passed first; code tree matched commit 7d0172d, "-dirty" reflects unsynced documents only). All 16 sessions / 13 animals in every corrected copy. A local smoke run of 15_build_A14 (all sessions, results in the scratchpad) preceded the ICE run and motivated the two post hoc checks recorded in AMENDMENTS (A14 post hoc additions). |

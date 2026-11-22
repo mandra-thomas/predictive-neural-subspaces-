@@ -316,14 +316,103 @@ What the three lines of evidence support together:
 This is a recording-side explanation, but not the "spike-sorting artifact" the label suggests. It cannot fully
 exclude a physiological contribution to amplitude change.
 
+**Correction after the third pilot (A14, below).** The "detection loss at the electrode–tissue interface" reading above
+did not hold up. A14 found three things:
+- the moment-to-moment amplitude-rate coupling has the opposite sign to detection loss;
+- correcting every unit for its own amplitude change, even maximally, leaves the mode almost intact;
+- amplitude change is not concentrated early in the session.
+
+The 2a correlation is real but small (a rank correlation of about 0.15 across units).
+
+
+## Third pilot: does amplitude loss account for the slow mode? (amendment A14, run on PACE ICE)
+
+**Question and why the obvious test fails.** A13 left open whether shrinking spike amplitudes are enough to produce
+the slow mode. The obvious correction would regress each unit's rate on its amplitude over time and remove the fit.
+That test cannot fail: both quantities are near-ramps, so it removes any ramp in any unit whose amplitude drifts,
+whatever the cause. The registered design (`f3008e7`, committed before any of it was computed) has three parts:
+- it estimates the coupling only from co-fluctuations around the time trend;
+- it brackets the answer between a conservative and a maximal correction;
+- it tests whether amplitude change is concentrated early in the session.
+
+A local smoke run exposed two weaknesses in the design, so two post hoc checks were added and recorded before the ICE
+run. ICE job 7241313 covered all 16 sessions and 13 mice.
+
+**Part 1: coupling beyond the trend.** Each unit gets a Poisson regression of its spike count in each 30 s window on
+its relative spike amplitude in that window, with a quadratic in time as nuisance terms. Spike-detection loss predicts
+a positive coefficient: smaller spikes, fewer detected. The coefficient is negative instead:
+- the mean across animals is −1.54 (median −1.43), and only 27% of units are positive;
+- the one-sided p for a positive coupling is 0.99;
+- with a degree-5 time polynomial it is −1.92 (p = 0.995).
+
+A coefficient of −1.5 means that in a window where a unit's spikes are 10% smaller than usual, it fires about 16% more.
+
+The known cause of this sign is that spikes shrink during bursts and fast firing, an effect of rate on amplitude. The
+post hoc check therefore used only isolated spikes, each at least 50 ms after the same unit's previous spike (median
+47% of spikes). The coupling is still negative (mean −1.32, median −0.97, p = 0.98). Burst attenuation does not hide a
+positive detection coupling.
+
+**Part 2: amplitude-corrected refits.** Each unit's counts were multiplied, window by window, by a factor undoing its
+estimated amplitude effect, clipped to between half and double. The full pipeline was then refit. The main measure is
+how well the 30 s subspace decodes elapsed time, relative to the original R-squared of 0.84. The "residual ramp"
+column needs no refit: it projects the corrected data onto the original slow direction and gives the fraction of the
+original slope that remains.
+
+| Correction | What it uses | Elapsed-time R² (fraction of original) | Residual ramp | Reading |
+|---|---|---|---|---|
+| Conservative (registered) | session median of the fluctuation coupling | 0.85 (101%) | 1.00 | survives |
+| Maximal (registered) | each unit's coupling with no time terms | 0.80 (95%) | 0.86 | survives |
+| Slow-maximal (post hoc) | each unit's coupling on a 5.5 min smoothed amplitude | 0.78 (93%) | 0.85 | survives |
+
+The conservative correction does nothing useful because its coefficient is negative. The informative rows are the
+maximal ones. Removing from every unit everything that moves with its own amplitude takes away about a seventh of the
+ramp. The 30 s subspace still decodes elapsed time at 93 to 95% of its original level, and the drift flag fires in
+14 of 16 sessions. The primary tests are unchanged in every corrected copy:
+- geometry, Holm p between 0.0004 and 0.004;
+- prior, 0.63 to 0.73;
+- current side, 0.006 to 0.013.
+
+**Part 3: timing.** For units with a consistent amplitude trend, an index compares the change in the first third of
+the session with the change in the last third. It runs from −1 (all late) to +1 (all early). Settling after insertion
+predicts early change. The observed index is −0.12 (p = 0.75 for "early"): if anything, the change is later. The slow
+mode itself is almost exactly linear (index −0.02).
+
+**Reading.** The registered rule outputs "amplitude cannot account for the mode", because even the maximal correction
+"survives". All three parts agree:
+- the coupling has the wrong sign, even with isolated spikes;
+- correction removes at most about 15% of the ramp;
+- the timing does not match settling.
+
+The A13 link between amplitude trend and slow-mode loading is real but small. It is not the mechanism.
+
+**Caveats.**
+- Correction factors were clipped to between 0.5 and 2. About a third of units hit the clip in at least one window,
+  so a unit that lost more than half its detected spikes to amplitude would be under-corrected.
+- Kilosort amplitudes are template scalings, not calibrated voltages, and the detection threshold acts on whitened
+  data.
+- The task starts some minutes after insertion, so settling that ended before the task is invisible here.
+
+**Where this leaves the slow mode.** Each candidate tested so far explains little of it:
+- unit turnover (A12);
+- spike-sorting assignment and rigid probe motion (A13);
+- spike-amplitude change and detection loss (A14);
+- pupil, engagement and satiety beyond the shared trend (A12, A13).
+
+What remains is a slow, close-to-linear change in MOs firing that tracks time in the session and survives every
+recording control applied. That makes a neural origin more plausible than before, for example slow arousal or
+neuromodulatory drift, fatigue, or elapsed-time coding. It is not established. Behavioural comparisons are limited by
+the ramp shape, and unmeasured recording factors remain possible.
+
 ## Possible next steps
 
 1. **Stationarity control.** Done (amendment A12, above). The slow mode survives.
 2. **Engagement, satiety, amplitude and multi-unit checks.** Done (amendment A13, above).
-3. **Amplitude-corrected slow mode** (not yet pre-registered). Regress each unit's windowed rate on its own amplitude
-   time course and recompute the slow mode from the residual rates. Also test whether amplitude change is concentrated
-   early in the session, as tissue settling after insertion would predict.
-4. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
+3. **Amplitude-corrected slow mode and early concentration.** Done (amendment A14, above). Amplitude cannot account for
+   the mode.
+4. **Spontaneous-activity epochs** (not yet registered). IBL sessions include spontaneous periods outside the task,
+   which the current analysis excludes. Ask whether the slow mode continues through the post-task spontaneous period
+   (not tied to doing the task) or resets or flattens there (task-linked).
+5. **Second region.** Relax the census rule to 14 sessions to admit MOp. This would be an amendment.
 
 ## Suggested slide outline (Nov 30)
 
