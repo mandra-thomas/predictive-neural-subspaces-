@@ -29,3 +29,7 @@ data_ampcorr_slow/
 results_ampcorr_slow/
 data_region2/
 results_region2/
+data_detrend_q/
+results_detrend_q/
+data_detrend_c/
+results_detrend_c/
