@@ -305,3 +305,54 @@ The two numbers were:
   trajectory (filled as above, then a centred running median over 11 windows, about 5.5 min). It applies the factor
   with that same trajectory, clipped to the range 0.5 to 2, and refits scripts 04 to 06. It is read with the same
   survives / intermediate / removed rule, and its residual ramp fraction is also reported.
+
+## A15: does it generalise beyond MOs, and does the slow mode relate to behaviour? (pre-registered 2026-11-22, before any non-MOs population was binned or fitted, and before any behavioural comparison)
+
+**Why.** These tests ask whether scaling the project up is a sensible next step. A15 uses only data already cached
+locally: the good-unit spike files for the 20 MOs probes in the 16 frozen sessions, which cover every region those
+probes pass through, plus the cached trial tables. It runs locally. A census of the cached cluster tables (unit
+counts per Beryl region only, no activity) found 15 sessions from 12 mice with at least one non-MOs region holding
+20 or more good units.
+
+**Second-region population.** In each session, the non-MOs Beryl region (excluding root, void and fiber tracts) with
+the most good units over the session's MOs probes is chosen. Ties go alphabetically.
+- Preprocessing is identical to the primary analysis (same bins, rate filter, trial mask and windows), written to
+  `data_region2/`.
+- The primary inclusion rules apply (at least 20 units after the rate filter, at least 400 masked trials). Sessions
+  that fail are excluded and reported.
+- The chosen region per session is recorded in `data_region2/meta/frozen.json`.
+
+**Part 1: does the pattern replicate in another region?** Scripts 03 to 06 run unchanged on `data_region2/` at
+d = 5. These criteria are fixed in advance:
+- Prior in the population (gate): Fisher-combined p of the session-level pseudo-session tests is below 0.05.
+- Core pattern replicates if all of the following hold:
+  - P1 (geometry) Holm p < 0.05;
+  - P3 (current side, short beats long) Holm p < 0.05;
+  - P2 (prior, long beats short) is not significant (Holm p ≥ 0.05);
+  - the 30 s subspace decodes elapsed time with R-squared at least 0.5.
+- "Partial" if 2 or 3 of the four hold; "does not replicate" otherwise.
+- Nesting, drift flags and the other secondary outputs are reported as produced by 06.
+
+**Part 2: is the slow mode shared across regions beyond the trend?**
+- The second region's slow mode is defined exactly as in A12 and A13, from its own 30 s fit. It is computed on the
+  MOs 30 s windows so both series share time bins.
+- Statistic: the signed correlation between the two slow modes after each is residualised on a quadratic in window
+  index. Both are already sign-aligned to increase with time.
+- Null: other sessions' residualised second-region series aligned from task start. Corrected score = real minus the
+  median cross-session value. One-sided Wilcoxon greater than 0 across animals.
+- Secondary: the raw (non-detrended) correlation, reported only to show how trivially two ramps correlate. Also
+  whether the second region was recorded on the same probe as the MOs units (descriptive).
+- Caveat: regions on the same probe share any probe-level recording factor, so shared fluctuations here are
+  necessary but not sufficient for a brain-wide state.
+
+**Part 3: does the MOs slow mode track behaviour beyond the trend?**
+- Two window-level signals, each the mean over trials whose stimulus onset falls in the window:
+  - log reaction time (first movement minus stimulus onset, trials with values between 0.05 and 30 s);
+  - accuracy (rewarded or not, all trials).
+- Method as A13 Part 1: residualise the slow mode and each signal on a quadratic, take the absolute residual
+  correlation, and correct by the cross-session median. One-sided Wilcoxon across animals.
+- Secondary: sign consistency (two-sided Wilcoxon on the signed residual correlation).
+
+**Overall.** No multiplicity correction; exploratory; all statistics reported. Part 1 is the main evidence for
+whether scaling is worthwhile. Parts 2 and 3 indicate whether the slow mode is a candidate brain-wide, behaviourally
+relevant signal.
