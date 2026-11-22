@@ -1,0 +1,13 @@
+# LaTeX build products (the two PDFs are committed on purpose)
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.xdv
+*.pdfpc
