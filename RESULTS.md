@@ -423,7 +423,7 @@ test and the behaviour tests were pre-registered before any of this data was bin
 | P2 prior rises with lag, Holm p | 0.89 | 0.52 |
 | P3 current side falls with lag, Holm p | 0.0061 | 0.012 |
 | Elapsed-time R² of the 30 s subspace | 0.84 | 0.82 |
-| Drift flags | 15/16 | 14/15 |
+| Drift flags | 14/16 | 14/15 |
 | Nesting (30 s slow direction inside the 0.5 s subspace) | 0.92 | 0.92 |
 
 The prior is present in the full second-region populations (Fisher-combined gate p = 0.002, with 40% of sessions
