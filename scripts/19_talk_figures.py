@@ -104,7 +104,7 @@ def fig_controls():
     h1 = ax.scatter([], [], s=26, color=MUTED, label="one mouse")
     h2 = ax.errorbar([], [], xerr=[], fmt="o", ms=9, color=SERIES[0], label="mean over mice, 95% CI")
     h3 = ax.errorbar([], [], xerr=[], fmt="o", ms=9, color=SERIES[1], label="post hoc version")
-    ax.set_title("The slow mode survives every recording control", loc="left")
+    ax.set_title("Elapsed-time decoding from the 30 s subspace under each control", loc="left")
     fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.legend(handles=[h1, h2, h3], loc="lower center", ncol=3, fontsize=12, bbox_to_anchor=(0.5, 0.0))
     fig.savefig(FIG_DIR / "fig4_slowmode_controls.pdf")
