@@ -19,8 +19,9 @@ information. But the 30 s subspaces do not carry the block prior, at any lag. In
 the data covariance. The most predictable direction at every horizon is the same slow, drift-like mode. That mode
 sits almost entirely inside the 0.5 s subspace too.
 
-The block prior *is* present in the full population (it replicates Findling et al.). It lives in directions that are
-neither high-variance nor predictable from the population's own past.
+The block prior *is* present in the full population (it replicates Findling et al.). It does not rise with prediction horizon
+(no detectable rise under two decoders or after detrending; A16), and prior estimates for individual subspaces sit
+near the noise floor.
 
 ## Data and design
 
@@ -56,7 +57,9 @@ The prior is decodable from MOs, so the GO criterion was met.
 
 ### P1: geometry
 
-The mean principal angle between subspaces fit on opposite session halves was:
+The mean principal angle between subspaces fit on opposite session halves was as follows. These are **session means**.
+The report and slides use **mouse means**, which the tests use: 58.9° (0.5 s floor), 68.0° (30 s floor), 71.6° (cross),
+chance 67.9°; for the 30 s halves the closest direction is 48.2° against chance 47.0°.
 
 | Comparison | Mean angle | First (smallest) angle |
 |---|---|---|
@@ -118,11 +121,14 @@ figure is 76%. The slow mode is shared rather than split off.
 The proposal's drift flag fires in 14 of 16 sessions (12 of 16 after residualization). The directions unique to the
 30 s subspace carry almost none of it: R-squared 0.12 raw, 0.03 residual.
 
-**Unit turnover.** In 14 of 16 sessions, at least one unit is effectively silent for an entire fifth of the session
-(118 of 842 units overall). This is the classic signature of probe drift or sorting instability. It is also what
+**Unit turnover.** Recomputed from data/interim with explicit definitions: 257 of 842 units fall below 0.1 Hz in
+some fifth of the session (15 of 16 sessions), and 68 units are completely silent for a fifth (13 sessions). An
+earlier figure of "118 units, 14 of 16 sessions" used an unrecorded definition and is superseded. This is the classic signature of probe drift or sorting instability. It is also what
 exposed the bug fixed in D10.
 
-**Estimator check.** These are held-out R-squared values for predicting future activity.
+**Estimator check.** These are held-out R-squared values for predicting future activity: session means of each
+session's chosen-penalty score. The report and slides use mouse means with each method's best penalty (ridge
+0.373/0.176, RRR 0.246/0.172, PCA 0.235/0.150, random 0.162/0.118); the conclusions are the same.
 
 | Method | 0.5 s lag | 30 s lag |
 |---|---|---|
@@ -464,9 +470,9 @@ MOs slow mode only.
 - Combined with A12-A14, the controls rule out the specific recording artifacts tested. They do not identify a brain
   state either.
 
-## Post hoc follow-ups from external review (amendment A16, run locally)
+## Post hoc follow-ups (amendment A16, run locally)
 
-Two external reviews asked four questions the project had not tested. Each was written into AMENDMENTS.md
+Four questions the project had not tested were added after all primary and pilot results were known. Each was written into AMENDMENTS.md
 (`246fddb`) before it ran. All four are post hoc and exploratory.
 
 **1. Remove the drift and refit: was the prior masked by the ramp?**
