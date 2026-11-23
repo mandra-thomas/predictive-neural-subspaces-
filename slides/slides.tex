@@ -298,8 +298,8 @@ Two sanity checks. On the left, decoding the prior from the whole population, as
 the pseudo-session null, though the effect is small: an $R^2$ of about 0.06. Keep that number in mind; it matters
 later. On the right, each line is a method; the vertical axis is how much of
 future activity it predicts on held-out data, and every line falls as we predict further ahead, as expected. The lagged subspaces beat PCA and random subspaces of the same size, and at 30 seconds five
-dimensions get 96\% of an unconstrained model. So the rank limit is not what hides anything predictable: at long horizons there is little predictable variance
-outside these five dimensions.
+dimensions get 96\% of an unconstrained model. So five dimensions capture nearly all of the model's aggregate future-activity predictability, but that does not
+guarantee they recover smaller task-relevant signals: a signal that explains little predictable variance can be left out.
 \qa{Why RRR rather than PCA?}{It makes the horizon an explicit knob with everything else fixed. Its edge over PCA is
 modest and mostly trial-locked structure (backup).}
 \qa{Where does 96\% come from?}{The mean of per-mouse ratios (0.961); the plotted mouse means give 98\%.}}
@@ -383,7 +383,7 @@ choice and movement, so not pure sensory coding.}
 \note{%
 I show the stimulus first because it is the cleaner positive result, and it sets up the contrast with the prior. Each
 blue bar is how well a subspace decodes the current stimulus side, minus what the same decoder gets on pseudo-sessions,
-so zero means chance; the grey bars are PCA and random baselines. Decoding falls as the horizon grows, consistently across mice. But the 0.5 second subspace is no
+so zero means no advantage over the pseudo-session null; the grey bars are PCA and random baselines. Decoding falls as the horizon grows, consistently across mice. But the 0.5 second subspace is no
 better than a random one: long lags lose the stimulus rather than short lags specializing for it. The drop persists after
 controlling for block information. So the stimulus half of the hypothesis holds, in a weaker form than predicted; it holds at ten dimensions but not at
 three, so the effect is real but modest.}
@@ -601,8 +601,8 @@ change in a contributing unit: unit-level nonstationarity.}
 \item The predicted enrichment of the block prior at longer horizons was not supported.
 \item The dominant predictable direction tracks session time, but it isn't specific to long horizons: PCA and
 short-lag RRR have it too.
-\item Its origin is unresolved despite targeted controls; slowness alone doesn't surface a small signal, even after the
-drift is removed.
+\item Its origin is unresolved despite targeted controls; detrending did not produce a robust gain in block-prior
+information at longer horizons.
 \end{enumerate}
 
 Next: matched-unit controls, a ground-truth simulation, independent recordings.
@@ -610,8 +610,8 @@ Next: matched-unit controls, a ground-truth simulation, independent recordings.
 Three takeaways, and the third is the one I'd most like you to remember. The predicted enrichment of the block prior at longer
 horizons was not supported. The dominant predictable direction tracks session
 time, and it is not special to long horizons. And its origin is still unresolved despite targeted controls. The lesson
-for methods: predictive objectives rank by variance, and slowness alone does not surface a small signal, even after the
-drift is removed. Next: matched-unit controls, a ground-truth simulation to check
+for methods, within this dataset: prediction horizon alone did not preferentially recover the block prior, and the
+detrending we tried did not produce a robust gain at longer horizons either. Next: matched-unit controls, a ground-truth simulation to check
 that the method can find a small slow signal, and independent recordings. Thanks, happy to take
 questions.
 \qa{Isn't this just a failed hypothesis?}{Yes, and here is what it taught us: predictive methods rank by variance, so a
