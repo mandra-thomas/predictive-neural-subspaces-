@@ -55,9 +55,8 @@
 Does the horizon of a predictive objective determine what a neural population subspace encodes? I fit lagged
 reduced-rank ridge regression to Neuropixels recordings from mouse secondary motor cortex (13 mice, International
 Brain Laboratory) at lags of 0.5 to 30\,s and tested, with pre-registered primary tests, whether long-lag subspaces
-carry the Bayes-optimal block prior and short-lag subspaces the current stimulus. The prior did not rise with horizon,
-also under a second decoder and after detrending (post hoc), and no subspace captured more than about a third of the
-full population's prior signal (post hoc). The other two tests passed only in qualified form: stimulus information was
+carry the Bayes-optimal block prior and short-lag subspaces the current stimulus. The predicted rise of the prior with horizon was not supported, and follow-ups with a second decoder and two
+detrending choices (post hoc) did not establish a robust increase. The other two tests passed only in qualified form: stimulus information was
 lost at long lags rather than gained at short ones, and the geometric difference held in one basis only. Decodability
 from every five-dimensional summary was dominated by a mode associated with session time (interpolated elapsed-time
 $R^2$ 0.84 at 30\,s, 0.80 for PCA) whose spatial carrier was not reproducible (post hoc). No single recording artifact
@@ -91,10 +90,11 @@ those optimized for 0.5\,s by more than the split-half noise floor of either. \e
 rises with the lag, while decoding of the current stimulus side falls. I tested both in secondary motor cortex (MOs),
 the only candidate region with enough sessions, under a pre-registered plan (Section~\ref{sec:prereg}).
 
-\paragraph{Summary of findings.} The prior is present in the full MOs population, replicating \citet{findling2025}. It did not rise with the prediction horizon under the registered decoder, nor, in post hoc checks, under a second
-decoder or after the session trend was removed. On the subspace decoder's scale the 0.5\,s subspace captured about a
-third of the full population's prior signal and no subspace captured more; the ordering across lags depends on the
-decoder (post hoc).
+\paragraph{Summary of findings.} The prior is present in the full MOs population, replicating \citet{findling2025}. The predicted rise with the prediction horizon was not supported: no rise was detectable under the registered
+decoder, and post hoc checks with a second decoder and after removing the session trend did not establish a robust
+increase. On the ridge decoder's scale the 0.5\,s subspace captured about a third of the full-population signal; on the
+Lasso decoder's scale the 30\,s subspace captured about half. The fraction and ordering depend on the decoder (post
+hoc), and subspace-level prior estimates sit near the noise floor.
 The other two pre-registered predictions held only in qualified form: long-lag subspaces carry less current-stimulus
 information because they lose it, not because short-lag subspaces specialize in it, and the geometric difference
 between horizons holds only in one basis. Every low-dimensional summary, the long-lag subspaces slightly more than the
@@ -232,8 +232,8 @@ Sessions were averaged within each mouse, and conditions compared with one-sided
 a family \citep{holm1979}: \textbf{P1}, the cross-lag angle exceeds the same-lag floor at 0.5\,s \emph{and} at 30\,s
 (an intersection-union test); \textbf{P2}, the corrected prior $R^2$ rises from 0.5\,s to 30\,s; \textbf{P3}, the
 corrected current-side AUC falls from 0.5\,s to 30\,s. \emph{Descriptive}: means over mice with percentile-bootstrap
-intervals over mice, which under-cover with $n=13$ and carry no test. \emph{Exploratory}: four follow-up pilots, each
-pre-registered with a reading rule before its data were analysed, and post hoc checks prompted by two external reviews obtained by the author;
+intervals over mice, which under-cover with $n=13$ and carry no test. \emph{Exploratory}: one pre-registered pilot (A12) and three prospectively documented follow-ups (A13--A15), each
+with a reading rule written before its data were analysed, and post hoc checks (A16) designed after all primary and pilot results were known;
 none is corrected for multiplicity. ``Pre-registered'' means written in a timestamped commit to the author's private
 repository, not a public registry. The amendment file, committed before any real-data fit, lists nine deviations from
 the proposal and eleven additions, including a trial-locked residual rerun (event responses removed by a linear GLM
@@ -249,7 +249,10 @@ primary result; Appendix~\ref{app:prereg} lists every value that moved.
 \label{sec:gate}
 
 The prior gate passed: the median corrected prior $R^2$ from the full population was 0.064 with the Lasso decoder,
-5 of 16 sessions were individually significant, and the Fisher-combined $p$ was $1.2\times10^{-5}$. On the subspace decoder's scale (post hoc) the full population scores 0.159 (mouse mean; session median 0.108). Lagged RRR predicted future
+5 of 16 sessions were individually significant, and the Fisher-combined $p$ was $1.2\times10^{-5}$. In post hoc same-scale comparisons, the full population scores 0.159 on the ridge decoder (mouse mean; session median
+0.108) and 0.070 on the Lasso decoder (mouse mean); on the ridge scale the 0.5\,s subspace captured about a third of
+this signal, and on the Lasso scale the 30\,s subspace (0.038) captured about half (0.5\,s 0.026, PCA 0.019). The
+fraction and ordering depend on the decoder. Lagged RRR predicted future
 activity better than PCA at every lag (by 0.011 to 0.022), and at 30\,s five dimensions recovered 96\% of the
 full-rank held-out $R^2$ (Appendix Table~\ref{tab:estimator}): what is predictable 30\,s ahead is very
 low-dimensional. After removing trial-locked responses, RRR's margin over PCA shrank to 0.005 to 0.008, with intervals
@@ -279,24 +282,28 @@ including zero at every lag.
   \end{tabular}
 \end{table}
 
-\paragraph{P2, prior: no rise with horizon.} The prior did not rise from 0.5\,s to 30\,s (Table~\ref{tab:primary};
+\paragraph{P2, prior: no detectable rise with horizon.} The predicted rise was not supported (Table~\ref{tab:primary};
 median change over mice $-0.041$). This conclusion does not rest on the bootstrap upper bound ($+0.002$) alone: under
 the Findling decoder (post hoc) the 30\,s minus 0.5\,s difference was positive in 7 of 13 mice (median 0.001,
-two-sided $p=0.34$), against 4 of 13 under the ridge decoder (median $-0.042$, $p=0.22$), so there is no rise under
-either decoder, but the apparent fall is decoder-dependent and is not claimed. After residualization the change is negative (interval excludes zero), but no test in that direction was registered
-and no fall is claimed. Per subspace (descriptive; Figure~\ref{fig:content}a), the
-corrected prior $R^2$ was 0.054 [0.006, 0.105] at 0.5\,s (about a third of the full population's 0.159),
-$-0.027$, $-0.057$ and $-0.046$ at 2, 8 and 30\,s, 0.013 for PCA and $-0.030$ for the random subspace. The 0.5\,s
-value excludes zero across mice, but its across-session Fisher combination is not significant ($p=0.15$), so it is
-weak evidence.
+two-sided $p=0.34$), against 4 of 13 under the ridge decoder (median $-0.042$, $p=0.22$), so neither decoder shows a
+detectable rise, and the apparent fall is decoder-dependent and is not claimed. After residualization the change is
+negative (interval excludes zero), but no test in that direction was registered and no fall is claimed. Subspace-level
+prior estimates sit at the noise floor (Figure~\ref{fig:content}a). The registered ridge analysis gives 0.054 [0.006,
+0.105] at 0.5\,s, then $-0.027$, $-0.057$ and $-0.046$ at 2, 8 and 30\,s, 0.013 for PCA and $-0.030$ for the random
+subspace (the 0.5\,s across-session Fisher combination is not significant, $p=0.15$); this ordering does not survive
+the second decoder or the detrends.
 
 \paragraph{Was the prior masked by the ramp? (post hoc).} I detrended every unit (a quadratic in time, or a cosine
-basis with periods of at least 20 minutes) and refit the whole pipeline. Afterwards elapsed-time $R^2$ was negative for
-every subspace and no session was drift-flagged. With the quadratic detrend the prior was near zero everywhere (0.5\,s
-$-0.002$, 30\,s $-0.015$; P2 change $-0.015$ [$-0.090$, 0.047], $\holm=0.58$). With the gentler cosine detrend a small
-prior appeared about equally in every summary (0.5\,s 0.031, 30\,s 0.051 [$-0.000$, 0.101], PCA 0.028 [0.004, 0.053],
-random 0.020; P2 $+0.020$ [$-0.025$, 0.068], $\holm=0.29$). The reading rule, written before running (post hoc amendment A16), was ``not masked'' for both:
-removing the ramp does not make the prior rise with horizon.
+basis with periods of at least 20 minutes, which removes more variance: median 26\% against 21\%) and refit the whole
+pipeline. Afterwards elapsed-time $R^2$ was negative for every subspace and no session was drift-flagged. With the
+quadratic detrend the prior was near zero everywhere (0.5\,s $-0.002$, 30\,s $-0.015$; P2 change $-0.015$ [$-0.090$,
+0.047], $\holm=0.58$). With the cosine detrend a small prior appeared about equally in every summary (0.5\,s 0.031,
+30\,s 0.051 [$-0.000$, 0.101], PCA 0.028 [0.004, 0.053], random 0.020; P2 $+0.020$ [$-0.025$, 0.068], $\holm=0.29$),
+so a modest rise is not excluded. The two detrends disagree: with the cosine basis a small prior appears everywhere and
+P3 holds ($\holm=0.0061$), while with the quadratic the prior vanishes even at 0.5\,s and P3 fails (0.22).
+Subspace-level prior estimates are therefore fragile, moving by about $\pm0.05$ across decoders and detrending choices,
+and only ``no detectable rise'' holds in every variant. The reading rule, written before running (post hoc amendment
+A16), was ``not masked'' for both.
 
 \paragraph{P3, current side: long lags lose it.} Corrected current-side AUC fell from 0.218 at 0.5\,s to 0.144 to
 0.161 at longer lags (Figure~\ref{fig:content}b), and the drop persists after controlling for block information (AUC
@@ -342,7 +349,8 @@ Elapsed time was strongly decodable from every five-dimensional summary (Figure~
 representations gave elapsed-time $R^2$ of 0.84 for the 30\,s subspace and 0.82 for the 0.5\,s subspace, against 0.80
 for PCA and 0.64 for covariance-matched random subspaces (0.73, 0.72, 0.70 and 0.56 after residualization). Long lags
 add only a little over PCA, though the increase with lag is consistent (per-session Spearman correlation with lag,
-mean 0.88). The drift flag fired in 14 of 16 sessions. The signal is shared rather than split off: the 0.5\,s subspace
+mean 0.88). The drift flag fired in 14 of 16 sessions, a lenient criterion, since the 0.5\,s subspace also beats PCA on elapsed
+time. The signal is shared rather than split off: the 0.5\,s subspace
 contains 92\% [90, 94] of the 30\,s subspace's leading direction, and the directions unique to the 30\,s subspace
 carry little of it (elapsed-time $R^2$ 0.12). I call the leading direction of the full-session 30\,s readout subspace
 the \emph{session-time mode}; the name describes its association with time and does not imply a neural or cognitive
@@ -354,16 +362,16 @@ every variant, including leave-one-mouse-out (post hoc).
 \subsection{Corroboration in neighbouring areas on the same probes (exploratory)}
 \label{sec:region2}
 
-In a pre-registered extension, for each session I took the non-MOs area with the most good units on the same probes
+In a prospectively documented exploratory extension, for each session I took the non-MOs area with the most good units on the same probes
 and reran the unchanged pipeline: 15 sessions from 12 mice and nine areas, frontal cortex in 10 sessions and lateral
-septum or striatum in 5. All four registered criteria held (Table~\ref{tab:region2}). Because two are lenient (``P2 not
+septum or striatum in 5. All four criteria written in advance held (Table~\ref{tab:region2}). Because two are lenient (``P2 not
 significant'' is a null, and ``elapsed-time $R^2\ge0.5$'' is passed even by random subspaces, 0.56), and the areas
 share probes, sessions and mice with MOs, this is corroboration rather than replication. The prior is barely present
 in these populations (median corrected $R^2$ 0.001 with the Lasso decoder; the gate ran after the fits), so they speak
-to ``no rise with horizon'' but not to where the prior lives.
+to ``no detectable rise with horizon'' but not to where the prior lives.
 
 \begin{table}[t]
-  \caption{Neighbouring areas on the same probes (pre-registered, exploratory), against MOs. Criteria: P1 and P3
+  \caption{Neighbouring areas on the same probes (prospectively documented, exploratory), against MOs. Criteria: P1 and P3
   significant, P2 not significant, 30\,s elapsed-time $R^2\ge0.5$.}
   \label{tab:region2}
   \centering\small
@@ -385,8 +393,8 @@ to ``no rise with horizon'' but not to where the prior lives.
 \section{What is the session-time mode? (exploratory)}
 \label{sec:slowmode}
 
-A mode that tracks session time could be a recording artifact or a slow change in brain state. Four pre-registered
-pilots and post hoc checks tested the candidates; procedures, registered readings and full statistics are in
+A mode that tracks session time could be a recording artifact or a slow change in brain state. One pre-registered pilot (A12), three prospectively documented exploratory follow-ups (A13--A15) and post hoc checks
+(A16) tested the candidates; procedures, documented readings and full statistics are in
 Appendix~\ref{app:pilots}. Figure~\ref{fig:controls} shows elapsed-time decoding after refitting on each modified copy
 of the data, against the same sessions' original values.
 
@@ -425,14 +433,14 @@ much as against a shared state, though these detrended tests have limited power.
   \maybefig{rfig_controls.pdf}{width=0.92\linewidth}{2.3in}
   \caption{Elapsed-time $R^2$ of the 30\,s subspace after refitting the full pipeline on each modified data copy
   (exploratory). Grey: mice; filled marker and bar: mean over mice and 95\% bootstrap CI (orange: post hoc variant);
-  open circle: the original value for the same sessions; solid line: original 0.84; dashed: the pre-registered 75\%
-  and 50\% thresholds. The registered conservative amplitude correction is omitted because it corrects in the wrong
+  open circle: the original value for the same sessions; solid line: original 0.84; dashed: the 75\% and 50\% thresholds written in advance. The prospectively specified conservative amplitude correction is omitted because it corrects in the wrong
   direction. Right: copy versus same-session original, with sessions/mice.}
   \label{fig:controls}
 \end{figure}
 
-\paragraph{Where this leaves the mode.} It is a reproducible association between population activity and session time
-whose carrier units appear to change within a session (post hoc). I found no single recording artifact that accounts for it, one step is
+\paragraph{Where this leaves the mode.} It is a consistent association between population activity and session time:
+the time course is consistent across sessions, but which units carry it is not reproducible across halves (post
+hoc). I found no single recording artifact that accounts for it, one step is
 artifact-consistent, the amplitude-stable subset is unresolved, and no behavioural covariate explains its
 fluctuations. It is not established as neural or cognitive.
 
@@ -446,9 +454,12 @@ horizon, while the prior is a small signal (full-population corrected $R^2$: Las
 mean 0.159, session median 0.108). With $d=5$, a large slow signal would be selected first even if the prior were
 perfectly predictable. The other four dimensions need not hold the prior either: if many units drift independently,
 as the unstable spatial carrier suggests (post hoc), slow variance is itself multi-dimensional and can fill them. The
-detrending check is consistent with this account but not diagnostic: after the cosine detrend the 30\,s subspace had
-the highest prior score (0.051), yet the rise from 0.5\,s was not significant ($p=0.29$). Variance ranking is therefore
-the most plausible account rather than an established one; the ground-truth simulation proposed below would test it.
+detrending check is consistent with this account only in part: it fits the cosine result (a small prior appears in
+every summary once the ramp is gone; 30\,s 0.051, rise $p=0.29$) but not the quadratic one, where the prior vanishes
+everywhere. The variance-ranking hypothesis is a mechanistic interpretation of the observed selection pattern, not an
+experimentally identified cause. Alternatives remain: the prior signal may be too weak relative to nuisance variation,
+its encoding may not be linearly recoverable by RRR, it may change over time or with behavioural state, the horizons
+may be inappropriate, or power may be insufficient. The ground-truth simulation proposed below would test the account.
 Separately, the design could not have distinguished a dynamical from a static code for the prior: a 30\,s lag spans
 about six to eight trials (median stimulus-to-stimulus interval 3.9\,s, mean 5.1\,s), while blocks last tens of trials
 (median about 46), so any persistent representation of the prior is predictable 30\,s ahead whether or not it
@@ -471,7 +482,9 @@ tests have limited power.
 subset. The spontaneous periods outside the task would show whether the mode is task-linked. Independent sessions and
 regions need new downloads (MOp has 14 sessions from 12 mice). Comparisons with DCA and slow feature analysis, a
 ground-truth simulation with known drift and a known prior, and a drift-robust objective would test the
-variance-ranking account directly. Beyond the course, a public repository with a documented reproduction procedure
+variance-ranking account directly. Because fixed-horizon prediction cannot separate a persistent (static) belief
+representation from a dynamically evolving one, an analysis aligned to block transitions, asking how the population
+prior signal changes trial by trial after a switch, would be needed. Beyond the course, a public repository with a documented reproduction procedure
 would be needed.
 
 \paragraph{Conclusion.} At every horizon tested, the predictive subspaces of MOs were dominated by session-time
@@ -489,7 +502,7 @@ scripts.
 % AI-use statement drafted for the author's review; edit to reflect your own contribution before submission.
 % Author must confirm: which design decisions/amendments were yours vs suggested by Claude's adversarial review;
 % what you wrote vs what Claude wrote.
-% If the external reviews were produced with AI tools, disclose that in the AI-use statement.
+
 \section*{AI use}
 Claude (Anthropic), run as Claude Code, was used extensively in this project: to plan the analysis and adversarially
 review the plan; to write the analysis code and tests; to run the analyses and the post hoc follow-up analyses,
@@ -508,8 +521,9 @@ the proposal, made the design decisions and amendments, and checked the results.
 \label{app:prereg}
 
 The amendment file was committed before any real-data fit. Table~\ref{tab:amend} summarizes every entry.
-\emph{Pre-reg.} means written in a timestamped commit before the relevant data were analysed; \emph{post hoc} means
-added after results were seen.
+\emph{Pre-reg.} means written in a timestamped commit before the relevant data were analysed; \emph{prospectively
+documented} means the same procedure for exploratory follow-ups written after the 20 November analysis freeze;
+\emph{post hoc} means designed after results were seen.
 
 \begin{table}[H]
   \caption{Deviations from the proposal (D), additions (A), and later amendments.}
@@ -541,10 +555,10 @@ added after results were seen.
     D10 & z-score SD floor raised from $10^{-3}$ to 0.218 & Bug (Section~\ref{sec:prereg}) & post hoc fix \\
     P1h & Leave-one-mouse-out and flagged-session robustness & Robustness only & post hoc \\
     A12 & Pilot: stable units, probe motion, pupil (17 Nov) & What is the slow mode? & pre-reg., exploratory \\
-    A13 & Pilot: engagement, satiety, amplitude, multi-unit (21 Nov) & Ramp-independent evidence & pre-reg., exploratory \\
-    A14 & Pilot: amplitude-rate coupling, corrected refits, timing (22 Nov) & Is amplitude loss sufficient? & pre-reg., exploratory; 2 post hoc checks \\
-    A15 & Neighbouring areas, cross-area slow mode, behaviour (22 Nov) & Does it generalize? & pre-reg., exploratory; completed \\
-    A16 & Detrend-and-refit, same-scale prior reference, spatial reproducibility, step sessions (22 Nov) & Two external reviews obtained by the author & post hoc; design written before running \\
+    A13 & Pilot: engagement, satiety, amplitude, multi-unit (21 Nov) & Ramp-independent evidence & prospectively documented, exploratory \\
+    A14 & Pilot: amplitude-rate coupling, corrected refits, timing (22 Nov) & Is amplitude loss sufficient? & prospectively documented, exploratory; 2 post hoc checks \\
+    A15 & Neighbouring areas, cross-area slow mode, behaviour (22 Nov) & Does it generalize? & prospectively documented, exploratory \\
+    A16 & Detrend-and-refit, same-scale prior reference, spatial reproducibility, step sessions (22 Nov) & Post hoc follow-up checks & post hoc; design written before running \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -569,8 +583,8 @@ $p$-values moved: residual P1 0.048 to 0.013 and P3 0.012 to 0.0051; residual wo
 significant) to 0.027 and P3 0.024 to 0.010; $d=3$ P1 0.049 to 0.032. P2 values changed slightly (residual 0.999 to
 0.996, $d=3$ 0.23 to 0.21, $d=10$ 0.81 to 0.88) and stayed far from significance. An earlier estimator result
 (reduced rank beating full-rank ridge at 30\,s) was an artifact of the bug. The proposal froze analyses on 20 November
-(``bug fixes only from here''); the main analysis, including this rerun, was complete on 16 November, the first pilot
-was registered on 17 November and the others on 21 and 22 November.
+(``bug fixes only from here''); the main analysis, including this rerun, was complete on 16 November, the first pilot (A12) was pre-registered on 17 November, A13--A15 were prospectively documented on 21 and 22
+November, and the post hoc A16 checks were designed on 22 November after all earlier results were known.
 
 \section{Implementation details}
 \label{app:impl}
@@ -619,13 +633,13 @@ quadratic time nuisance terms, and refit after rescaling counts by $f_u(t)=\exp(
 $[0.5, 2]$. A15 reran the pipeline on the largest non-MOs area on the same probes, and tested detrended cross-area
 sharing and log reaction time and accuracy. A16 (post hoc) is described with its results below.
 
-\paragraph{Registered readings.} A12 read ``mixed or undetermined'': the mode survived the stable-unit refit, but
+\paragraph{Documented readings.} A12 read ``mixed or undetermined'': the mode survived the stable-unit refit, but
 neither motion nor pupil explained its session-specific shape. A13's rule output ``sorting artifact'' through its
 second branch (amplitude-stable refit not ``survives'' and the amplitude-loading test significant). The label is a
 misnomer: the most direct sorting test, the multi-unit refit, reproduced the mode, and the rule had not anticipated
 amplitude loss acting through spike detection. A14 then tested detection loss directly and read ``amplitude cannot
 account for the mode'': the coupling had the wrong sign and maximal corrections left the mode largely intact. Its
-registered conservative arm used the session-median coupling, which is negative (median $-1.43$), so it corrects in
+prospectively specified conservative arm used the session-median coupling, which is negative (median $-1.43$), so it corrects in
 the wrong direction and is not a test of detection loss. A15 read ``replicates'' (here described as corroboration).
 Same-session originals for the subset refits (post hoc comparisons): stable units 0.77 vs 0.83, multi-unit 0.74 vs
 0.88, amplitude-stable 0.49 vs 0.73 (PCA 0.43 vs 0.68).
@@ -649,7 +663,7 @@ Same-session originals for the subset refits (post hoc comparisons): stable unit
     Amplitude, stable (A13) & Refit on rate- and amplitude-stable units & $R^2$ 0.49 (5 sessions, 5 mice); ``intermediate'' \\
     Engagement, satiety (A13) & Residual correlation beyond a quadratic trend, session-permutation null & $p=0.19$ and $p=0.12$; fluctuating-engagement subset $p=0.049$, signs inconsistent \\
     Detection coupling (A14) & Sign of amplitude-rate coupling beyond the trend & Negative: mean $-1.54$, $p=0.99$; degree-5 trend $-1.92$; isolated spikes (post hoc) $-1.32$, $p=0.98$ \\
-    Amplitude correction (A14) & Refit after removing each unit's amplitude-linked rate (maximal arms) & $R^2$ 0.80 / 0.78 (maximal / slow-maximal, post hoc), both ``survive''; the registered conservative arm (0.85) corrects in the wrong direction ($\beta<0$) and is not a test of detection loss \\
+    Amplitude correction (A14) & Refit after removing each unit's amplitude-linked rate (maximal arms) & $R^2$ 0.80 / 0.78 (maximal / slow-maximal, post hoc), both ``survive''; the prospectively specified conservative arm (0.85) corrects in the wrong direction ($\beta<0$) and is not a test of detection loss \\
     Settling (A14) & Is amplitude change concentrated early? & Index $-0.12$ ($p=0.75$); if anything, later \\
     Shared across areas (A15) & Do MOs and neighbouring-area slow modes co-fluctuate beyond a quadratic trend? & Raw match 0.94; detrended corrected 0.006, $p=0.48$ (12 mice) \\
     Behaviour (A15) & Residual correlation with log reaction time and accuracy & $p=0.12$ and $p=0.34$; signs inconsistent \\
@@ -659,7 +673,7 @@ Same-session originals for the subset refits (post hoc comparisons): stable unit
 
 \paragraph{A16: detrend and refit (post hoc).} Each unit's square-root activity was detrended by a least-squares
 quadratic in time, or by a cosine basis with periods of at least 20 minutes, and the pipeline refit unchanged. The
-registered reading for both was ``not masked'' (Table~\ref{tab:detrend}).
+reading rule written before running gave ``not masked'' for both (Table~\ref{tab:detrend}).
 
 \begin{table}[H]
   \caption{Detrend-and-refit (post hoc). Corrected prior $R^2$ per subspace (means over mice), P2 change from 0.5\,s
@@ -817,7 +831,7 @@ $p=0.016$, uncorrected); prior decoding from the two complements did not differ 
 nesting indices were 0.94 (0.5\,s containing 30\,s) and 0.89 (reverse), and RRR's margin over PCA was 0.005 to 0.008
 with confidence intervals including zero at every lag. All three A14 corrected copies left the primary tests unchanged (geometry $\holm$ 0.0004 to 0.004, prior 0.63 to
 0.73, current side 0.006 to 0.013). In the maximal and slow-maximal copies the drift flag fired in 14 of 16 sessions
-and the corrected data kept 0.86 and 0.85 of the original slow-direction slope. The registered conservative copy
+and the corrected data kept 0.86 and 0.85 of the original slow-direction slope. The prospectively specified conservative copy
 (13 of 16 flags, slope fraction 1.00) corrects in the wrong direction ($\beta<0$) and is not a test of detection
 loss.
 
