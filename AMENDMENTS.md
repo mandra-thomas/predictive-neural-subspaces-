@@ -1,5 +1,52 @@
 # Amendments to the proposal (pre-registered)
 
+## Index (added 2026-11-22; navigation only, no entry below was changed)
+
+The table lists every entry in this file with the date and commit that first recorded it (from `git log`), its
+status, the section of `RESULTS.md` that reports it, and the code that implements it. Times are US Eastern.
+
+**Terminology.** *Pre-registered* means the entry was committed before the data it concerns were analysed; this
+applies to D1 to D9, A1 to A11 (all in the first commit, before any real-data fit) and A12. *Prospectively documented
+exploratory* applies to A13, A14 and A15. Their designs and reading rules were likewise committed before the relevant
+data were analysed, and their headings below say "pre-registered", but they were written on 21 and 22 November, after
+the 20 November analysis freeze in the proposal, so the report and `RESULTS.md` use the narrower label. *Post hoc*
+means designed after the relevant results were seen: D10 (a bug fix), P1h, the two A14 post hoc additions, and A16.
+
+| # | First recorded | Status | RESULTS.md section | Code |
+|---|---|---|---|---|
+| D1 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design | `02_preprocess.py`, `pns.pipeline` |
+| D2 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design | `01_census.py`, `02_preprocess.py` |
+| D3 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design | `pns.prior` |
+| D4 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design; Secondary results (penalties) | `04_fit_subspaces.py`, `pns.rrr` |
+| D5 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P3 | `05_decode.py`, `pns.pipeline` |
+| D6 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results | `06_stats.py`, `pns.stats` |
+| D7 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P1 | `06_stats.py`, `pns.analysis` |
+| D8 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P1 | `04_fit_subspaces.py`, `pns.pipeline` |
+| D9 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design | `02_preprocess.py`, `pns.pipeline` |
+| A1 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design (prior gate) | `03_prior_gate.py` |
+| A2 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P1; Secondary results (estimator check) | `04_fit_subspaces.py`, `pns.geometry` |
+| A3 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P1; Secondary results (nesting) | `04_fit_subspaces.py`, `pns.geometry` |
+| A4 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P2; Secondary results (other measures) | `05_decode.py`, `06_stats.py` |
+| A5 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Primary results, P3 | `05_decode.py`, `pns.analysis` |
+| A6 | 2026-11-16 07:25 (`98a0033`) | pre-registered | How to read this file; Primary results | `05_decode.py`, `pns.analysis` |
+| A7 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Secondary results | `06_stats.py`, `pns.stats` |
+| A8 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Data and design | `pns.lagged` |
+| A9 | 2026-11-16 07:25 (`98a0033`) | pre-registered | not reported separately (report appendix decoding table) | `05_decode.py`, `pns.pipeline` |
+| A10 | 2026-11-16 07:25 (`98a0033`) | pre-registered | Secondary results (session-time mode) | `06_stats.py`, `pns.analysis` |
+| A11 | 2026-11-16 07:25 (`98a0033`) | pre-registered (sensitivity) | Primary results; Secondary results; Robustness | `04_fit_subspaces.py` and `05_decode.py` with `--residual`, `pns.pipeline.residualize_session` |
+| D10 | 2026-11-16 10:46 (`c6893b1`) | post hoc (bug fix) | What changed after the first run | `pns.transform` (`SD_FLOOR`) |
+| P1h | 2026-11-16 10:46 (`c6893b1`) | post hoc | Robustness | `08_robustness.py` |
+| A12 | 2026-11-17 03:02 (`e965b42`) | pre-registered, exploratory | Pilot (A12) | `09_fetch_state_signals.py`, `10_stable_units.py`, `11_pilot_state.py`, `slurm/pilot_A12.sbatch` |
+| A13 | 2026-11-21 17:05 (`fd5f3d4`) | prospectively documented exploratory | Second pilot (A13) | `12_fetch_A13.py`, `13_build_A13.py`, `14_pilot_A13.py`, `slurm/pilot_A13.sbatch` |
+| A14 | 2026-11-22 10:16 (`f3008e7`); post hoc additions 10:25 (`7d0172d`) | prospectively documented exploratory; two post hoc checks | Third pilot (A14) | `15_build_A14.py`, `16_pilot_A14.py`, `pns.ampcorr`, `slurm/pilot_A14.sbatch` |
+| A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
+| A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
+
+The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
+amendment. The entries below are the original dated record and are left exactly as written.
+
+---
+
 Committed on 2026-11-16, **before any real-data fit**. This file lists every departure from the proposal
 ("Prediction Horizon and the Content of Neural Population Subspaces", Oct 8 2026) and every addition, each
 with its reason. Later changes are appended with a date and logged in `ANALYSIS_LOG.md`.

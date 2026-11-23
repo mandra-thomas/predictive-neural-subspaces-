@@ -1,4 +1,4 @@
-"""Amendment A16 (post hoc, local): parts 1-4 of the external-review follow-ups. See AMENDMENTS.md, A16.
+"""Amendment A16 (post hoc, local): parts 1-4 of the post hoc follow-ups. See AMENDMENTS.md, A16.
 
 Part 1  reads results_detrend_{q,c}/stats/d5 (refits of 04-06 on 21_build_detrend output) and applies the reading.
 Part 2  same-scale prior reference: (a) ridge/contiguous decoder on the full population with script 05's pseudo

@@ -7,7 +7,7 @@ Part 2b amplitude-stable refit, read with the A12 test-1 rules.
 Part 3a multi-unit refit: elapsed-time R2 of the 30 s subspace, and |r| between multi-unit and unit slow modes.
 Part 3b Spearman(multi-unit slow-mode loadings, depth derivative of the mean multi-unit rate profile); shuffle null;
         Fisher-combined across sessions.
-Writes results/a13/{sessions.csv, summary.json}.
+Writes results/a13/{sessions_d5.csv, summary_d5.json} (d in the file name).
 """
 import json
 from pathlib import Path

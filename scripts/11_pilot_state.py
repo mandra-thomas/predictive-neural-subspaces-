@@ -8,7 +8,7 @@ Corrected = |r_real| - median |r_cross|; one-sided Wilcoxon across animals. Seco
 linear time trend from both series.
 
 Test 1 (stable units) is summarised from the stable-units rerun of scripts 04-06 (--stable-results).
-Writes results/pilot/{sessions,summary}.{csv,json}.
+Writes results/pilot/{sessions_d5.csv, summary_d5.json} (d in the file name).
 """
 import json
 from pathlib import Path

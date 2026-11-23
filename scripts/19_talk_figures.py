@@ -9,8 +9,9 @@ fig4_slowmode_controls : for each recording-control data version (amendments A12
 fig5_slowmode_examples : the sign-aligned slow mode (pns.slowmode.slow_mode: first readout direction of the
                          full-session 30 s subspace, activity projected on it, averaged in 30 s windows) against
                          time in session, one panel per session, with a least-squares straight line. By the rule below,
-                         four of the six are clear ramps and two (CSHL049, DY_014) are step-like; the
-                         title says so rather than swapping sessions.
+                         three of the six (CSHL058, CSHL060, KS023) are near-linear ramps, CSH_ZAD_024 rises in
+                         several steps, and two (CSHL049, DY_014) are flat with a step; the title says so rather
+                         than swapping sessions.
 
 Session-selection rule for fig5 (fixed in advance, no cherry-picking): walk data/meta/frozen.json in its stored order
 and take the first session of each of the first six distinct mice. The suptitle also reports the median correlation

@@ -1,8 +1,10 @@
-"""Amendment A14 third pilot (runs on ICE after 15_build_A14 and the 04-06 refits on both corrected copies).
+"""Amendment A14 third pilot (runs on ICE after 15_build_A14 and the 04-06 refits on the three corrected copies).
 
 Part 1  fluctuation amplitude-rate coupling (session median over units, animal means, one-sided Wilcoxon > 0).
-Part 2  readings of the conservative and maximal amplitude-corrected refits (elapsed-time R2 of the 30 s subspace
-        relative to the original) and, without refitting, the residual ramp fraction along the original slow direction.
+Part 2  readings of the conservative and maximal amplitude-corrected refits and of the post hoc slow-maximal refit
+        (elapsed-time R2 of the 30 s subspace relative to the original) and, without refitting, the residual ramp
+        fraction along the original slow direction.
+Post hoc 1b  the Part 1 coupling with amplitudes from isolated spikes only (reported, not in the overall reading).
 Part 3  early-concentration index of amplitude change (and, secondary, of the slow mode itself).
 Writes results/a14/{sessions_d5.csv, summary_d5.json}.
 """

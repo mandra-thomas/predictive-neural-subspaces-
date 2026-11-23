@@ -1,4 +1,4 @@
-"""Slow-mode helpers for the drift-versus-state pilots (amendments A12 and A13).
+"""Slow-mode helpers for the drift-versus-state pilots (amendments A12 to A16) and the slow-mode figures.
 
 The slow mode is the first basis column of the full-session longest-lag readout subspace; its time course is the
 z-scored sqrt-count activity projected on it, averaged in non-overlapping 30 s windows (60 bins of 0.5 s),
