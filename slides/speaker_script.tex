@@ -1,0 +1,598 @@
+% Speaker script: slide-by-slide talking points for the 23 Nov presentation, plus Q&A prep.
+% Companion to slides.tex (same content as its \note{} text, broken into short lines to present from).
+% Build: `make speaker_script.pdf` (or latexmk -pdf speaker_script.tex).
+\documentclass[12pt]{article}
+\usepackage[letterpaper,margin=0.8in,top=0.7in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[sfdefault,lining]{FiraSans}
+\usepackage{newtxsf}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\hypersetup{pdftitle={Speaker script: Prediction Horizon and the Content of Neural Population Subspaces},
+  pdfauthor={Gunnar Andra-Thomas}, colorlinks=true, linkcolor=black}
+
+\definecolor{teal}{HTML}{23373B}
+\definecolor{accent}{HTML}{2A78D6}
+\definecolor{ink}{HTML}{52514E}
+\definecolor{warn}{HTML}{B4521E}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=1.3em, itemsep=2pt, topsep=2pt, parsep=0pt}
+\setlist[itemize,2]{leftmargin=1.2em, label=\textendash}
+\titleformat{\section}{\Large\bfseries\color{teal}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{0pt}{6pt}
+\titleformat{\subsection}{\large\bfseries\color{teal}}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{10pt}{3pt}
+
+% \slide{number}{title}{time on slide}{clock at end of slide}
+\newcommand{\slide}[4]{%
+  \newpage
+  \begin{tcolorbox}[colback=teal, colframe=teal, coltext=white, arc=2pt, boxsep=3pt, left=6pt, right=6pt]
+    {\small SLIDE #1 \hfill #3 on this slide \textperiodcentered{} finish by #4}\\[2pt]
+    {\Large\bfseries #2}
+  \end{tcolorbox}\vspace{2pt}}
+\newcommand{\point}[1]{{\color{ink}\textbf{On screen:} #1}\par}
+\newcommand{\say}{\par\smallskip{\color{accent}\textbf{Say}}\par}
+\newcommand{\avoid}[1]{\par\smallskip{\color{warn}\textbf{Careful:} #1}\par}
+\newcommand{\bridge}[1]{\par\smallskip\begin{tcolorbox}[colback=accent!8, colframe=accent!40, arc=2pt, boxsep=2pt,
+  left=5pt]\textbf{Bridge to next slide:} #1\end{tcolorbox}}
+\newcommand{\ifasked}[1]{\par\smallskip{\color{ink}\textbf{Only if asked:} #1}\par}
+
+% Q&A entries: \q{question}{bullets}
+\newcommand{\q}[2]{\par\medskip{\bfseries\color{teal}Q: #1}\par\vspace{1pt}\begin{itemize}#2\end{itemize}}
+
+\begin{document}
+
+% ======================================================================================
+\begin{center}
+{\LARGE\bfseries\color{teal} Speaker script}\\[4pt]
+{\large Prediction Horizon and the Content of Neural Population Subspaces}\\[2pt]
+{\color{ink}Gunnar Andra-Thomas \textperiodcentered{} CSE 8803 NBD \textperiodcentered{} Monday 23 November 2026}
+\end{center}
+
+\subsection*{How to use this}
+\begin{itemize}
+\item One page per slide. The box at the top gives the slide number, title, time budget and the clock time you
+should reach by the end of that slide.
+\item \textbf{Say} lines are talking points, not a script to read. Say each one in your own words.
+\item Numbers on the slides are there for questions. Say only the few marked here.
+\item 12 content slides plus the title, about 15 minutes. If you're behind at slide 8, shorten slides 9 and 10.
+\end{itemize}
+
+\subsection*{The whole talk in four sentences}
+\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
+\item I asked whether predicting brain activity further ahead pulls out the animal's slow belief about the task.
+\item It doesn't: there is no detectable rise in block-prior information with prediction horizon.
+\item What every low-dimensional summary picks up instead is a slow change across the session.
+\item These methods rank directions by how much variance they predict, and that big slow signal wins first.
+\end{enumerate}
+
+\subsection*{Three distinctions to keep straight all talk}
+\begin{itemize}
+\item \textbf{Corrected score} = real score minus the pseudo-session null median. Zero means ``no advantage over the
+null''. It is \emph{not} percent of variance explained.
+\item \textbf{Prior:} ``no detectable rise''. Never say ``it falls''.
+\item \textbf{Stimulus:} long horizons \emph{lose} it. Short horizons are not \emph{specialized} for it.
+\end{itemize}
+
+\subsection*{Clock checkpoints}
+\begin{itemize}
+\item End of slide 4 (method): about 4:05.
+\item End of slide 8 (prior): about 9:35.
+\item End of slide 13 (takeaways): about 15:00.
+\end{itemize}
+
+% ======================================================================================
+\slide{1}{Title}{20 s}{0:20}
+\point{Title, your name, course.}
+\say
+\begin{itemize}
+\item Hi, I'm Gunnar.
+\item The question: when you look for the directions of brain activity that best predict its own future, does
+\emph{how far ahead} you predict decide what they encode?
+\item Short answer, in mouse secondary motor cortex: mostly not.
+\item Data: public Neuropixels recordings from the International Brain Laboratory.
+\item The three main tests were pre-registered before I fitted real data.
+\end{itemize}
+
+% ======================================================================================
+\slide{2}{Is a slow belief among the dominant predictable signals?}{1:00}{1:20}
+\point{Two columns: Neuroscience (left) and Methods (right).}
+\say
+\begin{itemize}
+\item \textbf{Left, neuroscience.}
+  \begin{itemize}
+  \item Animals track hidden task states over many trials.
+  \item The IBL ``block prior'' is a well-studied example: it can be decoded weakly across the brain (Findling 2025).
+  \item Question: is a belief like this one of the \emph{dominant} predictable signals in population activity?
+  \end{itemize}
+\item \textbf{Right, methods.}
+  \begin{itemize}
+  \item Predictive methods find structure without labels: lagged regression, slow features, DCA, and predictive
+  learning in ML.
+  \item If the prediction horizon sorted signals by timescale, long horizons would find belief states for free.
+  \end{itemize}
+\item Preview of the punchline: these methods care about more than timescale. They rank directions by how much
+future variance they explain.
+\end{itemize}
+
+% ======================================================================================
+\slide{3}{Hypothesis: the prediction horizon sorts content by timescale}{1:15}{2:35}
+\point{Grey step line = the true block. Blue curve = the ideal-observer prior. Hypothesis box on the right.}
+\say
+\begin{itemize}
+\item \textbf{The task.} A grating appears left or right; the mouse turns a wheel to report the side.
+\item The side is biased 80/20, in blocks that switch \emph{without a cue}. So the mouse has to infer the block.
+\item \textbf{Grey line:} the true block.
+\item \textbf{Blue curve:} the Bayes-optimal prior, what an ideal observer would believe. It is a slow variable
+that lags the true block.
+  \begin{itemize}
+  \item It is a model of the belief, not a measurement from the brain.
+  \end{itemize}
+\item \textbf{Hypothesis:}
+  \begin{itemize}
+  \item Predicting 30 s ahead isolates a slow subspace carrying the prior.
+  \item Predicting 0.5 s ahead isolates a fast subspace carrying the current stimulus.
+  \end{itemize}
+\item \textbf{Three tests, fixed before any real data:}
+  \begin{itemize}
+  \item Geometry: the subspaces differ.
+  \item Prior: decoding rises with horizon.
+  \item Stimulus: decoding falls with horizon.
+  \end{itemize}
+\item The prior and stimulus tests are the heart of it. Geometry only asks whether the subspaces differ at all.
+\end{itemize}
+
+% ======================================================================================
+\slide{4}{Method: predict activity $\Delta$ s ahead through a 5-dimensional bottleneck}{1:30}{4:05}
+\point{Diagram: activity now $\to$ 5 latents $\to$ activity $\Delta$ later. The formula underneath.}
+\say
+\begin{itemize}
+\item \textbf{Data line:} mouse secondary motor cortex (MOs), 16 sessions from 13 mice, activity in half-second bins.
+\item \textbf{The picture.}
+  \begin{itemize}
+  \item Take the population now and squeeze it through 5 latents.
+  \item Use those to predict the population $\Delta$ seconds later.
+  \item Four horizons: 0.5, 2, 8 and 30 s.
+  \end{itemize}
+\item \textbf{The formula says the same thing.} Point to each part as you say it:
+  \begin{itemize}
+  \item First term: how badly activity now predicts activity $\Delta$ later.
+  \item The rank limit of 5: the bottleneck.
+  \item $\lambda$: a ridge penalty, chosen by cross-validation once per session and shared by all lags.
+  \end{itemize}
+\item Name: lagged reduced-rank regression. PCA is the unsupervised baseline.
+\item \textbf{What gets fitted:} the 5 directions of current activity that best predict the future. That is
+``the subspace''.
+\item \textbf{What gets decoded:} from those 5 latents, I decode the stimulus, the prior and elapsed time with simple
+cross-validated decoders.
+\item Null and statistics are in the backup slides.
+\end{itemize}
+\bridge{``Before testing the hypothesis, two sanity checks.''}
+
+% ======================================================================================
+\slide{5}{The prior is in MOs; 5 dimensions capture most predictable activity}{1:15}{5:20}
+\point{Left: three big numbers (prior from the full population). Right: line plot of prediction accuracy vs.\ lag.}
+\say
+\begin{itemize}
+\item \textbf{Check 1, left.}
+  \begin{itemize}
+  \item Decoding the prior from the whole population, the way Findling did, beats the pseudo-session null.
+  \item But it is small: about 0.06.
+  \item Keep that number in mind; it matters later.
+  \end{itemize}
+\item \textbf{Check 2, right.}
+  \begin{itemize}
+  \item Each line is a method. The vertical axis is how well it predicts held-out future activity.
+  \item Every line falls further ahead, as expected.
+  \item Lagged RRR (blue) beats PCA and random subspaces of the same size.
+  \item At 30 s, 5 dimensions get 96\% of an unconstrained model.
+  \end{itemize}
+\item \textbf{The caveat. Say this one carefully:}
+  \begin{itemize}
+  \item 5 dimensions capture nearly all the \emph{aggregate} predictability.
+  \item That does not guarantee they capture small task signals. A signal that explains little predictable variance
+  can be left out.
+  \end{itemize}
+\end{itemize}
+\bridge{``So the method works. Now the three tests, starting with geometry.''}
+
+% ======================================================================================
+\slide{6}{Subspaces differ by lag, but 30 s ones don't reproduce across halves}{1:30}{6:50}
+\point{Three bars (same lag 0.5 s, cross lag, same lag 30 s) and the dashed chance line at about 68\textdegree.}
+\say
+\begin{itemize}
+\item \textbf{How to read it.}
+  \begin{itemize}
+  \item Angle between subspaces: 0\textdegree{} = they share a direction; 90\textdegree{} = completely different.
+  \item I fit each lag separately on the two halves of a session.
+  \item Each bar is the angle between those fits.
+  \item Dashed line: chance, i.e.\ random directions with the same variance profile. It is already about
+  68\textdegree.
+  \end{itemize}
+\item \textbf{Tell it as a story. Intuition first, numbers second:}
+  \begin{itemize}
+  \item We want to know whether short- and long-lag subspaces differ.
+  \item First, how reproducible is each one?
+  \item Short-lag fits reproduce: left bar, about 59\textdegree, well below chance.
+  \item 30 s fits do not: right bar, at chance, even for their single closest direction.
+  \item The cross-lag angle beats both, so the pre-registered test passes ($p = 0.0026$).
+  \end{itemize}
+\item \textbf{But it passes mostly through the short lag.} So it is \emph{not} two clean, stable representations.
+\item This is the weakest of the results.
+\end{itemize}
+\avoid{don't read the angles one by one. ``Short reproduces, long is at chance'' is the message.}
+\bridge{``That's whether they differ. Now what they contain, starting with the stimulus.''}
+
+% ======================================================================================
+\slide{7}{Longer horizons lose the current stimulus}{1:15}{8:05}
+\point{Bar chart: blue = RRR at 0.5, 2, 8, 30 s; grey = PCA and random.}
+\say
+\begin{itemize}
+\item I show the stimulus first because it is the cleaner positive result.
+\item \textbf{How to read it.}
+  \begin{itemize}
+  \item Each bar: how well a subspace decodes the current stimulus side.
+  \item Minus what the same decoder gets on pseudo-sessions.
+  \item So zero = no advantage over the pseudo-session null.
+  \end{itemize}
+\item \textbf{Result.}
+  \begin{itemize}
+  \item Decoding falls as the horizon grows ($p = 0.006$, 10 of 13 mice).
+  \item It holds after controlling for block information.
+  \end{itemize}
+\item \textbf{The nuance:} the 0.5 s subspace is no better than a random one (grey).
+  \begin{itemize}
+  \item So long lags \emph{lose} the stimulus.
+  \item Short lags don't \emph{specialize} for it.
+  \end{itemize}
+\item The stimulus half of the hypothesis holds, in a weaker form than predicted.
+\item Holds at 10 dimensions, not at 3: real, but modest.
+\end{itemize}
+\bridge{``Now the central prediction: the prior.''}
+
+% ======================================================================================
+\slide{8}{Predicting further ahead: no detectable gain in block-prior information}{1:30}{9:35}
+\point{Left: same bar layout for the prior. Right: one dot per mouse = its change from 0.5 s to 30 s.}
+\say
+\begin{itemize}
+\item Same layout. The hypothesis predicted the blue bars to \emph{rise} left to right.
+\item \textbf{Right panel.}
+  \begin{itemize}
+  \item Each dot is one mouse's change from 0.5 to 30 s.
+  \item Already corrected against that mouse's own pseudo-sessions.
+  \item Most sit at or below zero. Only 4 of 13 rise.
+  \end{itemize}
+\item \textbf{The left bars} at 2--30 s have intervals that include zero: noise around the null.
+\item \textbf{This was the central prediction, and it is not supported.}
+\item The prior \emph{is} real in the population (slide 5). It is just a small signal.
+\item \textbf{The wording to use:} ``no detectable rise''.
+  \begin{itemize}
+  \item Individual bars move by about $\pm0.05$ if you change the decoder or detrend.
+  \item The one thing that holds in every version is that there's no rise.
+  \end{itemize}
+\end{itemize}
+\avoid{don't say the prior ``falls'' or that the 0.5 s subspace ``has the prior''. The 0.054 is distance above the null,
+not 5\% of variance.}
+\bridge{``So if not the prior, what does the 30 s subspace carry?''}
+
+% ======================================================================================
+\slide{9}{The leading 30 s direction tracks session time, and so does PCA}{1:15}{10:50}
+\point{4$\times$4 grid: all 16 sessions. Blue = activity along the leading 30 s direction; dashed = straight-line fit.}
+\say
+\begin{itemize}
+\item \textbf{Each small panel is one session.}
+  \begin{itemize}
+  \item Blue: activity along the subspace's leading direction, in 30 s windows, across the session.
+  \item Panels are sorted by how closely it follows time.
+  \end{itemize}
+\item In 12 of 16 it is nearly a straight ramp. A few look more like steps.
+\item Showing all 16 means you see the typical case, not a picked example.
+\item \textbf{Elapsed-time decoding} (bottom line):
+  \begin{itemize}
+  \item 30 s subspace: 0.84.
+  \item But the 0.5 s subspace, PCA, and even random subspaces are close behind.
+  \end{itemize}
+\item \textbf{Message:} every low-dimensional summary of these recordings is dominated by this session ramp.
+Long horizons have it only slightly more.
+\end{itemize}
+\bridge{``The obvious worry is that this is recording drift.''}
+
+% ======================================================================================
+\slide{10}{Recording controls leave most of the ramp, except the strictest unit filter}{1:15}{12:05}
+\point{Each row = one version of the data, refit from scratch. Filled dot = control; hollow = original on the same
+sessions; dashed lines = pre-registered 75\% and 50\% thresholds.}
+\say
+\begin{itemize}
+\item Each row: I changed the data to remove one possible cause, then refit everything.
+\item \textbf{These each leave most of the ramp:}
+  \begin{itemize}
+  \item removing trial-locked responses;
+  \item dropping units that fade in and out;
+  \item skipping spike sorting entirely (multi-unit activity);
+  \item correcting for spikes shrinking in amplitude.
+  \end{itemize}
+\item Spike-amplitude coupling actually has the \emph{wrong sign} for an amplitude artifact.
+\item Probe motion, pupil, engagement and satiety: no link beyond the shared trend (backup slides).
+\item \textbf{The exception, and the biggest open challenge:} the strictest filter.
+  \begin{itemize}
+  \item Units stable in both rate and amplitude: only 5 sessions pass.
+  \item The ramp falls by about a third, and PCA falls just as much.
+  \item Is that just fewer units, or removing the units that carry it? Matched-unit-count resampling would tell.
+  \end{itemize}
+\end{itemize}
+\bridge{``Is this specific to MOs?''}
+
+% ======================================================================================
+\slide{11}{The same pattern holds in other areas on the same probes}{1:00}{13:05}
+\point{Left: elapsed-time bars, MOs (blue) vs.\ other areas (orange). Right: the three tests.}
+\say
+\begin{itemize}
+\item The probes pass through other areas too.
+\item In each session I took the largest other area (mostly frontal) and reran the \emph{unchanged} pipeline.
+\item Criteria were fixed before binning.
+\item \textbf{Left:} same ordering, slightly lower. The ramp is everywhere.
+\item \textbf{Right:}
+  \begin{itemize}
+  \item Geometry and stimulus effects hold there too.
+  \item The prior shows no rise, but it is barely present in these areas, so that part says little.
+  \end{itemize}
+\item \textbf{Honest limit:} same probes, so this is corroboration, not independent replication.
+\end{itemize}
+
+% ======================================================================================
+\slide{12}{What the data show, possible mechanisms, and the main limits}{1:10}{14:15}
+\point{Left = what the data show. Right = speculation. Bottom line = limits.}
+\say
+\begin{itemize}
+\item \textbf{Left, the data:}
+  \begin{itemize}
+  \item no detectable rise of the prior with horizon;
+  \item one session-time direction dominates, shared by PCA and short-lag RRR;
+  \item no single recording cause tested explains most of it.
+  \end{itemize}
+\item \textbf{Right, speculation. Most plausible: variance ranking.}
+  \begin{itemize}
+  \item These methods keep the directions that predict the most future variance.
+  \item A 30 s lag spans only a few trials, and blocks last minutes.
+  \item So a persistent prior \emph{would} be predictable at every horizon tested.
+  \item But it is small, and with 5 dimensions the big ramp wins first.
+  \item Plausible, not demonstrated.
+  \end{itemize}
+\item \textbf{Limits:}
+  \begin{itemize}
+  \item the strictest unit filter;
+  \item 13 mice, and the other areas share probes;
+  \item the follow-ups are exploratory.
+  \end{itemize}
+\end{itemize}
+
+% ======================================================================================
+\slide{13}{Takeaways}{45 s}{15:00}
+\point{Three numbered takeaways and a ``Next'' line.}
+\say
+\begin{itemize}
+\item \textbf{One.} The predicted enrichment of the block prior at longer horizons was not supported.
+\item \textbf{Two.} The dominant predictable direction tracks session time, and it is not special to long horizons.
+\item \textbf{Three} (the one to remember). Its origin is unresolved despite targeted controls. Detrending did not
+produce a robust gain in block-prior information at longer horizons.
+\item \textbf{Lesson, within this dataset:} prediction horizon alone did not preferentially recover the block prior.
+\item \textbf{Next:}
+  \begin{itemize}
+  \item matched-unit controls;
+  \item a ground-truth simulation, to check the method can find a small slow signal;
+  \item independent recordings.
+  \end{itemize}
+\item ``Thanks, happy to take questions.''
+\end{itemize}
+
+% ======================================================================================
+\newpage
+\section*{Backup slides: what each one is for}
+Jump to these only when a question calls for them.
+\begin{itemize}[itemsep=4pt]
+\item \textbf{Data, null, statistics, pre-registration.} Region choice, session counts, how the pseudo-session null
+works, Wilcoxon and Holm, which analyses were pre-registered.
+\item \textbf{The factorization, and four things to explain.} The RRR closed form, readout vs.\ loading basis,
+pseudo-sessions, the intersection--union test.
+\item \textbf{Why lagged RRR rather than PCA or other methods.} CCA, DCA, GPFA, slow features; RRR's modest edge.
+\item \textbf{How strong is the prior result?} Every variant of the prior test; the ``no detectable rise'' wording.
+\item \textbf{Robustness table.} Holm $p$ for all three tests across 10 variants.
+\item \textbf{Full decoding matrix.} Every variable by every subspace.
+\item \textbf{Nesting.} The 0.5 s subspace contains 92\% of the 30 s leading direction.
+\item \textbf{Candidate recording explanations.} One row per cause tested.
+\item \textbf{Amplitude pilot.} Wrong-sign coupling; corrected refits keep 93--95\%.
+\item \textbf{Probe motion, sorting, state signals.} Motion, pupil, engagement, satiety.
+\item \textbf{The normalization bug.} The one post-results change.
+\end{itemize}
+
+% ======================================================================================
+\newpage
+\section*{Q\&A prep}
+\textbf{Answer pattern:} one-line answer first, then the reason, then stop. If you don't know: ``I didn't test that;
+what would settle it is \ldots''
+
+\subsection*{The hypothesis and the setup}
+
+\q{Why would horizon sort content by timescale?}{
+\item A signal can only predict the future if it's still there.
+\item A stimulus response lasts under a second; a block belief lasts minutes.
+\item The catch: long horizons keep \emph{all} slow signals, ranked by size, and the biggest one here isn't the
+belief.}
+
+\q{Why MOs?}{
+\item A rule fixed before any analysis chose it: at least 15 sessions from at least 8 mice.
+\item MOs was the only area that qualified (16 sessions, 13 mice; MOp had 14 from 12).
+\item It's also a frontal area associated with expectation signals.}
+
+\q{The prior is a model. How do you know the mouse computes it?}{
+\item I don't claim it does. It's a reference variable.
+\item The question is whether activity tracks it beyond what slow drift alone would give. The pseudo-session null tests
+exactly that.
+\item The mice's choices do shift with the block.}
+
+\q{Why such long horizons? Why not minutes, to match the blocks?}{
+\item Sessions are about 66 minutes, so a 30 s lag already leaves only about 130 independent windows.
+\item And blocks last minutes, so the prior is already predictable at 30 s. Horizon length wasn't the limit.}
+
+\subsection*{Method}
+
+\q{Why RRR instead of PCA?}{
+\item It makes the horizon an explicit knob: only $\Delta$ changes between fits.
+\item Closed form and well studied.
+\item Honestly, it beats PCA only modestly, and much of that edge is trial-locked structure.}
+
+\q{Why not DCA, slow feature analysis, CCA or GPFA?}{
+\item DCA predicts over a window, not at a chosen horizon. Slow features and CCA are close cousins. GPFA was a planned
+extension.
+\item I'd expect any predictability-ranked method to find the ramp first. Comparing them is a next step.}
+
+\q{Why 5 dimensions?}{
+\item Fixed in advance.
+\item 3 and 10 give the same pattern, except the stimulus test fails at 3.
+\item At 30 s, 5 dimensions already get 96\% of full predictability.}
+
+\q{Why one ridge penalty shared across lags?}{
+\item So any difference between lags comes from the lag, not the penalty.
+\item Still chosen by cross-validation.}
+
+\q{What's the readout basis vs.\ the loading basis?}{
+\item Readout: which current activity the model reads from (the registered subspace).
+\item Loading: which future patterns it predicts.
+\item Geometry passes in readout and fails in loading ($p = 0.96$), consistent with one shared slow signal.}
+
+\q{Why contiguous cross-validation folds?}{
+\item Neighbouring bins are highly correlated, so random folds leak the future into training.
+\item Contiguous, purged folds are stricter. That's also why raw prior scores go negative.}
+
+\subsection*{Null and statistics}
+
+\q{What's a pseudo-session, and why is it a valid null?}{
+\item A fake block sequence drawn from the experimenter's own rules.
+\item Slow neural drift correlates with fake blocks just as well as real ones, but the brain can't know the fake ones.
+\item Beating them means more than chance alignment with drift.}
+
+\q{Why not just shuffle trials?}{
+\item Shuffling destroys the slow structure, so the null becomes too easy and any drift looks like ``prior coding''.}
+
+\q{Does a corrected 0.054 mean 5\% of variance?}{
+\item No. It's the distance above the null median on that decoder's scale.
+\item Zero means no advantage over the null.}
+
+\q{Why are the raw prior R-squared values negative?}{
+\item Contiguous folds: a decoder trained on one stretch extrapolates badly to another.
+\item The null suffers equally, so the corrected difference is still meaningful.}
+
+\q{Why the mouse as the unit? Why one-sided tests?}{
+\item Sessions from one mouse aren't independent, so they're averaged first.
+\item One-sided because the hypotheses are directional. That was fixed before the data.
+\item Two-sided values are still significant: 0.0051 and 0.012.}
+
+\q{Enough power with 13 mice?}{
+\item For moderate effects, yes: geometry and stimulus are under 0.01.
+\item For a small prior rise, no. That's why I say ``no detectable rise'', not ``no rise''.}
+
+\subsection*{Results}
+
+\q{Isn't ``no rise'' just absence of evidence?}{
+\item Yes, and that's how I phrase it.
+\item It's consistent: only 4 of 13 mice rise, and no rise shows up in any variant, decoder or detrend.
+\item A modest rise isn't excluded: after the cosine detrend the interval reaches +0.068.}
+
+\q{The 0.5 s bar (0.054) is higher than 30 s. So the prior falls?}{
+\item I don't claim that. The single bars are at the noise floor and move about $\pm0.05$ with the decoder.
+\item With Findling's decoder, 30 s is slightly \emph{higher} (0.038 vs 0.026).}
+
+\q{How much of the prior do the subspaces capture?}{
+\item It depends on the decoder.
+\item Same decoder on the full population gives 0.159: 0.5 s captures about a third, PCA 8\%, 30 s none.
+\item With Findling's decoder, 30 s captures about half.
+\item Only the horizon comparison is robust.}
+
+\q{Why is the 0.5 s subspace no better than random for the stimulus?}{
+\item Stimulus information is spread widely, so almost any 5 directions pick some up.
+\item The effect is ``long lags lose it'', not ``short lags specialize''.}
+
+\q{If one slow mode dominates, why don't the 30 s halves agree?}{
+\item The time course is consistent, but which units carry it changes within a session.
+\item Post hoc: the leading direction isn't reproducible in filters, loadings, activation patterns or capture.
+\item Caveat: the halves are different times, so reproducibility and change over time are confounded.}
+
+\q{How does a random subspace decode elapsed time at 0.64?}{
+\item The ramp is large and spread across many units, so almost any direction picks it up.
+\item That's the point: session time dominates every low-dimensional view.}
+
+\q{Elapsed-time decoding is just interpolation within a session, isn't it?}{
+\item Yes. It measures how smoothly a representation varies with time.
+\item All subspaces are scored the same way. The comparison is what matters.}
+
+\subsection*{The session-time mode}
+
+\q{Isn't it just electrode drift?}{
+\item I tested the main candidates one by one: unit turnover, spike sorting, rigid probe motion, spike amplitude.
+\item None explains most of it.
+\item The strictest unit filter weakens it (0.73 to 0.49 in 5 sessions; PCA falls equally). That's the open
+challenge.
+\item So: not established as neural, not explained by any single artifact I tested.}
+
+\q{Why is the amplitude coupling negative?}{
+\item During fast firing and bursts, spikes get smaller: rate affects amplitude.
+\item Detection loss would give the opposite sign.
+\item Still negative using isolated spikes only.}
+
+\q{Why not just remove the drift and refit?}{
+\item I did, post hoc, two ways.
+\item Slow-cosine detrend: a small prior appears about equally in every subspace, PCA included.
+\item Quadratic detrend: the prior is near zero everywhere, and the stimulus effect weakens.
+\item Neither shows a detectable rise with horizon.}
+
+\q{Other areas on the same probe: isn't that the same artifact twice?}{
+\item It could be. It shows the pattern isn't specific to MOs, not that it's neural.
+\item One weak point against a probe cause: the fluctuations around the ramp aren't shared between areas.}
+
+\q{Is it arousal, fatigue or satiety?}{
+\item Beyond the shared trend, it doesn't track pupil, engagement, cumulative reward, reaction time or accuracy.
+\item But ramp-shaped signals are hard to tell apart with these tests.}
+
+\q{What about the outlier mouse, DY\_014?}{
+\item It's dominated by one very high-rate cluster with one abrupt step: artifact-consistent.
+\item Its effects go the same way, and dropping it changes nothing.}
+
+\q{Did you change anything after seeing results?}{
+\item One bug fix: a z-scoring floor that let a silent unit blow up held-out scores.
+\item Raw primary $p$-values didn't move. Old outputs are kept.
+\item Everything after the freeze is labelled exploratory or post hoc.}
+
+\subsection*{Big picture}
+
+\q{Isn't this just a failed hypothesis?}{
+\item Yes, the central prediction failed. The proposal planned for that outcome.
+\item What it taught: these methods rank by variance, a small belief signal loses to a large session ramp, and
+we characterized that ramp.}
+
+\q{Could the prior be coded dynamically rather than statically?}{
+\item This design can't tell.
+\item 30 s spans only 6--8 trials; blocks last about 46.
+\item Both kinds of code are predictable 30 s ahead.
+\item Analysis aligned to block switches would separate them.}
+
+\q{What does this mean for predictive learning in ML?}{
+\item Predictive objectives grab the biggest predictable signal first.
+\item If a nuisance like drift is large, it takes the capacity, and small task variables can be missed.}
+
+\q{How would you fix the method?}{
+\item Add time or trend as a nuisance in the objective, use a drift-robust objective, or use more dimensions.
+\item Test the fixes on a ground-truth simulation with a known drift and a known small prior.}
+
+\q{What would change your conclusion?}{
+\item A decoder or preprocessing where 30 s consistently beats 0.5 s for the prior across mice.
+\item Matched-unit resampling showing the ramp is an artifact whose removal reveals a horizon-specific prior.}
+
+\q{Did you use AI tools?}{
+\item Yes, disclosed in the report as the course requires.}
+
+\end{document}
