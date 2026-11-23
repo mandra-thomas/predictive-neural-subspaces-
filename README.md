@@ -22,8 +22,8 @@ with horizon, and every low-dimensional summary, long-horizon or not, is dominat
 Three labels are used throughout. **Pre-registered** means written in a timestamped commit before the relevant data
 were analysed; it applies to the primary tests, the deviations, and additions A1 to A12. **Prospectively documented
 exploratory** applies to A13 to A15: each design and reading rule was committed before its data were analysed, but
-after the 20 November analysis freeze. **Post hoc** applies to D10 (a bug fix), P1h, the two A14 post hoc checks, and
-A16, which were designed after the relevant results were seen.
+after the 20 November analysis freeze. **Post hoc** applies to D10 (a bug fix), P1h, the two A14 post hoc checks, A16
+and A17, which were designed after the relevant results were seen.
 
 ## Setup
 

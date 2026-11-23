@@ -244,7 +244,26 @@ def fig_nesting():
     plt.close(fig)
 
 
+# ----------------------------------------------------------------------------- timescales (A17 part 0, post hoc)
+def fig_timescales():
+    from pns.plotting import timescale_panels
+    a17 = ROOT / "results" / "a17"
+    ts, bl, ac = (pd.read_csv(a17 / f) for f in ("timescales.csv", "blocks.csv", "prior_acf.csv"))
+    fig, axs = plt.subplots(1, 2, figsize=(5.5, 2.1), gridspec_kw={"width_ratios": [1.35, 1]})
+    timescale_panels(axs[0], axs[1], ts, bl, ac)
+    axs[0].set_title("a  Timescales on one clock", loc="left")
+    axs[1].set_title("b  Predictable share", loc="left")
+    fig.tight_layout()
+    fig.savefig(OUT / "rfig_timescales.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
+    import sys as _sys
+    if _sys.argv[1:] == ["timescales"]:
+        rc()
+        fig_timescales()
+        raise SystemExit
     rc()
     print(json.dumps(fig_geometry(), indent=1))
     print(json.dumps({k: {s: round(v, 3) for s, v in d.items()} for k, d in fig_content().items()}, indent=1))

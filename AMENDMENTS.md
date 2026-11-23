@@ -10,7 +10,8 @@ applies to D1 to D9, A1 to A11 (all in the first commit, before any real-data fi
 exploratory* applies to A13, A14 and A15. Their designs and reading rules were likewise committed before the relevant
 data were analysed, and their headings below say "pre-registered", but they were written on 21 and 22 November, after
 the 20 November analysis freeze in the proposal, so the report and `RESULTS.md` use the narrower label. *Post hoc*
-means designed after the relevant results were seen: D10 (a bug fix), P1h, the two A14 post hoc additions, and A16.
+means designed after the relevant results were seen: D10 (a bug fix), P1h, the two A14 post hoc additions, A16 and
+A17 (A17 executes extensions listed in the proposal, with post hoc specifics).
 
 | # | First recorded | Status | RESULTS.md section | Code |
 |---|---|---|---|---|
@@ -41,9 +42,10 @@ means designed after the relevant results were seen: D10 (a bug fix), P1h, the t
 | A14 | 2026-11-22 10:16 (`f3008e7`); post hoc additions 10:25 (`7d0172d`) | prospectively documented exploratory; two post hoc checks | Third pilot (A14) | `15_build_A14.py`, `16_pilot_A14.py`, `pns.ampcorr`, `slurm/pilot_A14.sbatch` |
 | A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
+| A17 | 2026-11-23 (see `git log -- AMENDMENTS.md`) | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
-amendment. The entries below are the original dated record and are left exactly as written.
+amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
 
 ---
 
@@ -461,3 +463,121 @@ Wilcoxon of (cosine minus chance) > 0 for each representation.
   directions can swap order between halves when singular values are close. So also report the fraction of each half's
   leading 30 s readout direction that lies inside the other half's full 5-D 30 s readout subspace (the squared norm of
   its projection, averaged over both directions), against the same quantity for covariance-matched random directions.
+
+## A17: testing the timescale account (post hoc; written 2026-11-23, after the talk, before any A17 neural-data analysis)
+
+**Why.** After the 23 November talk, external reviews and the instructor's questions converged on one design flaw. The
+registered lags (0.5 to 30 s) were chosen as if a longer horizon would select the block prior, but a variance-ranked
+predictive objective keeps whichever directions carry the most predictable variance, and the session-time drift is
+both larger and more persistent than the prior at every lag. A17 measures the timescales and variance shares directly,
+extends the lag sweep across the prior's own timescale, and adds a descriptive block-switch alignment. A18 (to be
+written separately, before its data are analysed) will cover a calibrated simulation and a latent state-space model.
+
+**Status and honesty notes.**
+- Everything in A17 is post hoc: designed after all primary, pilot and A16 results were known. It is exploratory,
+  changes no earlier reading, and has no multiplicity correction across parts.
+- It executes extensions the proposal itself listed ("lags of 60 to 120 s; GPFA latents ordered by learned timescale;
+  a latent linear dynamical system"); the specifics below are post hoc, and the sweep here goes beyond 120 s, to 4 min.
+- The 20 November freeze allowed bug fixes only. The library changes made for A17/A18 are disclosed here:
+  - `pns.pipeline.fit_session` lag guard: a bug fix. Today a lag at least as long as a CV block, or a session half
+    with no lagged pairs, fails silently (empty folds are skipped, the NaN curve makes argmax pick the first alpha,
+    and an empty half returns an arbitrary basis). The guard raises instead. No existing run is affected.
+  - `pns.pipeline.fit_session` `model.alpha_lags` and a separate random stream for lags outside it: a new feature.
+    With the default (all configured lags) behaviour is unchanged.
+  - `pns.timescales` and `pns.plotting.timescale_panels`: new code. A18 will add `pns.lds` and new simulator modes.
+- What was seen before writing this entry. Part 0 (below) uses task data only: trial times, block probabilities and
+  the Bayes-optimal prior, no neural data. Its numbers were computed while planning and in a run of script 23 before
+  this commit, and the Part 2 prediction is derived from them. The A16 detrended refits are also already known
+  (cosine detrend: corrected prior 0.031 at 0.5 s, 0.051 at 30 s; quadratic: the prior vanishes at every lag). Because
+  the two detrends disagree, and I chose between them before, Part 2 runs both and requires agreement.
+
+**Part 0: timescales (task data only; script `23_timescales_A17.py`).** Per session:
+- session duration;
+- median stimulus interval;
+- durations of completed biased blocks (runs of `probabilityLeft`, excluding the opening unbiased block and the
+  final, truncated block), in trials and minutes;
+- the autocorrelation rho_pi of the Bayes-optimal prior per 0.5 s bin at 0.5 s to 8 min, and its integrated
+  timescale tau_pi (truncated at the first zero crossing), in seconds and trials;
+- the fraction of the per-bin prior's variance that lies inside the >= 20 min cosine span (what the A16 cosine
+  detrend removes from the prior's own time course).
+
+The prior for trial t is the belief before stimulus t; it is assigned to bins with centres in
+(stimOn[t-1], stimOn[t]]. Already computed:
+- tau_pi: median 67 s (about 17 trials); first zero crossing, median 2.2 min.
+- rho_pi (median): 0.77 at 30 s, 0.52 at 60 s, 0.10 at 2 min, -0.19 at 4 min.
+- Completed blocks: 215 (median 46 trials, 3.6 min).
+- Prior variance inside the cosine span: median 12% (range 4 to 45%).
+
+**Part 1: variance shares (descriptive; no reading rule).** On whole-session z-scored square-root activity (D10
+floor), at the population level (sums over units of explained and total variance), with pseudo-session corrections
+at the sum level (sum of real minus the median of the summed null), never by summing per-unit corrections.
+- **Low-frequency share:** in-sample variance explained by the >= 20 min cosine design, and by the quadratic. It is
+  called a low-frequency share, not "drift".
+- **Prior share, primary:** pre-stimulus window activity (`win_pre_stim`, BWM-masked trials with a finite window, as
+  the prior decoder uses) regressed on the prior. Both activity and prior are first projected off the cosine design
+  evaluated at the window times. Corrected with the exact 200 pseudo priors of script 05
+  (`session_seed(eid, seed, "null")`, `pseudo_sides`, `bayes_optimal_prior`).
+- **Prior share, secondary (per bin):** the per-bin prior after regressing out from activity and prior the cosine
+  design plus raised-cosine event kernels: unsigned (the A11 design), stimulus kernels signed by side times
+  sqrt(contrast), movement kernels signed by choice, and feedback kernels signed by outcome. This removes the
+  stimulus-evoked route by which the current side, which matches the block 80% of the time, leaks into a per-bin
+  prior share.
+- **Trial-locked share:** in-sample variance explained by the A11 GLM.
+- **Entry check (descriptive; cut first if short of time).** Within one fitted model and one data root (raw with
+  raw, cosine-detrended with cosine-detrended), at lags 1 and 60 bins:
+  - recompute the full-rank ridge solution B_R at the session's alpha and G = B_R' X'X B_R + lambda B_R' B_R
+    (`pns.rrr`);
+  - estimate the prior loading b (per-unit regression coefficients of the secondary per-bin analysis);
+  - compare the Rayleigh quotient b'Gb / b'b with the 5th eigenvalue of G, and correct b by the median over the
+    pseudo-prior loadings.
+  - Reported as a ratio per session.
+- Writes `results/a17/budget_sessions.csv` and `budget.json`; script `24_budget_A17.py`.
+
+**Part 2: lag sweep across the prior's timescale (script `25_longlag_A17.py`).**
+- Config `config_a17_longlag.yaml` is `config.yaml` with `lags_bins: [1, 4, 16, 60, 120, 240, 480]` (0.5 s to 4 min)
+  and `model.alpha_lags: [1, 4, 16, 60]`, so each session's alpha is the A16 one.
+- Scripts 04 and 05 are refit on `data_detrend_c` and `data_detrend_q` into `results_a17_longlag_c` and
+  `results_a17_longlag_q`. Scripts 06 to 08 are not run on these roots: their short/long logic takes the first and
+  last lag, which would silently redefine P1 to P3.
+- **Reproduction check (must pass before reading).** In each new root, per-session alpha and the real and null scores
+  of `rrr_1`, `rrr_4`, `rrr_16`, `rrr_60`, `pca` and `random` equal the A16 roots.
+- **Reported, per lag:** the corrected prior, corrected current side and elapsed-time R² for `rrr_{lag}`, PCA and
+  random (mouse means, bootstrap CIs); and test pairs per CV fold. Lags of 240 and 480 bins are flagged as thinly
+  validated (fewer test pairs). `orth_*` and nesting outputs in these roots compare lag 1 with lag 480 and are not
+  reported.
+- **Prediction (from Part 0):** the corrected prior at each lag is no larger than at 0.5 s and falls roughly with
+  rho_pi(lag)², reaching about zero by 2 min.
+- **Reading:** "band selection" only if, in both roots, the 60 s corrected prior exceeds the 0.5 s value (paired-null
+  difference, one-sided Wilcoxon across mice, p < 0.05) and exceeds PCA's (paired-null difference, one-sided Wilcoxon,
+  p < 0.05). Otherwise "no band selection". Descriptive: Spearman correlation between the per-lag mean corrected prior
+  and the median rho_pi(lag)².
+- No raw-data root: on raw data the drift's dominance at every lag is already established.
+
+**Part 6: block-switch alignment (descriptive; script `28_switch_A17.py`, run after A18's scripts 26 and 27).**
+- Out-of-fold decoded prior per trial (ridge alpha 1, five contiguous folds, BWM-masked trials) from (a) the
+  full-population pre-stimulus window, and (b) the A18 latent model's instantaneous band projection, if A18 runs.
+- Decoded values and the Bayes-optimal prior are aligned to completed switches between 0.2 and 0.8 blocks (trials
+  -20 to +40). The opening unbiased block is excluded.
+- Chance band: the same decoder output aligned to the switches of the 200 pseudo-session block sequences.
+- Reported: mouse-mean trajectories and the number of trials after a switch until the decoded prior is half-way.
+
+**Outcome table (fixed now; chooses the report's title, abstract claim and discussion lead after the results).**
+- Part 2 "no band selection", the A18 simulation reads "sufficient", and the latent model does not isolate the prior
+  (or is uninformative): the report leads with "a variance-ranked predictive objective cannot favour a prior with a
+  one-minute timescale over drift at any horizon", backed by the simulation.
+- The A18 latent model isolates the prior, with its simulation gate passed: lead with the positive methods result (an
+  explicit-drift latent model recovers the prior where RRR does not).
+- The A18 simulation reads "not sufficient": variance ranking is demoted as the explanation, and the alternatives
+  (weak or nonlinear prior coding, unit-level nonstationarity) lead.
+- Part 2 "band selection" in both roots: reported as contradicting the account, and the account is revised.
+- In every case P1 to P3 stay first in the abstract, and the current title is kept until the readings are in.
+
+**Multiplicity.** A17 has four uncorrected tests, all in Part 2: 60 s vs 0.5 s and 60 s vs PCA, in each of two roots.
+Parts 0, 1 and 6 are descriptive.
+
+**Errata recorded now.**
+- `RESULTS.md` (limitations) and the talk's Q&A said that a 30 s lag leaves only about 130 independent windows, so
+  long-lag fits are noisy by construction. That was wrong: RRR uses every overlapping pair of bins (a 66 min session
+  has about 7,900 bins; a 240 s lag gives up 480 of them). The real limit on any slow signal is the number of blocks
+  per session (about 13), and it is the same at every lag.
+- The talk's answer that "horizon length wasn't the limit" was untested; Parts 0 and 2 test it.

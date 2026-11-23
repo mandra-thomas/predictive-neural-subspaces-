@@ -351,6 +351,9 @@ remaining limitations are these:
 - The drift flag cannot separate electrode drift from slow internal-state change.
 - With a median task epoch of about 66 minutes, the 30 s lag leaves only about 130 non-overlapping windows per session
   (median 133), so long-lag fits are noisy by construction.
+  **Erratum (2026-11-23, A17):** this is wrong. RRR uses every overlapping pair of 0.5 s bins (about 7,900 per session;
+  a 240 s lag gives up 480 of them). The real limit on any slow signal is the number of blocks per session (about 13),
+  the same at every lag.
 - Decoders are linear, and the prior is read from one pre-stimulus window.
 - Bootstrap intervals over 13 mice under-cover; the pilots and post hoc checks are exploratory and uncorrected; the
   detrended tests have limited power.

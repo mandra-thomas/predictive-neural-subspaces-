@@ -124,7 +124,27 @@ def fig_nesting():
     return nest, iso
 
 
+def fig_timescales():
+    """A17 part 0 (post hoc, task data only): slide-sized timescale figure from results/a17/*.csv."""
+    from pns.plotting import timescale_panels
+    a17 = ROOT / "results" / "a17"
+    ts, bl, ac = (pd.read_csv(a17 / f) for f in ("timescales.csv", "blocks.csv", "prior_acf.csv"))
+    fig, axs = plt.subplots(1, 2, figsize=(W_IN, 2.5), gridspec_kw={"width_ratios": [1.35, 1]})
+    timescale_panels(axs[0], axs[1], ts, bl, ac, fs=9, compact=True)
+    axs[0].set_title("a  timescales on one clock", loc="left", fontsize=10)
+    axs[1].set_title("b  predictable share", loc="left", fontsize=10)
+    fig.tight_layout(pad=0.3, w_pad=0.8)
+    fig.savefig(FIG_DIR / "slide_timescales.pdf")
+    plt.close(fig)
+
+
 def main():
+    import sys
+    if sys.argv[1:] == ["timescales"]:
+        slide_style()
+        FIG_DIR.mkdir(exist_ok=True)
+        fig_timescales()
+        return
     slide_style()
     FIG_DIR.mkdir(exist_ok=True)
     picks, rs, med = fig_examples()

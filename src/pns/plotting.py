@@ -52,6 +52,60 @@ def label_line_ends(ax, x, ys, texts, min_gap_frac: float = 0.06, dx: int = 8) -
         ax.text(x, y, texts[i], transform=tr, va="center", fontsize=8, color=INK_2, clip_on=False)
 
 
+def timescale_panels(ax_a, ax_b, ts, blocks, acf_curves, registered=(0.5, 2, 8, 30), fs=7.5,
+                     compact=False) -> None:
+    """A17 Part 0 figure. ts: results/a17/timescales.csv; blocks: blocks.csv; acf_curves: prior_acf.csv.
+    (a) the task's timescales on one log clock (seconds), with the registered lag range shaded;
+    (b) the prior's predictable share rho(lag)^2 (median and IQR over sessions) against a linear ramp (rho = 1)."""
+    import numpy as np
+    rng = np.random.default_rng(0)
+    band = dict(color=SERIES[0], alpha=0.10, lw=0)
+    # (a) one clock
+    rows = [("stimulus interval", ts["stim_interval_s"].to_numpy(), SERIES[3]),
+            ("prior timescale $\\tau_\\pi$", ts["tau_pi_s"].to_numpy(), SERIES[0]),
+            ("block duration", blocks["minutes"].dropna().to_numpy() * 60, SERIES[1]),
+            ("session", ts["duration_min"].to_numpy() * 60, SERIES[2])]
+    ax_a.axvspan(min(registered), max(registered), **band)
+    for lag in registered:
+        ax_a.axvline(lag, color=SERIES[0], lw=0.6, alpha=0.5)
+    for i, (name, vals, col) in enumerate(rows):
+        y = len(rows) - 1 - i
+        ax_a.scatter(vals, y + rng.uniform(-0.18, 0.18, len(vals)), s=6, color=col, alpha=0.6, lw=0)
+        med = float(np.median(vals))
+        ax_a.plot([med, med], [y - 0.32, y + 0.32], color=INK, lw=1.2)
+    ax_a.set_yticks(range(len(rows)), [r[0] for r in rows][::-1])
+    ax_a.set_xscale("log")
+    ax_a.set_xlim(0.3, 8000)
+    ax_a.set_xticks([1, 10, 60, 600, 3600],
+                    ["1 s", "", "1 min", "", "1 h"] if compact else ["1 s", "10 s", "1 min", "10 min", "1 h"])
+    ax_a.minorticks_off()
+    ax_a.grid(axis="y", visible=False)
+    ax_a.text(np.sqrt(min(registered) * max(registered)), len(rows) - 0.45, "lags tested\n(0.5–30 s)",
+              ha="center", va="bottom", fontsize=fs, color=INK_2)
+    ax_a.set_ylim(-0.6, len(rows) - 0.45 + 0.9)
+    # (b) predictable share
+    piv = acf_curves.pivot(index="lag_s", columns="eid", values="rho") ** 2
+    lag = piv.index.to_numpy()
+    med, q1, q3 = piv.median(1), piv.quantile(0.25, 1), piv.quantile(0.75, 1)
+    ax_b.axvspan(min(registered), max(registered), **band)
+    ax_b.fill_between(lag, q1, q3, color=SERIES[0], alpha=0.25, lw=0)
+    ax_b.plot(lag, med, color=SERIES[0])
+    ax_b.axhline(1.0, color=INK_2, ls="--", lw=1.2)
+    ax_b.text(0.6, 0.97, "session ramp ($\\rho^2 = 1$)", fontsize=fs, color=INK_2, va="top")
+    for t in (30, 60, 120):
+        v = float(np.interp(t, lag, med))
+        ax_b.plot(t, v, "o", color=SERIES[0], ms=3.5)
+        ax_b.annotate(f"{v:.2f}", (t, v), xytext=(4, 3), textcoords="offset points", fontsize=fs, color=INK_2)
+    ax_b.text(0.6, 0.27, "block prior\n(median, IQR)", fontsize=fs, color=SERIES[0], va="top")
+    ax_b.set_xscale("log")
+    ax_b.set_xlim(0.5, 1200)
+    ax_b.set_ylim(0, 1.1)
+    ax_b.set_xticks([1, 10, 60, 600], ["1 s", "", "1 min", ""] if compact else ["1 s", "10 s", "1 min", "10 min"])
+    ax_b.minorticks_off()
+    ax_b.set_xlabel("prediction lag $\\Delta$")
+    ax_b.set_ylabel("$\\rho(\\Delta)^2$")
+
+
 def direct_label(ax, x, y, text, color_ink=INK_2, dx=4, dy=0):
     """Label at the line end, in ink (not the series colour)."""
     ax.annotate(text, (x, y), xytext=(dx, dy), textcoords="offset points", va="center", fontsize=8,
