@@ -1,8 +1,8 @@
 % Speaker script: slide-by-slide talking points for the 23 Nov presentation, plus Q&A prep.
 % Companion to slides.tex (same content as its \note{} text, broken into short lines to present from).
 % Build: `make speaker_script.pdf` (or latexmk -pdf speaker_script.tex).
-\documentclass[12pt]{article}
-\usepackage[letterpaper,margin=0.8in,top=0.7in]{geometry}
+\documentclass[10pt]{article}
+\usepackage[letterpaper,margin=0.5in,top=0.45in,bottom=0.55in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[sfdefault,lining]{FiraSans}
 \usepackage{newtxsf}
@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage[most]{tcolorbox}
 \usepackage{titlesec}
+\usepackage{multicol}
 \usepackage{hyperref}
 \hypersetup{pdftitle={Speaker script: Prediction Horizon and the Content of Neural Population Subspaces},
   pdfauthor={Gunnar Andra-Thomas}, colorlinks=true, linkcolor=black}
@@ -20,76 +21,59 @@
 \definecolor{warn}{HTML}{B4521E}
 
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{4pt}
-\setlist[itemize]{leftmargin=1.3em, itemsep=2pt, topsep=2pt, parsep=0pt}
+\setlength{\parskip}{1pt}
+\setlist[itemize]{leftmargin=1.1em, itemsep=0pt, topsep=1pt, parsep=0pt}
 \setlist[itemize,2]{leftmargin=1.2em, label=\textendash}
 \titleformat{\section}{\Large\bfseries\color{teal}}{}{0pt}{}
 \titlespacing*{\section}{0pt}{0pt}{6pt}
 \titleformat{\subsection}{\large\bfseries\color{teal}}{}{0pt}{}
 \titlespacing*{\subsection}{0pt}{10pt}{3pt}
 
-% \slide{number}{title}{time on slide}{clock at end of slide}
-\newcommand{\slide}[4]{%
-  \newpage
-  \begin{tcolorbox}[colback=teal, colframe=teal, coltext=white, arc=2pt, boxsep=3pt, left=6pt, right=6pt]
-    {\small SLIDE #1 \hfill #3 on this slide \textperiodcentered{} finish by #4}\\[2pt]
-    {\Large\bfseries #2}
-  \end{tcolorbox}\vspace{2pt}}
+% slidebox{number}{title}{time on slide}{clock at end}: one unbreakable box per slide
+\newtcolorbox{slidebox}[4]{enhanced, breakable=false, colback=white, colframe=teal, arc=2pt, boxrule=0.6pt,
+  left=5pt, right=5pt, top=2pt, bottom=2pt, before skip=5pt, after skip=3pt,
+  title={\textbf{#1.\ #2}\\{\small #3 on slide \textperiodcentered{} out by #4}}, fonttitle=\color{white}, coltitle=white,
+  toptitle=1pt, bottomtitle=1pt}
 \newcommand{\point}[1]{{\color{ink}\textbf{On screen:} #1}\par}
-\newcommand{\say}{\par\smallskip{\color{accent}\textbf{Say}}\par}
-\newcommand{\avoid}[1]{\par\smallskip{\color{warn}\textbf{Careful:} #1}\par}
-\newcommand{\bridge}[1]{\par\smallskip\begin{tcolorbox}[colback=accent!8, colframe=accent!40, arc=2pt, boxsep=2pt,
-  left=5pt]\textbf{Bridge to next slide:} #1\end{tcolorbox}}
+\newcommand{\say}{}
+\newcommand{\avoid}[1]{\par{\color{warn}\textbf{Careful:} #1}\par}
+\newcommand{\bridge}[1]{\par{\color{accent}\textbf{$\rightarrow$ Next:} #1}\par}
 \newcommand{\ifasked}[1]{\par\smallskip{\color{ink}\textbf{Only if asked:} #1}\par}
 
 % Q&A entries: \q{question}{bullets}
-\newcommand{\q}[2]{\par\medskip{\bfseries\color{teal}Q: #1}\par\vspace{1pt}\begin{itemize}#2\end{itemize}}
+\newcommand{\q}[2]{\par\smallskip\noindent\begin{minipage}{\linewidth}\raggedright{\bfseries\color{teal}Q: #1}\par\vspace{1pt}\begin{itemize}#2\end{itemize}\end{minipage}\par}
 
 \begin{document}
 
 % ======================================================================================
-\begin{center}
-{\LARGE\bfseries\color{teal} Speaker script}\\[4pt]
-{\large Prediction Horizon and the Content of Neural Population Subspaces}\\[2pt]
-{\color{ink}Gunnar Andra-Thomas \textperiodcentered{} CSE 8803 NBD \textperiodcentered{} Monday 23 November 2026}
-\end{center}
+{\large\bfseries\color{teal} Speaker script}\enspace{\color{ink}\small Prediction Horizon and the Content of Neural
+Population Subspaces \textperiodcentered{} Gunnar Andra-Thomas \textperiodcentered{} 23 Nov 2026}
 
-\subsection*{How to use this}
-\begin{itemize}
-\item One page per slide. The box at the top gives the slide number, title, time budget and the clock time you
-should reach by the end of that slide.
-\item \textbf{Say} lines are talking points, not a script to read. Say each one in your own words.
-\item Numbers on the slides are there for questions. Say only the few marked here.
-\item 12 content slides plus the title, about 15 minutes. If you're behind at slide 8, shorten slides 9 and 10.
-\end{itemize}
-
-\subsection*{The whole talk in four sentences}
-\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
-\item I asked whether predicting brain activity further ahead pulls out the animal's slow belief about the task.
-\item It doesn't: there is no detectable rise in block-prior information with prediction horizon.
-\item What every low-dimensional summary picks up instead is a slow change across the session.
-\item These methods rank directions by how much variance they predict, and that big slow signal wins first.
+\begin{tcolorbox}[colback=accent!6, colframe=accent!40, arc=2pt, boxrule=0.5pt, left=5pt, right=5pt, top=2pt, bottom=2pt]
+\begin{multicols}{2}
+\textbf{Whole talk in four sentences}
+\begin{enumerate}[leftmargin=1.3em, itemsep=0pt, topsep=1pt]
+\item Does predicting further ahead pull out the animal's slow belief?
+\item No: no detectable rise in block-prior information with horizon.
+\item Every low-dimensional summary picks up a slow session-time change instead.
+\item These methods rank by predicted variance; the big slow signal wins first.
 \end{enumerate}
-
-\subsection*{Three distinctions to keep straight all talk}
+\columnbreak
+\textbf{Keep straight all talk}
 \begin{itemize}
-\item \textbf{Corrected score} = real score minus the pseudo-session null median. Zero means ``no advantage over the
-null''. It is \emph{not} percent of variance explained.
-\item \textbf{Prior:} ``no detectable rise''. Never say ``it falls''.
-\item \textbf{Stimulus:} long horizons \emph{lose} it. Short horizons are not \emph{specialized} for it.
+\item \textbf{Corrected} = beats pseudo-session null by that much. Not \% variance.
+\item \textbf{Prior:} ``no detectable rise''. Never ``falls''.
+\item \textbf{Stimulus:} long lags \emph{lose} it; short lags not \emph{specialized}.
 \end{itemize}
-
-\subsection*{Clock checkpoints}
-\begin{itemize}
-\item End of slide 4 (method): about 4:05.
-\item End of slide 8 (prior): about 9:35.
-\item End of slide 13 (takeaways): about 15:00.
-\end{itemize}
+\textbf{Clock:} 4:05 after slide 4 \textperiodcentered{} 9:35 after slide 8 \textperiodcentered{} 15:00 end. Behind
+at slide 8? Shorten 9 and 10.
+\end{multicols}
+\end{tcolorbox}
 
 % ======================================================================================
-\slide{1}{Title}{20 s}{0:20}
+\begin{multicols}{2}\raggedright
+\begin{slidebox}{1}{Title}{20 s}{0:20}
 \point{Title, your name, course.}
-\say
 \begin{itemize}
 \item Hi, I'm Gunnar.
 \item The question: when you look for the directions of brain activity that best predict its own future, does
@@ -99,10 +83,9 @@ null''. It is \emph{not} percent of variance explained.
 \item The three main tests were pre-registered before I fitted real data.
 \end{itemize}
 
-% ======================================================================================
-\slide{2}{Is a slow belief among the dominant predictable signals?}{1:00}{1:20}
+\end{slidebox}
+\begin{slidebox}{2}{Is a slow belief among the dominant predictable signals?}{1:00}{1:20}
 \point{Two columns: Neuroscience (left) and Methods (right).}
-\say
 \begin{itemize}
 \item \textbf{Left, neuroscience.}
   \begin{itemize}
@@ -120,10 +103,9 @@ null''. It is \emph{not} percent of variance explained.
 future variance they explain.
 \end{itemize}
 
-% ======================================================================================
-\slide{3}{Hypothesis: the prediction horizon sorts content by timescale}{1:15}{2:35}
+\end{slidebox}
+\begin{slidebox}{3}{Hypothesis: the prediction horizon sorts content by timescale}{1:15}{2:35}
 \point{Grey step line = the true block. Blue curve = the ideal-observer prior. Hypothesis box on the right.}
-\say
 \begin{itemize}
 \item \textbf{The task.} A grating appears left or right; the mouse turns a wheel to report the side.
 \item The side is biased 80/20, in blocks that switch \emph{without a cue}. So the mouse has to infer the block.
@@ -147,10 +129,9 @@ that lags the true block.
 \item The prior and stimulus tests are the heart of it. Geometry only asks whether the subspaces differ at all.
 \end{itemize}
 
-% ======================================================================================
-\slide{4}{Method: predict activity $\Delta$ s ahead through a 5-dimensional bottleneck}{1:30}{4:05}
+\end{slidebox}
+\begin{slidebox}{4}{Method: predict activity $\Delta$ s ahead through a 5-dimensional bottleneck}{1:30}{4:05}
 \point{Diagram: activity now $\to$ 5 latents $\to$ activity $\Delta$ later. The formula underneath.}
-\say
 \begin{itemize}
 \item \textbf{Data line:} mouse secondary motor cortex (MOs), 16 sessions from 13 mice, activity in half-second bins.
 \item \textbf{The picture.}
@@ -174,10 +155,9 @@ cross-validated decoders.
 \end{itemize}
 \bridge{``Before testing the hypothesis, two sanity checks.''}
 
-% ======================================================================================
-\slide{5}{The prior is in MOs; 5 dimensions capture most predictable activity}{1:15}{5:20}
+\end{slidebox}
+\begin{slidebox}{5}{The prior is in MOs; 5 dimensions capture most predictable activity}{1:15}{5:20}
 \point{Left: three big numbers (prior from the full population). Right: line plot of prediction accuracy vs.\ lag.}
-\say
 \begin{itemize}
 \item \textbf{Check 1, left.}
   \begin{itemize}
@@ -201,10 +181,9 @@ cross-validated decoders.
 \end{itemize}
 \bridge{``So the method works. Now the three tests, starting with geometry.''}
 
-% ======================================================================================
-\slide{6}{Subspaces differ by lag, but 30 s ones don't reproduce across halves}{1:30}{6:50}
+\end{slidebox}
+\begin{slidebox}{6}{Subspaces differ by lag, but 30 s ones don't reproduce across halves}{1:30}{6:50}
 \point{Three bars (same lag 0.5 s, cross lag, same lag 30 s) and the dashed chance line at about 68\textdegree.}
-\say
 \begin{itemize}
 \item \textbf{How to read it.}
   \begin{itemize}
@@ -228,10 +207,9 @@ cross-validated decoders.
 \avoid{don't read the angles one by one. ``Short reproduces, long is at chance'' is the message.}
 \bridge{``That's whether they differ. Now what they contain, starting with the stimulus.''}
 
-% ======================================================================================
-\slide{7}{Longer horizons lose the current stimulus}{1:15}{8:05}
+\end{slidebox}
+\begin{slidebox}{7}{Longer horizons lose the current stimulus}{1:15}{8:05}
 \point{Bar chart: blue = RRR at 0.5, 2, 8, 30 s; grey = PCA and random.}
-\say
 \begin{itemize}
 \item I show the stimulus first because it is the cleaner positive result.
 \item \textbf{How to read it.}
@@ -255,10 +233,9 @@ cross-validated decoders.
 \end{itemize}
 \bridge{``Now the central prediction: the prior.''}
 
-% ======================================================================================
-\slide{8}{Predicting further ahead: no detectable gain in block-prior information}{1:30}{9:35}
+\end{slidebox}
+\begin{slidebox}{8}{Predicting further ahead: no detectable gain in block-prior information}{1:30}{9:35}
 \point{Left: same bar layout for the prior. Right: one dot per mouse = its change from 0.5 s to 30 s.}
-\say
 \begin{itemize}
 \item Same layout. The hypothesis predicted the blue bars to \emph{rise} left to right.
 \item \textbf{Right panel.}
@@ -280,10 +257,9 @@ cross-validated decoders.
 not 5\% of variance.}
 \bridge{``So if not the prior, what does the 30 s subspace carry?''}
 
-% ======================================================================================
-\slide{9}{The leading 30 s direction tracks session time, and so does PCA}{1:15}{10:50}
+\end{slidebox}
+\begin{slidebox}{9}{The leading 30 s direction tracks session time, and so does PCA}{1:15}{10:50}
 \point{4$\times$4 grid: all 16 sessions. Blue = activity along the leading 30 s direction; dashed = straight-line fit.}
-\say
 \begin{itemize}
 \item \textbf{Each small panel is one session.}
   \begin{itemize}
@@ -302,11 +278,10 @@ Long horizons have it only slightly more.
 \end{itemize}
 \bridge{``The obvious worry is that this is recording drift.''}
 
-% ======================================================================================
-\slide{10}{Recording controls leave most of the ramp, except the strictest unit filter}{1:15}{12:05}
+\end{slidebox}
+\begin{slidebox}{10}{Recording controls leave most of the ramp, except the strictest unit filter}{1:15}{12:05}
 \point{Each row = one version of the data, refit from scratch. Filled dot = control; hollow = original on the same
 sessions; dashed lines = pre-registered 75\% and 50\% thresholds.}
-\say
 \begin{itemize}
 \item Each row: I changed the data to remove one possible cause, then refit everything.
 \item \textbf{These each leave most of the ramp:}
@@ -327,10 +302,9 @@ sessions; dashed lines = pre-registered 75\% and 50\% thresholds.}
 \end{itemize}
 \bridge{``Is this specific to MOs?''}
 
-% ======================================================================================
-\slide{11}{The same pattern holds in other areas on the same probes}{1:00}{13:05}
+\end{slidebox}
+\begin{slidebox}{11}{The same pattern holds in other areas on the same probes}{1:00}{13:05}
 \point{Left: elapsed-time bars, MOs (blue) vs.\ other areas (orange). Right: the three tests.}
-\say
 \begin{itemize}
 \item The probes pass through other areas too.
 \item In each session I took the largest other area (mostly frontal) and reran the \emph{unchanged} pipeline.
@@ -344,10 +318,9 @@ sessions; dashed lines = pre-registered 75\% and 50\% thresholds.}
 \item \textbf{Honest limit:} same probes, so this is corroboration, not independent replication.
 \end{itemize}
 
-% ======================================================================================
-\slide{12}{What the data show, possible mechanisms, and the main limits}{1:10}{14:15}
+\end{slidebox}
+\begin{slidebox}{12}{What the data show, possible mechanisms, and the main limits}{1:10}{14:15}
 \point{Left = what the data show. Right = speculation. Bottom line = limits.}
-\say
 \begin{itemize}
 \item \textbf{Left, the data:}
   \begin{itemize}
@@ -371,10 +344,9 @@ sessions; dashed lines = pre-registered 75\% and 50\% thresholds.}
   \end{itemize}
 \end{itemize}
 
-% ======================================================================================
-\slide{13}{Takeaways}{45 s}{15:00}
+\end{slidebox}
+\begin{slidebox}{13}{Takeaways}{45 s}{15:00}
 \point{Three numbered takeaways and a ``Next'' line.}
-\say
 \begin{itemize}
 \item \textbf{One.} The predicted enrichment of the block prior at longer horizons was not supported.
 \item \textbf{Two.} The dominant predictable direction tracks session time, and it is not special to long horizons.
@@ -390,29 +362,15 @@ produce a robust gain in block-prior information at longer horizons.
 \item ``Thanks, happy to take questions.''
 \end{itemize}
 
+\end{slidebox}
+
 % ======================================================================================
-\newpage
-\section*{Backup slides: what each one is for}
-Jump to these only when a question calls for them.
-\begin{itemize}[itemsep=4pt]
-\item \textbf{Data, null, statistics, pre-registration.} Region choice, session counts, how the pseudo-session null
-works, Wilcoxon and Holm, which analyses were pre-registered.
-\item \textbf{The factorization, and four things to explain.} The RRR closed form, readout vs.\ loading basis,
-pseudo-sessions, the intersection--union test.
-\item \textbf{Why lagged RRR rather than PCA or other methods.} CCA, DCA, GPFA, slow features; RRR's modest edge.
-\item \textbf{How strong is the prior result?} Every variant of the prior test; the ``no detectable rise'' wording.
-\item \textbf{Robustness table.} Holm $p$ for all three tests across 10 variants.
-\item \textbf{Full decoding matrix.} Every variable by every subspace.
-\item \textbf{Nesting.} The 0.5 s subspace contains 92\% of the 30 s leading direction.
-\item \textbf{Candidate recording explanations.} One row per cause tested.
-\item \textbf{Amplitude pilot.} Wrong-sign coupling; corrected refits keep 93--95\%.
-\item \textbf{Probe motion, sorting, state signals.} Motion, pupil, engagement, satiety.
-\item \textbf{The normalization bug.} The one post-results change.
-\end{itemize}
+\end{multicols}
 
 % ======================================================================================
 \newpage
-\section*{Q\&A prep}
+\section*{Q\&A prep}\vspace{-2pt}
+\begin{multicols}{2}\raggedright
 \textbf{Answer pattern:} one-line answer first, then the reason, then stop. If you don't know: ``I didn't test that;
 what would settle it is \ldots''
 
@@ -594,5 +552,26 @@ we characterized that ramp.}
 
 \q{Did you use AI tools?}{
 \item Yes, disclosed in the report as the course requires.}
+
+\end{multicols}
+
+\subsection*{Backup slides: when to jump to them}
+\begin{multicols}{2}\small\raggedright
+\begin{itemize}
+\item \textbf{Data, null, statistics, pre-registration.} Region choice, session counts, how the pseudo-session null
+works, Wilcoxon and Holm, which analyses were pre-registered.
+\item \textbf{The factorization, and four things to explain.} The RRR closed form, readout vs.\ loading basis,
+pseudo-sessions, the intersection--union test.
+\item \textbf{Why lagged RRR rather than PCA or other methods.} CCA, DCA, GPFA, slow features; RRR's modest edge.
+\item \textbf{How strong is the prior result?} Every variant of the prior test; the ``no detectable rise'' wording.
+\item \textbf{Robustness table.} Holm $p$ for all three tests across 10 variants.
+\item \textbf{Full decoding matrix.} Every variable by every subspace.
+\item \textbf{Nesting.} The 0.5 s subspace contains 92\% of the 30 s leading direction.
+\item \textbf{Candidate recording explanations.} One row per cause tested.
+\item \textbf{Amplitude pilot.} Wrong-sign coupling; corrected refits keep 93--95\%.
+\item \textbf{Probe motion, sorting, state signals.} Motion, pupil, engagement, satiety.
+\item \textbf{The normalization bug.} The one post-results change.
+\end{itemize}
+\end{multicols}
 
 \end{document}
