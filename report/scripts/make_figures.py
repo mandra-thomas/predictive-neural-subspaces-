@@ -2,7 +2,7 @@
 
 Run from the repository root with the project environment:
     python report/scripts/make_figures.py
-Writes report/figures/{rfig_geometry,rfig_content,rfig_controls}.pdf. Reads results*/ (not modified).
+Writes report/figures/{rfig_geometry,rfig_content,rfig_controls,rfig_estimator,rfig_nesting}.pdf. Reads results*/ (not modified).
 Summary convention: sessions are averaged within mouse, then averaged over mice (as in the primary tests);
 95% CIs are percentile bootstraps over mice (10,000 resamples, seed 0) unless taken from matrix.csv.
 """
