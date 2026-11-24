@@ -760,3 +760,18 @@ history-controlled full-population prior) is descriptive.
 
 **Not done here.** No latent-model fit, on simulated or real data. No frozen analysis, earlier result or A17 rule is
 changed. No branch is merged.
+
+**A18 part A addendum (written 2026-11-24 after the calibration output was seen, before the sweep ran; post hoc).**
+Calibration put the stimulus-history gain at 0.036 (prior gain 0.29): the encoded prior alone already makes the
+previous side as decodable as in the recordings, so the specified `neg_history` cell is almost the same as
+`neg_pure` and cannot test whether stimulus memory alone could mimic the prior. Also seen at calibration: the
+full-population history-controlled prior score is +0.041 in the calibrated simulation (median of 16 calibration
+sessions) and -0.061 in the recordings. One cell and one reading are added; nothing specified above changes.
+- **Cell `neg_history_strong`:** prior gain 0, low-rank drift at the calibrated gain, every other gain as calibrated,
+  and the history gain re-calibrated with the prior removed (same seeds 900 to 915 and the same fixed-point rule) so
+  that history alone reproduces the real full-population previous-side AUC. Stage `calibrate_neg`; stored in
+  `calibration.json` under `neg_history_strong`.
+- **Reading B2 (history alone):** "history alone can mimic the prior score" if in `neg_history_strong` the
+  full-population corrected prior is positive in 22 or more of 32 seeds and its mean is at least half the real
+  target (0.108 / 2). Reported descriptively alongside: its history-controlled score, and how the real
+  history-controlled score (-0.061) compares with every cell's.

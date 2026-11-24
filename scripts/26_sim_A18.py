@@ -6,7 +6,8 @@ Stages (run in order; each reads the previous stage's output from results/a18/):
   calibrate  simulated sessions on calibration seeds 900-915 (session k's task and unit rates): damped multiplicative
              fixed-point iteration of six gains onto six real targets; then the per-unit drift regime's two drift
              parameters onto the same two drift targets -> calibration.json, calibration_trace.csv
-  sweep      ten cells x seeds 1000-1031 (task and rates of session (seed - 1000) mod 16), raw pipeline for every
+  calibrate_neg  (A18 addendum) history gain re-calibrated with no prior, for the cell neg_history_strong
+  sweep      ten cells (eleven with the addendum) x seeds 1000-1031 (task and rates of session (seed - 1000) mod 16), raw pipeline for every
              cell and the in-memory cosine detrend for four -> sim_seeds.csv
   summary    pre-specified readings, calibration diagnostics, profile comparison -> sim_summary.json, sim_cells.csv,
              a18_simulation.pdf
@@ -44,7 +45,7 @@ SETS = ["rrr_1", "rrr_4", "rrr_16", "rrr_60", "pca", "random"]
 
 
 def extra(p):
-    p.add_argument("--stage", required=True, choices=["targets", "calibrate", "sweep", "summary"])
+    p.add_argument("--stage", required=True, choices=["targets", "calibrate", "calibrate_neg", "sweep", "summary"])
 
 
 def real_pres(cfg):
@@ -158,6 +159,24 @@ def stage_calibrate(cfg, n_jobs):
                                          f"per_unit accepted {out['per_unit']['accepted']}")
 
 
+def stage_calibrate_neg(cfg, n_jobs):
+    """A18 part A addendum: history gain re-calibrated with the prior removed (history alone matches the real
+    full-population previous-side AUC)."""
+    cal = json.loads((OUT / "calibration.json").read_text())
+    real = json.loads((OUT / "real_targets.json").read_text())["session_median"]
+    target = {k: (v - 0.5 if k.endswith("_auc") else v) for k, v in real.items()}
+    trace = []
+    start = {**cal["lowrank"]["params"], "prior_gain": 0.0, "history_gain": 0.3}
+    par, cur, rat = iterate(start, ["history_gain"], target, "lowrank", cfg, n_jobs, trace, "neg_history_strong")
+    cal["neg_history_strong"] = {"params": par, "achieved": cur, "ratio": rat,
+                                 "accepted": {k: bool(abs(r - 1) <= ACCEPT_TOL) for k, r in rat.items()}}
+    write_json(OUT / "calibration.json", cal)
+    old = pd.read_csv(OUT / "calibration_trace.csv")
+    pd.concat([old, pd.DataFrame(trace)]).to_csv(OUT / "calibration_trace.csv", index=False)
+    log_run(cfg, "26_sim_A18 calibrate_neg", f"A18 addendum: history-only gain {par['history_gain']:.3f}, "
+                                             f"ratio {rat['history_gain']:.3f}")
+
+
 # ----------------------------------------------------------------------------- sweep
 def cells(cal):
     lr, pu = cal["lowrank"]["params"], cal["per_unit"]["params"]
@@ -168,6 +187,8 @@ def cells(cal):
         c[f"perunit_{tag}"] = ("per_unit", {**pu, "drift_gain": s * pu["drift_gain"]})
     c["neg_history"] = ("lowrank", {**lr, "prior_gain": 0.0})
     c["neg_pure"] = ("lowrank", {**lr, "prior_gain": 0.0, "history_gain": 0.0})
+    if "neg_history_strong" in cal:                                   # A18 part A addendum
+        c["neg_history_strong"] = ("lowrank", cal["neg_history_strong"]["params"])
     return c
 
 
@@ -286,6 +307,16 @@ def summarise(df, real):
         "hist_control_valid": bool(nh.priorhist_full_npos < need and nd.priorhist_full_npos >= need),
         "neg_history_hist_npos": nh.priorhist_full_npos, "nodrift_hist_npos": nd.priorhist_full_npos,
         "neg_pure_full_npos": npure.prior_full_npos, "neg_history_full_npos": nh.prior_full_npos}
+    if ("neg_history_strong", "raw") in R:                           # addendum reading B2
+        hs = R[("neg_history_strong", "raw")]
+        tgt = real["session_median"]["full_prior_corr"]
+        out["B2_history_alone"] = {
+            "history_alone_mimics": bool(hs.prior_full_npos >= need and hs.prior_full_mean >= tgt / 2),
+            "full_mean": hs.prior_full_mean, "full_npos": hs.prior_full_npos, "real_target": tgt,
+            "hist_controlled_mean": hs.priorhist_full_mean, "hist_controlled_npos": hs.priorhist_full_npos,
+            "real_hist_controlled_session_median": real["session_median"]["full_prior_hist_corr"],
+            "hist_controlled_by_cell": {c: R[(c, "raw")].priorhist_full_mean
+                                        for c in sorted({k[0] for k in R})}}
     # Reading C: profile comparison (descriptive)
     prof = real["real_profile"]
     feats = [f"prior_{fs}" for fs in ("rrr_1", "rrr_60", "pca", "random")] + \
@@ -360,7 +391,8 @@ def stage_summary(cfg):
     cdf.to_csv(OUT / "sim_cells.csv", index=False)
     write_json(OUT / "sim_summary.json", out)
     figure(cdf, real, OUT / "a18_simulation.pdf")
-    print(json.dumps({k: out[k] for k in ("G1_positive_control", "A_drift", "B_history", "recommend_lds")},
+    print(json.dumps({k: out[k] for k in ("G1_positive_control", "A_drift", "B_history", "B2_history_alone",
+                                          "recommend_lds") if k in out},
                      indent=1, default=str))
     log_run(cfg, "26_sim_A18 summary", f"A18 readings: G1 {out['G1_positive_control']['passed']}; "
                                        f"A lowrank '{out['A_drift']['lowrank']['reading']}', per-unit "
@@ -374,6 +406,7 @@ def main():
     args, cfg, n_jobs = setup(__doc__, extra)
     OUT.mkdir(parents=True, exist_ok=True)
     {"targets": lambda: stage_targets(cfg, n_jobs), "calibrate": lambda: stage_calibrate(cfg, n_jobs),
+     "calibrate_neg": lambda: stage_calibrate_neg(cfg, n_jobs),
      "sweep": lambda: stage_sweep(cfg, n_jobs), "summary": lambda: stage_summary(cfg)}[args.stage]()
 
 

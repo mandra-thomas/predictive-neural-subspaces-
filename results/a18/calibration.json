@@ -1,0 +1,112 @@
+{
+  "lowrank": {
+    "params": {
+      "prior_gain": 0.29109613042182164,
+      "drift_gain": 1.1456734131594624,
+      "drift_mid": 0.363925363567822,
+      "history_gain": 0.03575158868768337,
+      "evoked_gain": 2.4460251678577176,
+      "stim_gain": 1.0816266886155272
+    },
+    "achieved": {
+      "lowfreq_cos": 0.22548317691300301,
+      "midband": 0.04729673125025535,
+      "triallocked": 0.08599432520756067,
+      "pc1_frac": 0.2044727938609325,
+      "pc5_frac": 0.45233142948981875,
+      "full_prior_corr": 0.11082339851834239,
+      "full_prior_hist_corr": 0.04072489401503926,
+      "prior_trial_share_corr": 0.0011998898340030144,
+      "full_prev_side_auc": 0.05809191355438309,
+      "full_cur_side_auc": 0.3660530094922013
+    },
+    "ratio": {
+      "prior_gain": 1.0225213773198671,
+      "drift_gain": 0.9973570795531279,
+      "drift_mid": 1.0077952969935355,
+      "history_gain": 0.919595544073572,
+      "evoked_gain": 1.0002606989259912,
+      "stim_gain": 0.9918745899544527
+    },
+    "accepted": {
+      "prior_gain": true,
+      "drift_gain": true,
+      "drift_mid": true,
+      "history_gain": true,
+      "evoked_gain": true,
+      "stim_gain": true
+    }
+  },
+  "per_unit": {
+    "params": {
+      "prior_gain": 0.29109613042182164,
+      "drift_gain": 1.5217517486748975,
+      "drift_mid": 0.3646846275726838,
+      "history_gain": 0.03575158868768337,
+      "evoked_gain": 2.4460251678577176,
+      "stim_gain": 1.0816266886155272
+    },
+    "achieved": {
+      "lowfreq_cos": 0.21523773027507614,
+      "midband": 0.051051930679012814,
+      "triallocked": 0.09507336763190488,
+      "pc1_frac": 0.16263336747921248,
+      "pc5_frac": 0.39848609131091706,
+      "full_prior_corr": 0.23994602156618067,
+      "full_prior_hist_corr": 0.01994035097559821,
+      "prior_trial_share_corr": 0.0012563026369354377,
+      "full_prev_side_auc": 0.05419977518265928,
+      "full_cur_side_auc": 0.36211712302575005
+    },
+    "ratio": {
+      "drift_gain": 0.9520394249173559,
+      "drift_mid": 1.087810812305794
+    },
+    "accepted": {
+      "drift_gain": true,
+      "drift_mid": true
+    }
+  },
+  "target": {
+    "n_units": 48.5,
+    "T": 7978.0,
+    "lowfreq_cos": 0.22608069019175375,
+    "midband": 0.04693089101660963,
+    "triallocked": 0.08597191242232677,
+    "pc1_frac": 0.16313739487259754,
+    "pc5_frac": 0.4297284379448381,
+    "full_prior_corr": 0.10838247588409528,
+    "full_prior_hist_corr": -0.06100905510888027,
+    "prior_trial_share_corr": 0.001967738804671919,
+    "full_prev_side_auc": 0.0631711559813033,
+    "full_cur_side_auc": 0.36905170593089864
+  },
+  "fixed": {
+    "slow_noise": 0.3,
+    "slow_noise_loading": "separate",
+    "loading_scale": 0.6,
+    "drift_rank": 3,
+    "drift_decay": 0.3,
+    "history_tau": 1.0,
+    "history_k": 10
+  },
+  "seeds": [
+    900,
+    901,
+    902,
+    903,
+    904,
+    905,
+    906,
+    907,
+    908,
+    909,
+    910,
+    911,
+    912,
+    913,
+    914,
+    915
+  ],
+  "note": "AUC statistics are AUC - 0.5"
+}
