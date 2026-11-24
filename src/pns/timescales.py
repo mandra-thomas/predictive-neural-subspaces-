@@ -64,17 +64,27 @@ def session_timescales(pre: dict) -> dict:
     }
 
 
-def prior_per_bin(pre: dict) -> np.ndarray:
-    """Bayes-optimal prior per 0.5 s bin (NaN before the first and after the last valid stimulus onset)."""
+def trial_index_per_bin(pre: dict) -> tuple[np.ndarray, np.ndarray]:
+    """For each bin, the index (into the full trial arrays) of the next valid stimulus onset at or after the bin
+    centre, i.e. the trial whose pre-stimulus belief the bin carries; and a mask of bins that have one."""
     c = bin_centres(pre)
     st = np.asarray(pre["stimOn_times"], float)
-    pr = np.asarray(pre["prior"], float)
-    ok = np.isfinite(st) & np.isfinite(pr)
-    st, pr = st[ok], pr[ok]
-    k = np.searchsorted(st, c, side="left")
-    inside = (k < len(st)) & (c > st[0])
-    out = np.full(len(c), np.nan)
-    out[inside] = pr[k[inside]]
+    ok_idx = np.flatnonzero(np.isfinite(st))
+    st_ok = st[ok_idx]
+    k = np.searchsorted(st_ok, c, side="left")
+    inside = (k < len(st_ok)) & (c > st_ok[0])
+    idx = np.zeros(len(c), int)
+    idx[inside] = ok_idx[k[inside]]
+    return idx, inside
+
+
+def prior_per_bin(pre: dict, prior: np.ndarray | None = None) -> np.ndarray:
+    """Bayes-optimal prior per 0.5 s bin (NaN before the first and after the last valid stimulus onset).
+    `prior` may be (n_trials,) or (m, n_trials) (e.g. pseudo-session priors); default pre["prior"]."""
+    pr = np.asarray(pre["prior"] if prior is None else prior, float)
+    idx, inside = trial_index_per_bin(pre)
+    out = np.full(pr.shape[:-1] + (len(inside),), np.nan)
+    out[..., inside] = pr[..., idx[inside]]
     return out
 
 
@@ -164,3 +174,56 @@ def prior_cosine_fraction(pre: dict) -> float:
     x = prior_per_bin(pre)
     x[~valid] = np.nan
     return span_fraction(x, cosine_design(tc, t0, length))
+
+
+# ----------------------------------------------------------------------------- variance shares (A17 part 1)
+def signed_event_design(times: np.ndarray, ev_times: np.ndarray, weights: np.ndarray,
+                        span=(-1.0, 2.0), n_basis: int = 8) -> np.ndarray:
+    """(len(times), n_basis): raised-cosine responses to each event, each scaled by its weight (e.g. side x
+    sqrt(contrast)); same basis as the A11 trial-locked GLM (pipeline._raised_cosines)."""
+    from .pipeline import _raised_cosines
+    ev = np.asarray(ev_times, float)
+    w = np.asarray(weights, float)
+    ok = np.isfinite(ev) & np.isfinite(w)
+    order = np.argsort(ev[ok])
+    ev, w = ev[ok][order], w[ok][order]
+    D = np.zeros((len(times), n_basis))
+    lo = np.searchsorted(ev, times - span[1], side="left")
+    hi = np.searchsorted(ev, times - span[0], side="right")
+    for k in range(len(times)):
+        if hi[k] > lo[k]:
+            D[k] += (w[lo[k]:hi[k], None] * _raised_cosines(times[k] - ev[lo[k]:hi[k]], span, n_basis)).sum(0)
+    return D
+
+
+def event_design_full(pre: dict, times: np.ndarray) -> np.ndarray:
+    """Unsigned A11 event kernels (stimOn, firstMovement, feedback) plus kernels signed by side x sqrt(contrast),
+    choice and feedback outcome."""
+    from .pipeline import EVENTS, _event_design
+    events = {e: np.asarray(pre[e], float) for e in EVENTS}
+    side = np.asarray(pre["side"], float)
+    contrast = np.nan_to_num(np.asarray(pre["contrast"], float), nan=0.0)
+    signed = [signed_event_design(times, pre["stimOn_times"], side * np.sqrt(contrast)),
+              signed_event_design(times, pre["firstMovement_times"], np.asarray(pre["choice"], float)),
+              signed_event_design(times, pre["feedback_times"], np.asarray(pre["feedbackType"], float))]
+    return np.hstack([_event_design(times, events)] + signed)
+
+
+def residualize(A: np.ndarray, D: np.ndarray | None) -> np.ndarray:
+    """A minus its least-squares projection on [1, D] (columns of A treated separately)."""
+    ones = np.ones((len(A), 1))
+    X = ones if D is None else np.hstack([ones, D])
+    return A - X @ np.linalg.lstsq(X, A, rcond=None)[0]
+
+
+def population_share(W: np.ndarray, X: np.ndarray) -> np.ndarray:
+    """Share of the summed variance of the (already residualized) columns of W explained by each single regressor
+    column of X (also residualized): sum_u (x'w_u)^2/(x'x) / sum_u w_u'w_u. Returns one value per column of X."""
+    expl = ((X.T @ W) ** 2).sum(1) / np.sum(X ** 2, axis=0)
+    return expl / np.sum(W ** 2)
+
+
+def lowfreq_share(Z: np.ndarray, D: np.ndarray) -> float:
+    """In-sample share of the summed variance of Z explained by the design D (plus intercept)."""
+    Zc = Z - Z.mean(0)
+    return float(1 - np.sum(residualize(Z, D) ** 2) / np.sum(Zc ** 2))

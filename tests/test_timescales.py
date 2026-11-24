@@ -85,3 +85,34 @@ def test_detrend_pre_reproduces_cached_copy(kind):
     assert np.allclose(out["S_resid"], ref["S_resid"])
     assert np.allclose(out["Swin_resid_pre_stim"], ref["Swin_resid_pre_stim"], equal_nan=True)
     assert out["detrend_r2"] == pytest.approx(float(ref["detrend_r2"]))
+
+
+def test_population_share_equals_r2_for_one_unit():
+    from pns.timescales import population_share, residualize
+    rng = np.random.default_rng(2)
+    x = rng.standard_normal(500)
+    w = 0.6 * x + rng.standard_normal(500)
+    xr, wr = residualize(x[:, None], None), residualize(w[:, None], None)
+    assert population_share(wr, xr)[0] == pytest.approx(np.corrcoef(x, w)[0, 1] ** 2)
+
+
+def test_signed_event_design_scales_with_weight():
+    from pns.pipeline import _raised_cosines
+    from pns.timescales import signed_event_design
+    t = np.arange(0, 20, 0.5)
+    D = signed_event_design(t, np.array([5.0, 12.0, np.nan]), np.array([2.0, -1.0, 3.0]))
+    ref = 2 * _raised_cosines(t - 5.0) - _raised_cosines(t - 12.0)
+    assert np.allclose(D, ref)
+
+
+def test_prior_per_bin_maps_pseudo_priors_like_real():
+    edges = np.arange(0, 10.5, 0.5)
+    pre = {"edges": edges, "stimOn_times": np.array([2.0, 5.0, np.nan, 8.0]),
+           "prior": np.array([0.5, 0.6, 0.9, 0.7])}
+    null = np.array([[0.1, 0.2, 0.3, 0.4], [0.5, 0.6, 0.7, 0.8]])
+    out = prior_per_bin(pre, null)
+    assert out.shape == (2, 20)
+    real = prior_per_bin(pre)
+    ok = np.isfinite(real)
+    assert np.all(np.isfinite(out[:, ok])) and np.all(np.isnan(out[:, ~ok]))
+    assert np.allclose(out[0, ok], np.where(real[ok] == 0.6, 0.2, 0.4))

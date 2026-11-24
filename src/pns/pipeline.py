@@ -12,7 +12,7 @@ from .binning import bin_edges, bin_mean, bin_spikes, invalid_from_intervals, wi
 from .decode import auc_cv, lasso_nested_r2, r2_cv
 from .geometry import (angle_summary, complement_basis, cov_matched_random, nesting_index, principal_angles,
                        random_floor)
-from .lagged import chunk_folds, contiguous_folds, session_halves
+from .lagged import chunk_folds, contiguous_folds, lagged_pairs, purged_folds, session_halves
 from .prior import bayes_optimal_prior, pseudo_sides, side_from_contrasts
 from .rrr import METHODS, cv_lagged, fit_rrr, pca_basis
 from .stats import null_summary
@@ -127,6 +127,27 @@ def residualize_session(pre: dict, cfg: dict, ridge: float = 1.0) -> dict:
 
 
 # --------------------------------------------------------------------------- subspaces
+def check_lags(T: int, lags, valid, n_folds: int, embargo: int, half_gap: int) -> dict:
+    """Raise if a lag leaves a CV fold without test or training pairs, or a session half without pairs
+    (A17 bug fix: these cases used to fail silently). Returns the smallest number of test pairs per fold, per lag."""
+    seg = session_halves(T, half_gap)
+    out = {}
+    for lag in lags:
+        i, j = lagged_pairs(T, lag, valid)
+        if len(i) == 0:
+            raise ValueError(f"lag {lag} bins leaves no lagged pairs (T={T})")
+        folds = purged_folds(i, j, n_folds, embargo)
+        n_test = [len(te) for _, te in folds]
+        if min(n_test) == 0 or min(len(tr) for tr, _ in folds) < 10:
+            raise ValueError(f"lag {lag} bins is too long for {n_folds} contiguous CV folds (T={T}): "
+                             f"test pairs per fold {n_test}")
+        for h in (0, 1):
+            if len(lagged_pairs(T, lag, valid, np.where(seg == h, 0, -1))[0]) == 0:
+                raise ValueError(f"lag {lag} bins leaves session half {h} without pairs (T={T})")
+        out[int(lag)] = int(min(n_test))
+    return out
+
+
 def fit_session(pre: dict, cfg: dict, d: int, rng: np.random.Generator) -> tuple[dict, pd.DataFrame, pd.DataFrame, dict]:
     """Fit lagged RRR subspaces (full session and halves), the estimator check and geometry tables."""
     S = session_S(pre)
@@ -137,11 +158,21 @@ def fit_session(pre: dict, cfg: dict, d: int, rng: np.random.Generator) -> tuple
     lags = list(cfg["lags_bins"])
     alphas = cfg["model"]["alphas"]
     nf, emb = cfg["cv"]["n_folds"], cfg["cv"]["embargo_bins"]
+    # A17: alpha may be chosen over a subset of the lags (default: all lags, the registered behaviour)
+    alpha_lags = [int(x) for x in cfg["model"].get("alpha_lags", lags)]
+    if not set(alpha_lags) <= set(lags):
+        raise ValueError(f"model.alpha_lags {alpha_lags} must be a subset of lags_bins {lags}")
+    test_pairs = check_lags(T, lags, valid, nf, emb, cfg["cv"]["half_gap_bins"])
 
-    # estimator check + alpha selection (one CV pass per lag, all methods)
-    cv = {lag: cv_lagged(S, lag, d, alphas, nf, emb, valid, rng=rng, methods=METHODS) for lag in lags}
+    # estimator check + alpha selection (one CV pass per lag, all methods). Lags outside alpha_lags draw their
+    # random subspaces from their own stream, so adding lags leaves every draw for the alpha lags (and V_random,
+    # floors) unchanged.
+    cv = {}
+    for lag in lags:
+        r = rng if lag in alpha_lags else np.random.default_rng([int(cfg.get("seed", 0)), int(lag), T, p])
+        cv[lag] = cv_lagged(S, lag, d, alphas, nf, emb, valid, rng=r, methods=METHODS)
     curves = np.stack([cv[lag]["rrr"] for lag in lags])
-    a_idx = int(np.argmax(curves.mean(0)))
+    a_idx = int(np.argmax(np.stack([cv[lag]["rrr"] for lag in alpha_lags]).mean(0)))
     alpha = float(alphas[a_idx])
     per_lag_alpha = {lag: float(alphas[int(np.argmax(curves[k]))]) for k, lag in enumerate(lags)}
     weak = {lag: bool(np.all(curves[k] <= 0)) for k, lag in enumerate(lags)}
@@ -189,6 +220,9 @@ def fit_session(pre: dict, cfg: dict, d: int, rng: np.random.Generator) -> tuple
     meta = {"T": T, "p": p, "d": d, "alpha": alpha, "per_lag_alpha": per_lag_alpha, "weak_lag": weak,
             "n_trials_masked": int(np.sum(pre["mask"])), "prior_pleft_corr": float(pre["prior_pleft_corr"]),
             "median_trial_s": float(pre["median_trial_s"])}
+    if alpha_lags != lags:                          # A17 runs only: record what alpha was chosen over
+        meta["alpha_lags"] = alpha_lags
+        meta["min_test_pairs_per_fold"] = test_pairs
     for k in (1, 2):
         meta[f"nest_short_contains_long_k{k}"] = nesting_index(fits[f"Vin_full_{short}"], fits[f"Vin_full_{long_}"], k)
         meta[f"nest_long_contains_short_k{k}"] = nesting_index(fits[f"Vin_full_{long_}"], fits[f"Vin_full_{short}"], k)

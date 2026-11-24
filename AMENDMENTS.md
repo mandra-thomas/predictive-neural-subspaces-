@@ -42,7 +42,7 @@ A17 (A17 executes extensions listed in the proposal, with post hoc specifics).
 | A14 | 2026-11-22 10:16 (`f3008e7`); post hoc additions 10:25 (`7d0172d`) | prospectively documented exploratory; two post hoc checks | Third pilot (A14) | `15_build_A14.py`, `16_pilot_A14.py`, `pns.ampcorr`, `slurm/pilot_A14.sbatch` |
 | A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
-| A17 | 2026-11-23 (see `git log -- AMENDMENTS.md`) | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
+| A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
 amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
@@ -581,3 +581,16 @@ Parts 0, 1 and 6 are descriptive.
   has about 7,900 bins; a 240 s lag gives up 480 of them). The real limit on any slow signal is the number of blocks
   per session (about 13), and it is the same at every lag.
 - The talk's answer that "horizon length wasn't the limit" was untested; Parts 0 and 2 test it.
+
+**A17 part 1 addendum (written 2026-11-23 after seeing the entry-check output for one session, before running the
+other 15; descriptive).** As specified, the entry check's Rayleigh quotient measures the *total* predicted variance
+along the estimated prior-loading direction. That includes drift and any other signal sharing the direction, so it
+does not measure the prior's own contribution: in the first session it ranked the prior direction second at both
+lags, raw and detrended. It is still reported, labelled as such. Two quantities are added:
+- **Upper bound on the prior's predictable variance:** the pseudo-corrected prior-explained sum of squares (per-bin
+  secondary analysis, summed over units, real minus null median) times rho_pi(lag)² from Part 0, compared with the
+  5th eigenvalue of G. Because it ignores how well current activity can predict the prior's future component, it is
+  an upper bound: if it is below the 5th eigenvalue, the prior cannot be among a rank-5 fit's directions at that lag
+  however decodable it is.
+- **Capture:** the squared norm of the unit prior-loading direction projected onto that root's fitted `Vout_full_{lag}`
+  subspace, minus the median over the pseudo-prior loadings, against isotropic chance d/p.
