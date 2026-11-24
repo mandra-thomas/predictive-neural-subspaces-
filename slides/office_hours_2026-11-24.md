@@ -12,7 +12,7 @@ about 12 trials, with the autocorrelation reaching zero by 27 trials. Blocks las
 (IQR 2.4–5.2 min, 215 completed blocks). A session lasts a median of 66.5 min.
 
 Panel b shows how much of the prior's variance is still predictable Δ ahead (ρ²). It is 0.59 at 30 s, 0.27 at 60 s and
-0.02 at 2 min. A linear session ramp has ρ² = 1 at every lag.
+about 0.01 at 2 min. A linear session ramp has ρ² = 1 at every lag.
 
 ## Answers to the questions from the talk
 

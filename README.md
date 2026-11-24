@@ -7,16 +7,20 @@ recordings from mouse secondary motor cortex (MOs; 16 sessions from 13 mice) at 
 compares the resulting subspaces' geometry and what can be decoded from each: the Bayes-optimal block prior, stimulus
 side, choice, feedback, wheel speed and elapsed time. The short answer is that the block prior shows no detectable rise
 with horizon, and every low-dimensional summary, long-horizon or not, is dominated by a slow "session-time mode".
+Post hoc follow-ups (A17, on the `pilot-timescale-fix` branch) measure why a longer horizon could not have helped: the
+prior's own memory is about 12 trials (about a minute), far shorter than a block, and extending the lags to 4 minutes on
+drift-removed data selects no prior. A latent state-space model and a calibrated simulation (A18) are written and tested
+on synthetic data but have not yet been run on real data.
 
 ## Where to find what
 
 | File or folder | Contents |
 |---|---|
 | `RESULTS.md` | Every reported number, with its source file, the averaging used, and the interpretation |
-| `AMENDMENTS.md` | The dated pre-registration record: deviations from the proposal (D1 to D10), additions (A1 to A16) and the post hoc robustness check (P1h). An index at the top gives each entry's date and status |
+| `AMENDMENTS.md` | The dated pre-registration record: deviations from the proposal (D1 to D10), additions (A1 to A17) and the post hoc robustness check (P1h). An index at the top gives each entry's date and status |
 | `ANALYSIS_LOG.md` | Append-only log; every script run adds a row |
 | `report/` | Final report (`main.tex`, `main.pdf`) |
-| `slides/` | Final presentation (`slides.tex`, `slides.pdf`, `slides_notes.pdf`) |
+| `slides/` | Final presentation (`slides.tex`, `slides.pdf`, `slides_notes.pdf`) and the office-hours notes of 24 November (`office_hours_2026-11-24.md`) |
 | `reports/`, `research_notes/` | Literature review on slow neural modes |
 
 Three labels are used throughout. **Pre-registered** means written in a timestamped commit before the relevant data
@@ -47,8 +51,8 @@ the local ONE cache. Everything else reads the project's own cached files.
 
 ## Pipeline
 
-All scripts run from the repository root. The numbered pipeline scripts (01 to 08, plus 09, 11, 12, 14, 16, 18 and
-22) share a command line from `src/pns/runner.py`: `--eids` (explicit sessions), `--subset checkpoint|all`, `--force`
+All scripts run from the repository root. The numbered pipeline scripts (01 to 08, plus 09, 11, 12, 14, 16, 18, 22
+and 23 to 25) share a command line from `src/pns/runner.py`: `--eids` (explicit sessions), `--subset checkpoint|all`, `--force`
 (recompute cached per-session outputs), `--n-jobs`, `--config`, and `--residual` (the A11 trial-locked residual
 analysis, which must write to a separate results root). Scripts that fit or decode also take `--d` (the subspace
 dimension; default 5 from `config.yaml`). Paths come from `config.yaml` and can be overridden with the environment
@@ -101,12 +105,44 @@ script that applies the reading rule written in `AMENDMENTS.md`.
 | `21_build_detrend.py` | A16, post hoc | Builds `data_detrend_q/` (quadratic detrend) and `data_detrend_c/` (cosine detrend, periods of at least 20 min) |
 | `22_pilot_A16.py` | A16, post hoc | Detrend-and-refit reading, same-scale prior reference, split-half reproducibility of the leading 30 s direction, step sessions. Writes `results/a16/` |
 
+### Timescale follow-ups (A17, post hoc; scripts 23 to 25) and the planned A18
+
+A17 asks whether any prediction horizon could have favoured the block prior over the slow drift. Everything in it is
+post hoc (`AMENDMENTS.md`, A17, including the review note of 24 November). Results are summarised in `RESULTS.md`.
+
+| Script | Amendment and status | What it does |
+|---|---|---|
+| `23_timescales_A17.py` | A17 part 0, post hoc; task data only | Session and block durations, the prior's autocorrelation and integrated timescale (per 0.5 s bin and per trial), and the prior's variance inside the cosine detrend span. Writes `results/a17/timescales.{csv,json}`, `blocks.csv`, `prior_acf.csv` |
+| `24_budget_A17.py` | A17 part 1, post hoc; descriptive | Population-level variance shares (>= 20 min component, trial-locked GLM, pseudo-session-corrected prior), and a descriptive scale comparison of the prior's predictable variance with the RRR eigenvalues (not a bound; see the review note). Reads the raw and cosine-detrended fits. Writes `results/a17/budget_sessions.csv`, `budget.json` |
+| `25_longlag_A17.py` | A17 part 2, post hoc | Reproduction check of the long-lag roots against A16, per-lag summary, and the four "band selection" tests (60 s against 0.5 s and against PCA, in each detrended copy). Writes `results/a17/longlag_{c,q}.csv`, `longlag.json` |
+| `26_sim_A18.py`, `27_lds_A18.py` | A18, not yet written | Calibrated simulation (prior and drift competing, with a no-prior negative control) and the latent state-space model on real data. A18 is committed in `AMENDMENTS.md` before either runs |
+| `28_switch_A17.py` | A17 part 6, not yet written | Decoded prior aligned to block switches, against a pseudo-session chance band |
+
+Part 2 refits scripts 04 and 05 (not 06 to 08, whose first/last-lag logic would compare 0.5 s with 4 min) on both
+detrended copies with the long-lag config, then runs script 25. Script 24 reads `results/a17/timescales.csv`, so run
+23 first:
+
+```bash
+python scripts/23_timescales_A17.py
+python scripts/24_budget_A17.py
+for v in c q; do
+  export PNS_DATA=data_detrend_$v PNS_RESULTS=results_a17_longlag_$v PNS_FIGURES=figures/a17_longlag_$v
+  python scripts/04_fit_subspaces.py --config config_a17_longlag.yaml --d 5
+  python scripts/05_decode.py --config config_a17_longlag.yaml --d 5
+done
+unset PNS_DATA PNS_RESULTS PNS_FIGURES
+python scripts/25_longlag_A17.py
+```
+
+Each long-lag refit takes about 15 to 20 minutes on a laptop. Do not run script 21 in a scratch setting: it writes
+`data_detrend_*` relative to the working directory.
+
 ### Figures (scripts 19 and 20)
 
 | Script | What it does |
 |---|---|
 | `19_talk_figures.py` | `figures/fig4_slowmode_controls` (elapsed-time decoding under each recording control) and `figures/fig5_slowmode_examples` (slow-mode time courses in six sessions chosen by a fixed rule). Reads results only |
-| `20_slide_figures.py` | Slide-sized `figures/slide_fig5.pdf` (all 16 sessions) and `figures/slide_figS1.pdf` (nesting and complements). Reads results only |
+| `20_slide_figures.py` | Slide-sized `figures/slide_fig5.pdf` (all 16 sessions) and `figures/slide_figS1.pdf` (nesting and complements). With the argument `timescales`, only `figures/slide_timescales.pdf` (A17 part 0). Reads results only |
 | `make_synthetic_dataset.py` | Writes a synthetic frozen dataset so scripts 03 to 07 can be smoke-tested without IBL data |
 
 ## Derived data and results folders
@@ -125,9 +161,10 @@ PNS_RESULTS=results_X`. Region 2 also runs script 03.
 | `data_ampcorr_low/`, `data_ampcorr_high/`, `data_ampcorr_slow/` | 15 (A14) | `results_ampcorr_low/`, `results_ampcorr_high/`, `results_ampcorr_slow/` | 16 |
 | `data_region2/` | 17 (A15) | `results_region2/` | 18 |
 | `data_detrend_q/`, `data_detrend_c/` | 21 (A16) | `results_detrend_q/`, `results_detrend_c/` | 22 |
+| `data_detrend_q/`, `data_detrend_c/`, refit with `config_a17_longlag.yaml` | 21 (A16) | `results_a17_longlag_q/`, `results_a17_longlag_c/` | 25 (A17) |
 
 Pilot summaries are written into the main results root: `results/pilot/` (A12), `results/a13/`, `results/a14/`,
-`results/a15/` and `results/a16/`. Runs on a copied data folder log into `results_X/ANALYSIS_LOG.md` (marked
+`results/a15/`, `results/a16/` and `results/a17/`. Runs on a copied data folder log into `results_X/ANALYSIS_LOG.md` (marked
 `[results: results_X]`), and those rows were merged into the root log afterwards.
 
 ## Running on PACE ICE
@@ -164,6 +201,7 @@ figure from script 19:
 python scripts/19_talk_figures.py            # figures/fig5_slowmode_examples.pdf (and fig4)
 (cd report && make figs)                      # copies figures/*.pdf used by the report into report/figures/
 python report/scripts/make_figures.py         # report/figures/rfig_{geometry,content,controls,estimator,nesting}.pdf
+python report/scripts/make_figures.py timescales   # report/figures/rfig_timescales.pdf (A17 part 0)
 (cd report && make)                           # latexmk -> report/main.pdf
 ```
 
@@ -171,6 +209,7 @@ The slides read their two image figures from `figures/` (gitignored), so build t
 
 ```bash
 python scripts/20_slide_figures.py           # figures/slide_fig5.pdf, figures/slide_figS1.pdf
+python scripts/20_slide_figures.py timescales   # figures/slide_timescales.pdf (A17 part 0)
 (cd slides && make)                           # slides.pdf, slides_notes.pdf, presentation_andra-thomas.pdf
 ```
 
@@ -189,9 +228,10 @@ On a laptop this takes about 3 minutes.
 
 | Path | Contents |
 |---|---|
-| `src/pns/` | Library modules: `prior`, `binning`, `transform`, `lagged`, `rrr`, `geometry`, `decode`, `stats`, `pipeline`, `analysis`, `slowmode` (slow-mode definition used by A12 to A16), `ampcorr` (A14 amplitude helpers), `synth`, `plotting`, `io_ibl` (the only IBL-importing module), `runner`, `config` |
+| `src/pns/` | Library modules: `prior`, `binning`, `transform`, `lagged`, `rrr`, `geometry`, `decode`, `stats`, `pipeline`, `analysis`, `slowmode` (slow-mode definition used by A12 to A16), `ampcorr` (A14 amplitude helpers), `timescales` (A17: task timescales, prior per bin, in-memory detrend, variance-share helpers), `lds` (A18: linear-Gaussian state-space model with explicit drift inputs, EM and Kalman smoothing; tested on synthetic data only), `synth` (with the A18 drift modes; default output unchanged), `plotting`, `io_ibl` (the only IBL-importing module), `runner`, `config` |
 | `scripts/` | Numbered pipeline, pilot and figure scripts (above) |
 | `config.yaml` | Frozen constants. Change them only through a logged amendment |
+| `config_a17_longlag.yaml` | A17 part 2: `config.yaml` with lags extended to 0.5 s to 4 min and `model.alpha_lags` fixed to the registered four lags. Pass it with `--config`; never export `PNS_CONFIG` |
 | `tests/` | Unit tests and synthetic positive and negative controls. `tests/reference/` holds the original `optimal_Bayesian` (MIT licence, IBL) for comparison |
 | `slurm/` | PACE ICE batch files |
 | `report/`, `slides/` | Final report and presentation |

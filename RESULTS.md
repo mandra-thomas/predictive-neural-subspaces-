@@ -1,8 +1,10 @@
 # Results summary: prediction horizon and the content of MOs population subspaces
 
-**Status as of 2026-11-22.** The main analysis was completed on 16 November (commit `c6893b1`, after the D10 bug fix)
+**Status as of 2026-11-24.** The main analysis was completed on 16 November (commit `c6893b1`, after the D10 bug fix)
 and has not changed since. The exploratory pilots ran on 17 November (A12) and 21 to 22 November (A13 to A15), and
-the post hoc checks (A16) on 22 November (commit `439e7dc`). The final, independently verified write-ups are the
+the post hoc checks (A16) on 22 November (commit `439e7dc`). The post hoc timescale follow-ups (A17 parts 0 to 2) ran
+on 23 November on the `pilot-timescale-fix` branch and were corrected after an outside review on 24 November; they
+are summarised in their own section below and are not yet in the report. The final, independently verified write-ups are the
 report, `report/main.tex` and `report/main.pdf` (commit `4928ad2`), and the slides, `slides/slides.tex` (commit
 `b3b60d2`). Where this file and those disagree in framing, the report is authoritative. Every number below was
 re-checked against the result files in the documentation pass of 2026-11-22 (see `ANALYSIS_LOG.md`).
@@ -38,7 +40,7 @@ smoothly with session time, interpolated within the session. It is not end-to-en
 registry) before the relevant data were analysed. That covers the three primary tests, the deviations D1 to D9, the
 additions A1 to A11 and the first pilot A12. A13 to A15 are *prospectively documented exploratory follow-ups*: each
 design and reading rule was committed before its data were analysed, but after the 20 November analysis freeze. D10
-(a bug fix), P1h (robustness), the two A14 post hoc checks and A16 are *post hoc*: designed after the relevant results
+(a bug fix), P1h (robustness), the two A14 post hoc checks, A16 and A17 are *post hoc*: designed after the relevant results
 were seen. Nothing outside the three primary tests is corrected for multiplicity. `AMENDMENTS.md` has an index of
 every entry.
 
@@ -65,6 +67,13 @@ The most plausible, but untested, explanation for why the hypothesis failed is v
 directions that predict the most variance, and a large slow signal wins those dimensions before a small one like the
 prior. Separately, fixed-horizon prediction could not have separated a static from a dynamical prior code here,
 because blocks outlast the longest horizon.
+
+The post hoc timescale follow-ups (A17) sharpen this. The prior's own memory is short: its autocorrelation timescale
+is about 12 trials (about a minute), and only about 1% of its variance is still predictable 2 minutes ahead, whereas
+the slow component stays almost fully predictable. So no horizon favours the prior: a longer lag makes it less
+predictable, not more. Extending the lags to 4 minutes on drift-removed data selects no prior, and the small prior
+signal in the subspaces is flat across lags and about what PCA carries. This makes variance ranking better
+characterised, but it is still not established as the cause; a calibrated simulation (A18) is the planned test.
 
 ## Data and design
 
@@ -322,7 +331,8 @@ chance.
    session-time mode is large and slow, and the prior is small, so with five dimensions the slow signal is selected first; if
    many units drift independently, slow variance can fill the other dimensions too. This account is a mechanistic
    interpretation of the selection pattern, not an experimentally identified cause, and the detrending check fits it
-   only in part (see A16). An earlier "static code" reading is superseded by the next point.
+   only in part (see A16). A17 measures the sizes and timescales involved but does not establish the cause either.
+   An earlier "static code" reading is superseded by the next point.
 2. The design could not have distinguished a dynamical from a static code for the prior. A 30 s lag spans about six to
    eight trials (median stimulus-to-stimulus interval 3.9 s), while blocks last tens of trials (median 46 completed
    trials, from the interim trial tables). Any persistent representation of the prior is therefore predictable 30 s
@@ -621,6 +631,107 @@ contributing most carry 48% of the jump, and one of them shows its largest windo
 session at exactly that time (100th percentile). Reading: **artifact-consistent**. The step coincides with an abrupt
 spike-amplitude change in a contributing unit, not with probe motion.
 
+## Timescale follow-ups (amendment A17, post hoc, run locally)
+
+After the talk, the instructor's questions ("trials or blocks?", "why not minutes?") and outside reviews pointed at
+the timescale logic of the design. A17 was written into `AMENDMENTS.md` (`0dbca28`) before any of its neural-data
+analyses ran; it is post hoc and exploratory, and its four tests are uncorrected. A dated review note (24 November,
+`2b27bb6`) corrects two claims made on 23 November; the corrected versions are given here. Values are session medians
+from `results/a17/timescales.json` and `results/a17/budget.json`, and mouse means from `results/a17/longlag_c.csv`,
+`longlag_q.csv` and `longlag.json`, unless stated.
+
+**Part 0: how long the prior stays predictable (task data only).** The question is how long the Bayes-optimal prior
+remembers itself, compared with the lags tested and the block length. Its autocorrelation $\rho_\pi(\Delta)$ is the
+correlation between the prior now and $\Delta$ later, and $\rho_\pi(\Delta)^2$ is the fraction of its variance that
+could be predicted that far ahead. Per 0.5 s bin (the prior of trial $t$ assigned to the bins before stimulus $t$),
+the fraction still predictable is 0.99 at 0.5 s, 0.88 at 8 s, 0.59 at 30 s, 0.27 at 60 s, 0.01 at 2 min and 0.04 at
+4 min (where the correlation is slightly negative, because blocks alternate). The integrated timescale is 67 s (IQR
+55 to 75 s across sessions). Counted per trial instead (one value per trial, added after the review so the result
+does not depend on how the prior is spread over bins), it is 12.2 trials (IQR 10.9 to 13.8), and the
+autocorrelation reaches zero after 27 trials. The per-bin version is longer in trials (16.9) because the prior is
+constant through long inter-trial gaps. For comparison, the median stimulus interval is 3.9 s, completed blocks last
+a median of 46 trials (3.6 min; 215 blocks), and sessions last 66.5 min. The ≥ 20 min cosine detrend of A16 removes
+a median 12% (range 4 to 45%) of the prior's own variance.
+
+**Reading.** The prior forgets itself within one to two minutes, far less than a block, while the slow component is
+almost fully predictable at every lag tested. A variance-ranked predictive objective therefore has no horizon at
+which it favours the prior over the drift; longer lags make the prior less predictable, not more. The earlier claim
+that blocks outlast the longest horizon still holds (a 30 s lag is about 8 trials), but the relevant timescale for
+prediction is the prior's own, about 12 trials.
+
+**Part 1: how large each source of activity is (descriptive).** On whole-session z-scored square-root activity, at
+the population level (sums over units):
+
+| Component | Session median [IQR] | How it is measured |
+|---|---|---|
+| ≥ 20 min component (cosine basis) | 22.6% [12.2, 28.3] | In-sample fit on all bins; not null-corrected |
+| Same, quadratic trend | 17.2% [10.4, 22.5] | In-sample fit on all bins |
+| Trial-locked responses (A11 GLM) | 8.6% [6.0, 10.3] | In-sample fit on all bins |
+| Block prior, pre-stimulus windows (primary) | 0.20% [0.06, 0.34] | Cosine span removed; real minus pseudo-session median; positive in 14 of 16 |
+| Block prior, per bin (secondary) | 0.09% [0.06, 0.17] | Cosine span and signed event kernels removed; pseudo-corrected; positive in 14 of 16 |
+
+The prior is genuinely present but tiny. The shares are measured differently (all bins against pre-stimulus windows;
+uncorrected against null-corrected), so they are not one additive budget. On the same bins, the slow share is a
+median 124 times the per-bin prior share; the honest summary is "about two orders of magnitude larger, under the
+respective measurements".
+
+A descriptive entry check compared the prior's predictable variance, estimated as its corrected per-bin sum of
+squares times $\rho_\pi(\Delta)^2$, with the 5th eigenvalue of the ridge-RRR matrix in the same fit. The ratio has a
+median of 0.05 (raw, 0.5 s), 0.14 (raw, 30 s), 0.13 (cosine-detrended, 0.5 s) and 0.66 (cosine-detrended, 30 s); it
+is below 1 in 16, 16, 16 and 12 of 16 sessions. This was first described as an upper bound showing that the prior
+"could not have entered" a rank-5 subspace. That claim is withdrawn (review note): $\rho_\pi^2$ is not an upper limit
+on the prior's predictability from past activity, fitted directions mix components, the eigenvalues describe the
+output side while the prior is decoded from the input side, and the corrected sum of squares is a noisy estimate. The
+comparison only says the prior's predictable variance is small next to the dominant modes. The direction the prior
+loads on is itself often strongly predictable: its total predicted variance exceeds the 5th eigenvalue in 8 to 14 of
+16 sessions before correction, and in 2 to 7 after.
+
+**Part 2: does any lag select the prior once the drift is removed?** Scripts 04 and 05 were refit with lags of 0.5 s
+to 4 min on both A16 detrended copies, with each session's ridge penalty fixed to its A16 value. A reproduction check
+passed first: per-session penalties, and real and null scores at the original lags, equal the A16 roots (largest
+difference $2 \times 10^{-14}$). The table gives the corrected prior $R^2$ by lag (mouse means [95% bootstrap CI]).
+
+| Lag | Prior still predictable (median) | Cosine-detrended copy | Quadratic-detrended copy | Fewest test pairs per fold |
+|---|---|---|---|---|
+| 0.5 s | 0.99 | 0.031 [−0.009, 0.073] | −0.002 [−0.035, 0.033] | 1291 |
+| 2 s | 0.97 | 0.043 [0.002, 0.085] | −0.054 [−0.156, 0.027] | 1288 |
+| 8 s | 0.88 | 0.037 [−0.004, 0.076] | −0.003 [−0.085, 0.059] | 1276 |
+| 30 s | 0.59 | 0.051 [−0.000, 0.100] | −0.015 [−0.101, 0.053] | 1232 |
+| 60 s | 0.27 | 0.049 [0.008, 0.091] | −0.018 [−0.128, 0.064] | 1172 |
+| 2 min | 0.01 | 0.032 [−0.007, 0.072] | −0.010 [−0.061, 0.035] | 1052 |
+| 4 min | 0.04 | 0.038 [0.002, 0.074] | 0.008 [−0.080, 0.074] | 812 |
+| PCA | | 0.028 [0.004, 0.054] | 0.006 [−0.030, 0.042] | |
+| Random | | 0.020 [−0.002, 0.042] | 0.006 [−0.016, 0.029] | |
+
+Test-pair counts only confirm that every fold has data; consecutive pairs are strongly dependent, and inference is
+over mice. Elapsed-time $R^2$ is negative for every subspace at every lag in both copies, so the trend stays removed.
+
+The rule written in advance reads "band selection" only if, in both copies, the 60 s subspace beats both the 0.5 s
+subspace and PCA (paired-null differences, one-sided Wilcoxon over 13 mice, p < 0.05). None of the four tests passes:
+
+- cosine copy, 60 s over 0.5 s: 6 of 13 mice, p = 0.29;
+- cosine copy, 60 s over PCA: 9 of 13 mice, p = 0.12;
+- quadratic copy, 60 s over 0.5 s: 5 of 13 mice, p = 0.55;
+- quadratic copy, 60 s over PCA: 6 of 13 mice, p = 0.53.
+
+The reading is **no band selection**.
+
+**A failed prediction.** A17 predicted that the corrected prior would fall with lag, roughly following the fraction
+still predictable, and reach about zero by 2 minutes. It did not. In the cosine copy it is flat at 0.03 to 0.05 from
+0.5 s to 4 min (rank correlation with the predictable fraction −0.14, p = 0.76; quadratic copy −0.11), including at
+lags where almost none of the prior is predictable, and close to PCA and random subspaces. The most plausible reading
+is that the small prior signal in these subspaces is incidental, carried by any reasonable five-dimensional summary,
+rather than selected through its predictability. The intervals (about ±0.05) cannot tell a flat line from a small
+decline, and the two detrends still disagree about whether any prior survives at all.
+
+**What A17 does and does not show.** It shows that the prior's memory is short (about 12 trials), that its variance
+is about two orders of magnitude smaller than the slow component under these measurements, and that lags up to
+4 minutes on drift-removed data do not select it. It does not show that variance competition is the cause of the
+original failure, or that the prior was mathematically excluded from the subspaces. Still to run: the block-switch
+alignment (part 6), and, under amendment A18 (to be committed before it runs), a calibrated simulation in which a
+prior and a drift of the measured sizes compete, with a no-prior negative control, and a latent state-space model
+with an explicit drift term and a learned timescale per latent.
+
 ## Where the session-time mode stands
 
 Taking A12 to A16 together:
@@ -652,12 +763,16 @@ cognitive, and it is not explained by any single recording artifact tested.
 3. **Independent sessions and regions**, which need new downloads. MOp has 14 sessions from 12 mice under the census
    rule.
 4. **Testing the variance-ranking account directly**: comparisons with Dynamical Components Analysis and slow feature
-   analysis, a ground-truth simulation with known drift and a known prior, and a drift-robust objective.
+   analysis, a ground-truth simulation with known drift and a known prior, and a drift-robust objective. In progress:
+   the simulation and an explicit-drift latent state-space model are built and tested on synthetic data (A18, not
+   yet committed as an amendment or run on real data).
 5. **A block-transition-aligned analysis**, asking how the population prior signal changes trial by trial after a
-   switch, since fixed-horizon prediction cannot separate a static from a dynamical belief code.
+   switch, since fixed-horizon prediction cannot separate a static from a dynamical belief code. Specified as A17
+   part 6 (`28_switch_A17.py`, not yet written).
 
 Done already: the stationarity control (A12), the engagement, satiety, amplitude and multi-unit checks (A13), the
-amplitude-corrected refits (A14), and the same-session second-area run (A15).
+amplitude-corrected refits (A14), the same-session second-area run (A15), the detrended refits (A16), and the
+timescale measurements and long-lag sweep (A17 parts 0 to 2).
 
 The presented talk is `slides/slides.tex`; the earlier suggested slide outline in this file was superseded by it and
 has been removed.
