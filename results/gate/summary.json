@@ -1,0 +1,8 @@
+{
+  "n_sessions": 16,
+  "median_corrected_r2": 0.06424744950058905,
+  "frac_sessions_p05": 0.3125,
+  "fisher_p": 1.2266414803038271e-05,
+  "n_pseudo": 200,
+  "decision": "GO"
+}

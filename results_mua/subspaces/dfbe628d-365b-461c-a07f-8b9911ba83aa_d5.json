@@ -1,0 +1,31 @@
+{
+  "T": 8039,
+  "p": 10,
+  "d": 5,
+  "alpha": 0.1,
+  "per_lag_alpha": {
+    "1": 0.03162277660168379,
+    "4": 1000.0,
+    "16": 0.31622776601683794,
+    "60": 0.31622776601683794
+  },
+  "weak_lag": {
+    "1": false,
+    "4": true,
+    "16": false,
+    "60": false
+  },
+  "n_trials_masked": 516,
+  "prior_pleft_corr": 0.8720557908440738,
+  "median_trial_s": 4.374106211329149,
+  "nest_short_contains_long_k1": 0.7048270133578426,
+  "nest_long_contains_short_k1": 0.4169961680198255,
+  "nest_short_contains_long_k2": 0.6999961436590341,
+  "nest_long_contains_short_k2": 0.5413515745627292,
+  "floor_mean_deg_mean": 39.9259423205968,
+  "floor_mean_deg_q05": 31.360612362755287,
+  "floor_first_deg_mean": 5.4287227252313,
+  "floor_first_deg_q05": 0.4481597002575999,
+  "floor_sum_sin2_mean": 2.1673138297442365,
+  "floor_sum_sin2_q05": 1.6248207905391578
+}

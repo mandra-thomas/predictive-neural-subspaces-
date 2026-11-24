@@ -1,6 +1,5 @@
 data/one_cache/
 data/interim/
-results/
 figures/
 paper-brain-wide-map/
 __pycache__/
@@ -13,25 +12,15 @@ __pycache__/
 /*.pdf
 slurm/logs/
 logs/
-results_residual/
 data_stable/
-results_stable/
 data_mua/
-results_mua/
 data_ampstable/
-results_ampstable/
 data/external/
 data_ampcorr_low/
-results_ampcorr_low/
 data_ampcorr_high/
-results_ampcorr_high/
 data_ampcorr_slow/
-results_ampcorr_slow/
 data_region2/
-results_region2/
 data_detrend_q/
-results_detrend_q/
 data_detrend_c/
-results_detrend_c/
-results_a17_longlag_c/
-results_a17_longlag_q/
+
+# results folders are committed (all files are small: ~48 MB in total, none over 1 MB)
