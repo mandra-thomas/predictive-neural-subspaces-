@@ -13,6 +13,18 @@ generator np.random.default_rng([seed, 17]) so existing draws are unchanged):
                           with variances decaying by drift_decay per component, on their own loadings
   drift_mode "per_unit" : the same kind of process drawn independently for every unit (rank about p)
   slow_noise_loading "separate" : the AR(0.99) slow noise gets its own loading instead of riding on the prior loading
+
+A18 calibration additions (all off by default; their random draws come from np.random.default_rng([seed, 18])):
+  task          : a real session's task sequence (`task_from_pre`): trial timing, stimulus sides, contrasts, choices,
+                  outcomes, block probabilities and the BWM trial mask. The prior is computed from the real sides.
+                  Task-dependent latents switch to trial t's value at feedback(t-1) + 0.5 s, and never later than
+                  0.6 s before stimOn(t), so the whole pre-stimulus window carries trial t's value.
+  unit_rates_hz : per-unit mean firing rates; after all latents are added, each unit's offset is set so that its
+                  mean rate over the session equals the target (Poisson observations).
+  history_gain  : a stimulus-history latent, sum_{j=1..history_k} side(t-j) exp(-(j-1)/history_tau), standardised
+                  over trials, on its own loading. It carries recent stimuli but no block prior.
+  evoked_gain   : unsigned responses to stimulus onset, movement onset and feedback (exp(-t/0.3 s) kernels over
+                  1.5 s), one latent per event on its own loadings: the part a trial-locked GLM removes.
 """
 from __future__ import annotations
 
@@ -51,38 +63,95 @@ def _slow_process(t: np.ndarray, rng, mid: float, min_period_min: float = 20.0, 
     return (x - x.mean()) / x.std()
 
 
+def task_from_pre(pre: dict) -> dict:
+    """The task sequence (no neural data) of a preprocessed real session, plus its units' mean rates."""
+    keys = ("side", "contrast", "stimOn_times", "firstMovement_times", "feedback_times", "choice", "feedbackType",
+            "probabilityLeft", "mask")
+    task = {k: np.asarray(pre[k]) for k in keys}
+    edges = np.asarray(pre["edges"], float)
+    task.update(t0=float(edges[0]), t1=float(edges[-1]))
+    rates = np.asarray(pre["counts"]).sum(0) / (edges[-1] - edges[0])
+    return task, rates
+
+
+def _real_trials(task: dict):
+    side = np.asarray(task["side"], float)
+    n = len(side)
+    stim_on = np.asarray(task["stimOn_times"], float)
+    first_move = np.asarray(task["firstMovement_times"], float)
+    feedback = np.asarray(task["feedback_times"], float)
+    contrast = np.nan_to_num(np.asarray(task["contrast"], float), nan=0.0)
+    k = np.arange(n)
+    ok = np.isfinite(stim_on)
+    starts = np.interp(k, k[ok], stim_on[ok]) - 1.0
+    starts[0] = task["t0"]
+    starts = np.maximum.accumulate(starts)
+    ends = np.r_[starts[1:], task["t1"]]
+    switch = starts.copy()
+    for i in range(1, n):
+        cands = []
+        if np.isfinite(feedback[i - 1]):
+            cands.append(feedback[i - 1] + 0.5)
+        if np.isfinite(stim_on[i]):
+            cands.append(stim_on[i] - 0.6)
+        if cands:
+            switch[i] = min(cands)
+    switch = np.maximum.accumulate(switch)
+    cl = np.where(side > 0, contrast, np.nan)
+    cr = np.where(side < 0, contrast, np.nan)
+    trials = {"intervals": np.column_stack([starts, ends]), "stimOn_times": stim_on,
+              "firstMovement_times": first_move, "feedback_times": feedback, "contrastLeft": cl, "contrastRight": cr,
+              "probabilityLeft": np.asarray(task["probabilityLeft"], float),
+              "choice": np.asarray(task["choice"], float), "feedbackType": np.asarray(task["feedbackType"], float)}
+    return (trials, switch, side, contrast, stim_on, first_move, feedback, np.asarray(task["choice"], float),
+            np.asarray(task["mask"], bool))
+
+
 def simulate_session(n_trials: int = 600, n_units: int = 40, seed: int = 0, prior_gain: float = 2.0,
                      stim_gain: float = 1.5, drift_gain: float = 0.0, slow_noise: float = 0.3,
                      base_rate_hz: float = 8.0, loading_scale: float = 0.6, drift_mode: str = "walk",
                      drift_rank: int = 3, drift_decay: float = 0.3, drift_mid: float = 0.0,
-                     slow_noise_loading: str = "shared") -> dict:
+                     slow_noise_loading: str = "shared", task: dict | None = None,
+                     unit_rates_hz: np.ndarray | None = None, history_gain: float = 0.0, history_tau: float = 1.0,
+                     history_k: int = 10, evoked_gain: float = 0.0) -> dict:
     if drift_mode not in ("walk", "lowrank", "per_unit") or slow_noise_loading not in ("shared", "separate"):
         raise ValueError(f"unknown drift_mode {drift_mode!r} or slow_noise_loading {slow_noise_loading!r}")
     rng = np.random.default_rng(seed)
     rng2 = np.random.default_rng([seed, 17])          # A18: all new draws
-    # --- trial structure
-    dur = rng.uniform(3.0, 5.0, n_trials)
-    starts = 1.0 + np.r_[0, np.cumsum(dur)[:-1]]
-    stim_on = starts + rng.uniform(0.4, 0.7, n_trials)
-    first_move = stim_on + rng.uniform(0.15, 0.45, n_trials)
-    feedback = first_move + 0.05
-    p_left, side = pseudo_sides(n_trials, rng)
-    prior = bayes_optimal_prior(side)
-    contrast = rng.choice([0.0, 0.0625, 0.125, 0.25, 1.0], n_trials)
-    p_correct = 0.5 + 0.45 * np.minimum(contrast / 0.25, 1.0)
-    correct = rng.random(n_trials) < p_correct
-    choice = np.where(correct, side, -side)              # +1 = left-stimulus choice in this convention
-    trials = {
-        "intervals": np.column_stack([starts, starts + dur]),
-        "stimOn_times": stim_on, "firstMovement_times": first_move, "feedback_times": feedback,
-        "contrastLeft": np.where(side > 0, contrast, np.nan), "contrastRight": np.where(side < 0, contrast, np.nan),
-        "probabilityLeft": p_left, "choice": choice.astype(float), "feedbackType": np.where(correct, 1.0, -1.0),
-    }
+    rng3 = np.random.default_rng([seed, 18])          # A18 calibration additions
+    mask = np.ones(n_trials, bool)
+    if task is None:
+        # --- trial structure
+        dur = rng.uniform(3.0, 5.0, n_trials)
+        starts = 1.0 + np.r_[0, np.cumsum(dur)[:-1]]
+        stim_on = starts + rng.uniform(0.4, 0.7, n_trials)
+        first_move = stim_on + rng.uniform(0.15, 0.45, n_trials)
+        feedback = first_move + 0.05
+        p_left, side = pseudo_sides(n_trials, rng)
+        prior = bayes_optimal_prior(side)
+        contrast = rng.choice([0.0, 0.0625, 0.125, 0.25, 1.0], n_trials)
+        p_correct = 0.5 + 0.45 * np.minimum(contrast / 0.25, 1.0)
+        correct = rng.random(n_trials) < p_correct
+        choice = np.where(correct, side, -side)              # +1 = left-stimulus choice in this convention
+        trials = {
+            "intervals": np.column_stack([starts, starts + dur]),
+            "stimOn_times": stim_on, "firstMovement_times": first_move, "feedback_times": feedback,
+            "contrastLeft": np.where(side > 0, contrast, np.nan), "contrastRight": np.where(side < 0, contrast, np.nan),
+            "probabilityLeft": p_left, "choice": choice.astype(float), "feedbackType": np.where(correct, 1.0, -1.0),
+        }
+        switch = starts
+        t_end = starts[-1] + dur[-1] + 1.0
+    else:
+        trials, switch, side, contrast, stim_on, first_move, feedback, choice, mask = _real_trials(task)
+        n_trials = len(side)
+        prior = bayes_optimal_prior(side)
+        t_end = float(task["t1"]) + 1.0
+    if unit_rates_hz is not None:
+        n_units = len(unit_rates_hz)
     # --- latents on the fine grid
-    t_end = starts[-1] + dur[-1] + 1.0
     t = np.arange(0, t_end, DT)
     n = len(t)
-    trial_of_t = np.clip(np.searchsorted(starts, t, side="right") - 1, 0, n_trials - 1)
+    trial_of_t = np.clip(np.searchsorted(switch, t, side="right") - 1, 0, n_trials - 1)
     slow_ar = _ar(n, 0.99, slow_noise, rng)
     slow = prior_gain * (prior[trial_of_t] - 0.5) + (slow_ar if slow_noise_loading == "shared" else 0.0)
     fast = _ar(n, 0.5, 0.3, rng)
@@ -90,7 +159,7 @@ def simulate_session(n_trials: int = 600, n_units: int = 40, seed: int = 0, prio
     kern = np.exp(-np.arange(0, int(1.5 / DT)) * DT / 0.3)
     drive = np.zeros(n)
     for k in range(n_trials):
-        if contrast[k] > 0:
+        if contrast[k] > 0 and np.isfinite(stim_on[k]):
             seg = slice(k_on[k], min(k_on[k] + len(kern), n))
             drive[seg] += side[k] * np.sqrt(contrast[k]) * kern[: seg.stop - seg.start]
     fast = fast + stim_gain * drive
@@ -124,6 +193,28 @@ def simulate_session(n_trials: int = 600, n_units: int = 40, seed: int = 0, prio
         Dunits = np.column_stack([np.interp(t, tc, Dunits_c[:, u]) for u in range(n_units)])
         log_rate = log_rate + drift_gain * Dunits
         truth_extra["drift_units_coarse_t"] = tc
+    if history_gain:
+        h = np.zeros(n_trials)
+        for j in range(1, history_k + 1):
+            h[j:] += side[:-j] * np.exp(-(j - 1) / history_tau)
+        h = (h - h.mean()) / h.std()
+        L_h = rng3.standard_normal(n_units) * loading_scale
+        log_rate = log_rate + np.outer(history_gain * h[trial_of_t], L_h)
+        truth_extra.update({"history": h, "L_history": L_h})
+    if evoked_gain:
+        E = np.zeros((n, 3))
+        for c, ev in enumerate((stim_on, first_move, feedback)):
+            k_ev = np.searchsorted(t, ev[np.isfinite(ev)])
+            for k0 in k_ev:
+                seg = slice(k0, min(k0 + len(kern), n))
+                E[seg, c] += kern[: seg.stop - seg.start]
+        L_ev = rng3.standard_normal((n_units, 3)) * loading_scale
+        log_rate = log_rate + evoked_gain * E @ L_ev.T
+        truth_extra["L_evoked"] = L_ev
+    if unit_rates_hz is not None:                      # match each unit's mean rate to the target
+        m = np.exp(np.clip(log_rate, -10, 5)).mean(0)
+        log_rate = log_rate + np.log(np.asarray(unit_rates_hz, float)) - np.log(m)
+        truth_extra["trial_of_t"] = trial_of_t
     lam = np.exp(np.clip(log_rate, -10, 5)) * DT
     counts = rng.poisson(lam)
     tt, uu = np.nonzero(counts)
@@ -135,7 +226,8 @@ def simulate_session(n_trials: int = 600, n_units: int = 40, seed: int = 0, prio
     wheel_v = np.zeros(n)
     k_mv = np.searchsorted(t, first_move)
     for k in range(n_trials):
-        wheel_v[k_mv[k]: k_mv[k] + 6] += choice[k] * 3.0
+        if np.isfinite(first_move[k]):
+            wheel_v[k_mv[k]: k_mv[k] + 6] += choice[k] * 3.0
     return {"spike_times": spike_t[order], "spike_clusters": spike_c[order], "n_units": n_units,
-            "trials": trials, "mask": np.ones(n_trials, bool), "wheel_t": t, "wheel_v": wheel_v,
+            "trials": trials, "mask": mask, "wheel_t": t, "wheel_v": wheel_v,
             "truth": {"L": L, "latents": latents, "prior": prior, "side": side, **truth_extra}}

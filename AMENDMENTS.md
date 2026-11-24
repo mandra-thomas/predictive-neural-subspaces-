@@ -10,8 +10,8 @@ applies to D1 to D9, A1 to A11 (all in the first commit, before any real-data fi
 exploratory* applies to A13, A14 and A15. Their designs and reading rules were likewise committed before the relevant
 data were analysed, and their headings below say "pre-registered", but they were written on 21 and 22 November, after
 the 20 November analysis freeze in the proposal, so the report and `RESULTS.md` use the narrower label. *Post hoc*
-means designed after the relevant results were seen: D10 (a bug fix), P1h, the two A14 post hoc additions, A16 and
-A17 (A17 executes extensions listed in the proposal, with post hoc specifics).
+means designed after the relevant results were seen: D10 (a bug fix), P1h, the two A14 post hoc additions, A16,
+A17 (A17 executes extensions listed in the proposal, with post hoc specifics) and A18.
 
 | # | First recorded | Status | RESULTS.md section | Code |
 |---|---|---|---|---|
@@ -43,6 +43,7 @@ A17 (A17 executes extensions listed in the proposal, with post hoc specifics).
 | A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
 | A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day; review note 2026-11-24 | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
+| A18 part A | 2026-11-24, before any calibration or simulation outcome | post hoc | Calibrated simulation (A18 part A) | `pns.sim_a18`, `pns.synth` task/rate/history/evoked options, `26_sim_A18.py` |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
 amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
@@ -634,3 +635,128 @@ code and results; post hoc).** Four corrections and one sensitivity check. No re
   during which the prior is constant. The bin-based median is 67 s (IQR 55 to 75 s; bootstrap 95% interval of the
   median 55 to 75 s). Both versions put the prior's memory well below a block (median 46 trials, 3.6 min). Added to
   `23_timescales_A17.py` (new columns `*_trialidx` in `results/a17/timescales.csv`; earlier columns unchanged).
+
+## A18 part A: calibrated simulation of the prior competing with drift (post hoc; written 2026-11-24, before any calibration or simulation outcome was computed)
+
+**Why.** A17 measured that the block prior is small and short-lived next to the slow component, and that no lag up
+to 4 minutes selects it. It did not show that this competition causes the original failure, and the review note of
+24 November withdrew the claim that the prior was provably excluded from the rank-5 subspaces. Part A asks the causal
+question in a setting where the answer is known: when a prior and a drift of the measured sizes share one simulated
+population, does rank-5 lagged RRR lose the prior the way it did in the recordings, and is the drift needed for that?
+It also tests a weakness of the prior score itself: the pseudo-session null redraws the block sequence, so neurons
+that merely remember the last few real stimuli correlate with the real prior and not with the pseudo priors, which
+would give a positive corrected score without any encoded prior. Part B (the latent state-space model and its
+simulation gate) is not specified here; it gets its own addendum, committed before any latent-model fit on simulated
+or real data.
+
+**Status and honesty notes.**
+- Post hoc relative to the original study: designed after all primary, pilot, A16 and A17 results (including the
+  review note) were known. Exploratory; changes no earlier reading, no frozen analysis and no A17 decision rule.
+- What was seen before writing. The simulator's real-task path was checked for structure only (the simulated
+  session has the real session's length, prior and trial mask; unit rates match; the pre-stimulus window carries
+  trial t's task latents). Timing runs of `fit_session` and of one sweep job (cell "nodrift", seed 1000, at the
+  starting gains, not the calibrated ones) were made with their outputs not printed or inspected, and the summary
+  and figure code were run on random placeholder numbers. No calibration statistic of a simulated session, and no
+  simulated decoding score, has been looked at.
+- Code added for this entry (new features after the 20 November freeze): `pns.synth` options `task`,
+  `unit_rates_hz`, `history_gain`/`history_tau`/`history_k` and `evoked_gain` (all off by default; the default
+  output stays bit-identical, checked by the fingerprint test); `pns.sim_a18`; `scripts/26_sim_A18.py`;
+  `tests/test_sim_a18.py`. The tests check that the simulation's prior and elapsed-time scores equal
+  `pipeline.decode_session` to 1e-12 and that `calibration_stats` reproduces the published real values (A16
+  full-population ridge prior, A17 low-frequency, trial-locked and pre-stimulus prior shares) to 1e-10.
+
+**Audit of the generator against the recordings.**
+- *Matched exactly, per simulated session (taken from one real session, task data and unit rates only):* trial
+  timing (stimulus, movement and feedback times, including the long gaps), stimulus sides and contrasts, choices,
+  outcomes, block probabilities, the BWM trial mask, session length (so the number of 0.5 s bins), number of units,
+  and each unit's mean firing rate. The Bayes-optimal prior is computed from the real sides, so its timescale and
+  block structure are the recorded ones.
+- *Matched by calibration (six gains onto six real session medians):* full-population corrected prior R² (sets the
+  prior's strength); the >= 20 min share (drift strength); the 5 to 20 min share (drift's mid-band weight);
+  full-population previous-side AUC from the pre-stimulus window (strength of the stimulus-history trace); the
+  trial-locked share (unsigned evoked responses); full-population current-side AUC from the post-stimulus window
+  (signed stimulus response).
+- *Assumptions, not matched (each could change the answer):*
+  - Nuisance rank and spectrum. Low-rank drift (3 processes with variances decaying by 0.3 per component, fixed
+    loadings) is the primary regime; per-unit independent drift (rank about p) is the second. Real drift may lie
+    between them, and A16 found the units carrying the slow mode change between session halves, which fixed
+    loadings do not reproduce.
+  - Mixing geometry. Loadings are independent Gaussian across units (scale 0.6); the stimulus loading shares 0.3 of
+    the prior loading; the prior, history, evoked, slow-noise and drift loadings are otherwise independent.
+  - The prior is encoded linearly in log rate as one latent proportional to (prior - 0.5), switching at the previous
+    trial's feedback + 0.5 s.
+  - Stimulus history is one latent, sum over the last 10 sides with weights exp(-(j-1)/1 trial); real history
+    memory may be longer or include choices and outcomes.
+  - Evoked responses: exp(-t/0.3 s) kernels at stimulus, movement and feedback onsets.
+  - Other variability: an AR(1) slow noise (autocorrelation 0.99 per 0.5 s, sd 0.3, own loading), the original
+    fast noise and two shared fast noise factors. Observations are Poisson (no overdispersion or refractoriness).
+  - Reported, not matched (diagnostics): the leading and five leading principal components' variance fractions, the
+    A17 pre-stimulus prior share, and the full-population history-controlled prior score.
+
+**New real-data computation (stage `targets`; descriptive).** `calibration_stats` on the 16 recorded sessions, with
+script 05's exact pseudo-session draws: the six calibration targets, the diagnostics above, and one new descriptive
+number, the full-population *history-controlled* prior score (the prior and every pseudo prior each regressed on
+their own previous 5 sides before decoding). Writes `results/a18/real_targets.csv` and `real_targets.json`. No test
+is made on these numbers.
+
+**Calibration (stage `calibrate`).** Seeds 900 to 915, seed 900 + k using real session k's task and rates (disjoint
+from the sweep seeds). Starting gains: prior 1.0, drift 1.0, mid-band weight 0.5, history 0.3, evoked 0.5,
+stimulus 1.5. Each iteration simulates all 16 sessions, takes the median of each statistic, and multiplies each gain
+by (target / current) raised to 0.7 times the statistic's scaling exponent (0.5 for shares and R², 1 for AUC - 0.5),
+the factor clipped to [0.5, 2] (2 if the current value is not positive). Stop when all six are within 10% of
+target, or after 12 iterations. A target is "accepted" if within 25%; unaccepted targets are reported, not hidden.
+The per-unit regime then re-fits only its drift gain and mid-band weight onto the same two drift targets, other
+gains fixed. Only calibration statistics are computed during calibration; no subspace is fitted.
+
+**Cells (stage `sweep`).** Every cell uses the same 32 seeds (1000 to 1031; seed s uses real session (s - 1000) mod
+16, so each task appears twice), so trial sequences, loadings and noise draws are paired across cells; within a
+regime, cells differ only in the gains named.
+- `favourable`: prior gain x 3, no drift (positive control).
+- `nodrift`: calibrated, drift gain 0 (matched weak prior, no drift).
+- `lowrank_x0.33`, `lowrank_x1`, `lowrank_x3`: low-rank drift at 1/3, 1 and 3 times the calibrated drift gain.
+- `perunit_x0.33`, `perunit_x1`, `perunit_x3`: the same for per-unit drift.
+- `neg_history`: prior gain 0, everything else as `lowrank_x1` (stimulus history, evoked responses, drift present).
+- `neg_pure`: prior gain 0 and history gain 0, otherwise as `lowrank_x1` (null calibration check).
+
+**Analysis per simulated session (`pns.sim_a18.analyse_session`).** The registered pipeline: `fit_session` with
+`config.yaml` (lags 0.5, 2, 8 and 30 s; d = 5; the alpha grid and contiguous purged folds), PCA and the
+covariance-matched random subspace; prior decoding from the pre-stimulus window by ridge with contiguous folds and
+200 pseudo sessions (seed [s, 99]), for every subspace and the full population. Recorded: corrected prior per set;
+the P2-style change (30 s minus 0.5 s, corrected by the median paired pseudo difference); the history-controlled
+score per set; elapsed-time R² and current-side AUC per set; and the ground-truth capture of the true prior
+direction (the share of its optimal linear readout inside each subspace, and of its loading inside the 0.5 s and
+30 s loading bases, against chance d/p). The cells `nodrift`, `lowrank_x1`, `perunit_x1` and `neg_history` are also
+run after the in-memory cosine detrend (`timescales.detrend_pre`, identical to the A16 copy), for comparison with
+the A16/A17 cosine results. Output: `results/a18/sim_seeds.csv` (one row per cell, seed and pipeline).
+
+**Fixed metrics.** For a cell, c(set) is the mean over the 32 seeds of the corrected prior, and the capture of a set
+is c(set) / c(full population) (95% interval by resampling seeds). "Positive in enough seeds" means at least 22 of
+32 (one-sided binomial p < 0.05).
+
+**Readings (stage `summary`).**
+- *G1, positive control.* Passes if in `favourable` the full-population and the 30 s scores are each positive in at
+  least 22 of 32 seeds. If it fails, reading A is "uninformative".
+- *A, is drift needed or sufficient (primary: low-rank; secondary: per-unit)?* Let k0 be the 30 s capture in
+  `nodrift`. If k0 < 0.25: "weak prior sufficient" (the calibrated prior is not captured at 30 s even without
+  drift, so drift is not needed to explain the failure). Otherwise, at the calibrated drift: "drift sufficient" if
+  the 30 s capture is below k0 / 2 and the median P2-style change is at most 0; "drift not sufficient" if the
+  capture is at least k0 / 2 and the median change is positive; "intermediate" otherwise.
+- *B, history leakage.* `neg_pure` positive (full population) in 22 or more seeds: the null is miscalibrated, and
+  every simulated prior score is suspect. `neg_history` positive in 22 or more: "leakage present" (a stimulus-history
+  trace of the calibrated strength produces a positive pseudo-session-corrected prior score with no prior encoded);
+  its size is reported as a fraction of the real full-population target. The history-controlled score is "valid" if
+  it is positive in fewer than 22 seeds in `neg_history` and in 22 or more in `nodrift`.
+- *C, profile comparison (descriptive).* For `lowrank_x1` and `perunit_x1`, eight features are compared with the
+  real raw-data mouse means and their 95% intervals: corrected prior at 0.5 s, 30 s, PCA and random; elapsed-time R²
+  at 30 s, PCA and random; and the P2 change. The count inside the real interval is reported. A match shows the
+  simulated mechanism *can* produce the recorded pattern; it does not show that it *does* in the recordings.
+- *Recommendation for Part B.* Proceed to the latent state-space model on real data only if G1 passes, the
+  history-controlled score is valid (otherwise the model's readout cannot be told apart from stimulus memory and the
+  design must change first), and the full-population prior is positive in 22 or more seeds of `lowrank_x1` (so
+  there is something to find at realistic drift). Even then, Part B's own simulation gate comes first.
+
+**Multiplicity.** The readings are about the simulator, not tests on neural data. The one new real-data number (the
+history-controlled full-population prior) is descriptive.
+
+**Not done here.** No latent-model fit, on simulated or real data. No frozen analysis, earlier result or A17 rule is
+changed. No branch is merged.
