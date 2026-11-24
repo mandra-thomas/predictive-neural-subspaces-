@@ -16,6 +16,32 @@
   "tau_pi_s_median": 66.88051713271446,
   "tau_pi_trials_median": 16.940621821742816,
   "first_zero_s_median": 133.5,
+  "tau_pi_s_iqr": [
+    54.55555308035027,
+    75.15566745174384
+  ],
+  "tau_pi_s_median_boot95": [
+    54.77663194968416,
+    75.15200589313743
+  ],
+  "trial_indexed": {
+    "tau_trials_median": 12.217421874589125,
+    "tau_trials_iqr": [
+      10.916626553195828,
+      13.766906084478386
+    ],
+    "tau_trials_median_boot95": [
+      10.9837257992234,
+      13.551767829285032
+    ],
+    "first_zero_trials_median": 27.0,
+    "rho_median": {
+      "8tr": 0.6672311327332888,
+      "15tr": 0.36933271307610516,
+      "30tr": -0.0932084705663613,
+      "60tr": -0.2441483562867981
+    }
+  },
   "prior_cosine_fraction_median": 0.11729445991599402,
   "prior_cosine_fraction_range": [
     0.042208277508915204,

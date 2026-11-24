@@ -42,7 +42,7 @@ A17 (A17 executes extensions listed in the proposal, with post hoc specifics).
 | A14 | 2026-11-22 10:16 (`f3008e7`); post hoc additions 10:25 (`7d0172d`) | prospectively documented exploratory; two post hoc checks | Third pilot (A14) | `15_build_A14.py`, `16_pilot_A14.py`, `pns.ampcorr`, `slurm/pilot_A14.sbatch` |
 | A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
-| A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
+| A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day; review note 2026-11-24 | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
 amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
@@ -594,3 +594,43 @@ lags, raw and detrended. It is still reported, labelled as such. Two quantities 
   however decodable it is.
 - **Capture:** the squared norm of the unit prior-loading direction projected onto that root's fitted `Vout_full_{lag}`
   subspace, minus the median over the pseudo-prior loadings, against isotropic chance d/p.
+
+**A17 review note (written 2026-11-24, after Parts 0 to 2 had run, in response to an outside review of the committed
+code and results; post hoc).** Four corrections and one sensitivity check. No reading rule changes.
+- **The "upper bound" is not a bound; it is renamed a scale comparison.** The part 1 addendum above claimed that if
+  the corrected prior sum of squares times rho_pi² is below the 5th eigenvalue of G, the prior cannot be among a
+  rank-5 fit's directions. No derivation supports that, and it fails for four reasons. First, rho_pi² is the
+  predictability of the prior from its own current value; past activity can carry more information about the
+  future prior than that (for example about how long the current block has run), so it is not an upper limit on
+  the prior's predictability. Second, the fit's directions need not be pure components: a weak prior component that
+  shares a direction with a strong predictable signal can tilt the subspace even when its own share is below the
+  5th eigenvalue, and cross terms are ignored. Third, G's eigenvalues describe the output (loading) side, while the
+  prior is decoded from the input-side readout basis. Fourth, the pseudo-corrected sum of squares is an estimate
+  with sampling error, not a decomposition into independent sources. The quantity is still reported, as a
+  descriptive indicator that the prior's estimated predictable variance is small next to the dominant modes (its
+  ratio to the 5th eigenvalue has a median of 0.05 to 0.66 across roots and lags, and a maximum of 2.18). The
+  claim that the prior "could not have entered" a rank-5 subspace is withdrawn. Relatedly, the uncorrected Rayleigh
+  quotient along the prior-loading direction exceeds the 5th eigenvalue in 8 to 14 of 16 sessions (raw and
+  detrended, 0.5 s and 30 s), and the pseudo-corrected one in 2 to 7; the direction the prior loads on is often
+  strongly predictable, which is a further reason the comparison cannot settle entry.
+- **The variance shares are measured differently and are not one budget.** The >= 20 min share is the in-sample R²
+  of the cosine design on all 0.5 s bins of z-scored activity (not null-corrected). The primary prior share is
+  measured on pre-stimulus trial windows after projecting the cosine span off both sides, and is pseudo-corrected.
+  Their ratio (about 100) is not an exact competition between two additive sources. The per-bin secondary prior
+  share is on the same bins as the low-frequency share; per session the ratio of the two has a median of 124. The
+  report says "about two orders of magnitude larger, under the respective measurements".
+- **Pair counts are not independent observations.** The per-fold test-pair counts stored by the lag guard check that
+  each fold has data; consecutive pairs are strongly dependent, and inference is at the mouse level.
+- **No claim of a misaligned prior in the original decoder.** `prior_per_bin` (Part 0, and the per-bin prior share)
+  assigns trial t's prior to the 0.5 s bins before trial t's stimulus onset. The original decoder is unaffected by
+  that convention: it uses spike counts in the event-aligned window [-0.6, -0.1) s before stimulus onset
+  (`binning.window_counts`), and `bayes_optimal_prior` gives trial t's prior from the sides of trials before t. No A17
+  result implies that the original prior decoding was misaligned.
+- **Sensitivity of the prior timescale (Part 0).** Computed on the trial-indexed prior (one value per trial with a
+  valid stimulus onset, lags in trials), so it does not depend on how the prior is spread over bins: median 12.2
+  trials (IQR 10.9 to 13.8; bootstrap 95% interval of the median over sessions 11.0 to 13.6), first zero crossing
+  at 27 trials, autocorrelation 0.67 at 8 trials and 0.37 at 15 trials. That is shorter than the bin-based 16.9
+  trials (67 s divided by the median stimulus interval); the bin-based value is lengthened by long inter-trial gaps,
+  during which the prior is constant. The bin-based median is 67 s (IQR 55 to 75 s; bootstrap 95% interval of the
+  median 55 to 75 s). Both versions put the prior's memory well below a block (median 46 trials, 3.6 min). Added to
+  `23_timescales_A17.py` (new columns `*_trialidx` in `results/a17/timescales.csv`; earlier columns unchanged).

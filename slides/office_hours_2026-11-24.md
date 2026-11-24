@@ -7,7 +7,8 @@ probabilities and the Bayes-optimal prior.
 ## What the figure shows
 
 Panel a puts every timescale on one clock. The median stimulus interval is 3.9 s. The lags I tested ran from 0.5 to
-30 s. The prior's integrated timescale is about 67 s (17 trials). Blocks last a median of 46 trials, which is 3.6 min
+30 s. The prior's integrated timescale is about 67 s (IQR 55–75 s across sessions). Counted directly in trials it is
+about 12 trials, with the autocorrelation reaching zero by 27 trials. Blocks last a median of 46 trials, which is 3.6 min
 (IQR 2.4–5.2 min, 215 completed blocks). A session lasts a median of 66.5 min.
 
 Panel b shows how much of the prior's variance is still predictable Δ ahead (ρ²). It is 0.59 at 30 s, 0.27 at 60 s and
@@ -41,10 +42,12 @@ Panel b shows how much of the prior's variance is still predictable Δ ahead (ρ
   | Trial-locked responses | 8.6% |
   | Block prior, pre-stimulus windows (pseudo-session corrected) | 0.20% |
 
-  The slow component is about 100 times larger than the prior. An upper bound on the prior's predictable variance
-  (its explained variance times ρ²) is below the 5th RRR eigenvalue in 16 of 16 sessions on raw data, at both 0.5 s
-  and 30 s. So the prior could not have entered a 5-D subspace even if perfectly decodable. After removing the slow
-  trend this still holds at 0.5 s in all 16 sessions, and at 30 s in 12 of 16.
+  The two shares are measured differently (all bins vs pre-stimulus windows), so the honest statement is "about two
+  orders of magnitude larger, under the respective measurements", not an exact ratio. A rough scale comparison (the
+  prior's corrected explained variance times ρ²) is well below the 5th RRR eigenvalue in most sessions. This is
+  descriptive only. It is **not** a proof that the prior could not enter a 5-D subspace: components mix within
+  directions, ρ² is not a true upper limit on predictability, and the eigenvalues describe the output side while I
+  decode from the input side. I withdrew that claim (AMENDMENTS, A17 review note).
 - **Lag sweep to 4 min on the two detrended copies.** No lag selects the prior (60 s vs 0.5 s: p = 0.29 and 0.55;
   60 s vs PCA: p = 0.12 and 0.53). The prior I decode from these subspaces stays about the same from 0.5 s to 4 min.
   Cosine copy: 0.03–0.05, similar to PCA (0.03) and to random subspaces (0.02). Quadratic copy: about 0 at every lag.

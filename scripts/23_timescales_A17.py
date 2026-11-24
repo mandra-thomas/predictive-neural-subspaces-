@@ -3,6 +3,9 @@
 Per session: duration, median stimulus interval, completed-block durations, the prior's autocorrelation rho_pi at
 fixed lags, its integrated timescale tau_pi (seconds and trials; truncated at the first zero crossing), and the
 fraction of the per-bin prior's variance inside the >= 20 min cosine span (what the A16 cosine detrend removes).
+Sensitivity (added 2026-11-24 after an outside review): the same timescale computed on the trial-indexed prior (one
+value per trial with a valid stimOn, lags in trials), so it does not depend on how the prior is spread over 0.5 s
+bins; plus the session spread (IQR, and a bootstrap interval for the median over sessions).
 
 Writes results/a17/timescales.csv (per session), results/a17/blocks.csv (every completed block),
 results/a17/prior_acf.csv (dense log-spaced ACF per session, for the figure) and results/a17/timescales.json.
@@ -18,6 +21,15 @@ from pns.timescales import acf, integrated_timescale, prior_cosine_fraction, pri
 
 LAGS_S = [0.5, 2, 8, 30, 60, 120, 240, 480]
 MAX_LAG_S = 20 * 60
+LAGS_TRIALS = [8, 15, 30, 60]
+MAX_LAG_TRIALS = 300
+
+
+def boot_median(x, n=5000, seed=0):
+    """Percentile bootstrap 95% interval of the median over sessions (sessions resampled; 13 mice, 16 sessions)."""
+    rng = np.random.default_rng(seed)
+    b = np.median(rng.choice(x, (n, len(x))), axis=1)
+    return [float(np.percentile(b, 2.5)), float(np.percentile(b, 97.5))]
 
 
 def main():
@@ -41,6 +53,10 @@ def main():
                "tau_pi_s": tau_s, "tau_pi_trials": tau_s / ts["stim_interval_s"], "first_zero_s": zero_s,
                "prior_cosine_fraction": prior_cosine_fraction(pre)}
         row.update({f"rho_{l:g}s": r for l, r in zip(LAGS_S, rho)})
+        p_tr = np.asarray(pre["prior"], float)[np.isfinite(np.asarray(pre["stimOn_times"], float))]
+        tau_tr, zero_tr = integrated_timescale(p_tr, 1.0, MAX_LAG_TRIALS)
+        row.update({"tau_pi_trials_trialidx": tau_tr, "first_zero_trials_trialidx": zero_tr})
+        row.update({f"rho_{l}tr_trialidx": r for l, r in zip(LAGS_TRIALS, acf(p_tr, LAGS_TRIALS))})
         rows.append(row)
         blocks += [{"eid": eid, "subject": subj, "trials": n, "minutes": m}
                    for n, m in zip(ts["block_trials"], ts["block_min"])]
@@ -60,6 +76,16 @@ def main():
         "block_min_iqr": [float(bl.minutes.quantile(0.25)), float(bl.minutes.quantile(0.75))],
         "tau_pi_s_median": float(df.tau_pi_s.median()), "tau_pi_trials_median": float(df.tau_pi_trials.median()),
         "first_zero_s_median": float(df.first_zero_s.median()),
+        "tau_pi_s_iqr": [float(df.tau_pi_s.quantile(0.25)), float(df.tau_pi_s.quantile(0.75))],
+        "tau_pi_s_median_boot95": boot_median(df.tau_pi_s.values),
+        "trial_indexed": {
+            "tau_trials_median": float(df.tau_pi_trials_trialidx.median()),
+            "tau_trials_iqr": [float(df.tau_pi_trials_trialidx.quantile(0.25)),
+                               float(df.tau_pi_trials_trialidx.quantile(0.75))],
+            "tau_trials_median_boot95": boot_median(df.tau_pi_trials_trialidx.values),
+            "first_zero_trials_median": float(df.first_zero_trials_trialidx.median()),
+            "rho_median": {f"{l}tr": float(df[f"rho_{l}tr_trialidx"].median()) for l in LAGS_TRIALS},
+        },
         "prior_cosine_fraction_median": float(df.prior_cosine_fraction.median()),
         "prior_cosine_fraction_range": [float(df.prior_cosine_fraction.min()), float(df.prior_cosine_fraction.max())],
         "rho_median": {f"{l:g}s": float(df[f"rho_{l:g}s"].median()) for l in LAGS_S},
