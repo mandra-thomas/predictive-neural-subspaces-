@@ -1,0 +1,53 @@
+{
+ "motion_corrected": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": -0.006151494543000368,
+  "mean_abs_r_real": 0.7395899700774593,
+  "p": 0.3934326171875
+ },
+ "motion_detrended_corrected": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": 0.062427511790804094,
+  "mean_abs_r_real": 0.4413980756693103,
+  "p": 0.13671875
+ },
+ "pupil_corrected": {
+  "n_animals": 13,
+  "n_sessions": 15,
+  "mean": -0.0006593954150565966,
+  "mean_abs_r_real": 0.3452117562445011,
+  "p": 0.419677734375
+ },
+ "pupil_detrended_corrected": {
+  "n_animals": 13,
+  "n_sessions": 15,
+  "mean": -0.003714317862394806,
+  "mean_abs_r_real": 0.13088896864576843,
+  "p": 0.5537109375
+ },
+ "test1_stable_units": {
+  "available": true,
+  "elapsed_r2_original": 0.8412821191688408,
+  "elapsed_r2_stable": 0.7734754237542479,
+  "drift_flags_stable": 12,
+  "n_sessions_stable": 13,
+  "drift_flags_original": [
+   14,
+   16
+  ],
+  "primary_holm_original": {
+   "P1": 0.0025634765625,
+   "P2": 0.891845703125,
+   "P3": 0.006103515625
+  },
+  "primary_holm_stable": {
+   "P1": 0.002197265625,
+   "P2": 0.973876953125,
+   "P3": 0.02685546875
+  },
+  "reading": "survives"
+ },
+ "overall_reading": "mixed or undetermined"
+}

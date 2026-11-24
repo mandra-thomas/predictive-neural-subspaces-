@@ -1,0 +1,65 @@
+{
+ "part1_replication": {
+  "available": true,
+  "primary_holm": {
+   "P1": 0.003662109375,
+   "P2": 0.51513671875,
+   "P3": 0.01220703125
+  },
+  "elapsed_r2": 0.8200218324076732,
+  "gate": {
+   "n_sessions": 15,
+   "median_corrected_r2": 0.0010954173393297184,
+   "frac_sessions_p05": 0.4,
+   "fisher_p": 0.0019458608951450434,
+   "n_pseudo": 200,
+   "decision": "GO"
+  },
+  "prior_in_population": true,
+  "criteria": {
+   "P1_sig": true,
+   "P3_sig": true,
+   "P2_not_sig": true,
+   "elapsed_r2_ge_0.5": true
+  },
+  "reading": "replicates"
+ },
+ "part2_shared_slow_mode": {
+  "n_animals": 12,
+  "n_sessions": 15,
+  "mean": 0.006037774649065655,
+  "median": 0.00817562567969692,
+  "p": 0.48486328125
+ },
+ "part2_raw_match_median": 0.9405152665971325,
+ "part2_detrended_r_median": 0.06968706846075688,
+ "part2_n_same_probe": 15,
+ "part3_rt": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": 0.044655676157884544,
+  "median": 0.026292152316593598,
+  "p": 0.1219482421875
+ },
+ "part3_rt_sign": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": 0.025727984329484276,
+  "median": 0.03595350992868683,
+  "p": 0.497314453125
+ },
+ "part3_accuracy": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": 0.026526938756337347,
+  "median": -0.019342467596047033,
+  "p": 0.3424072265625
+ },
+ "part3_accuracy_sign": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": 0.016935295026054908,
+  "median": 0.05272475086848339,
+  "p": 0.375732421875
+ }
+}

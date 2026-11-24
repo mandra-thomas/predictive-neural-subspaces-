@@ -1,0 +1,4 @@
+test,p,n,mean_diff_short,mean_diff_long,ci_short,ci_long,n_sessions_excluded_weak,p_holm,stat,median,mean,ci_lo,ci_hi,n_sessions
+P1 geometry IUT (cross > same at both lags),0.0625,5,15.24901355801851,5.508248360372365,"(10.735131935248276, 20.00407745978014)","(0.8606918336246793, 9.294955179866793)",0.0,0.1875,,,,,,
+P2 prior: corrected R2(long) - R2(short) > 0,0.59375,5,,,,,,1.0,7.0,0.007567732768953839,-0.017458023363892083,-0.0706411413337175,0.018546679564813772,5.0
+P3 cur_side: corrected AUC(short) - AUC(long) > 0,0.78125,5,,,,,,1.0,5.0,-0.016955239892629648,-0.0300531520053867,-0.11882418161610404,0.03848629851343261,5.0

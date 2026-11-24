@@ -1,0 +1,85 @@
+{
+ "part1_fluct_coupling_q2": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": -1.5440439790951355,
+  "median": -1.433501672217621,
+  "p": 0.9932861328125
+ },
+ "part1_fluct_coupling_q5": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": -1.9241799778991517,
+  "median": -2.378025574186283,
+  "p": 0.9947509765625
+ },
+ "part1_frac_units_positive_median": 0.2690166975881262,
+ "total_coupling_median": -0.058032695294778794,
+ "part2_low": {
+  "available": true,
+  "elapsed_r2_original": 0.8412821191688408,
+  "elapsed_r2": 0.8457927673128954,
+  "fraction_of_original": 1.0053616355813089,
+  "drift_flags": 13,
+  "n_sessions": 16,
+  "primary_holm": {
+   "P1": 0.0003662109375,
+   "P2": 0.7291259765625,
+   "P3": 0.006103515625
+  },
+  "reading": "survives"
+ },
+ "part2_high": {
+  "available": true,
+  "elapsed_r2_original": 0.8412821191688408,
+  "elapsed_r2": 0.7958552225720544,
+  "fraction_of_original": 0.9460027788993464,
+  "drift_flags": 14,
+  "n_sessions": 16,
+  "primary_holm": {
+   "P1": 0.0018310546875,
+   "P2": 0.7060546875,
+   "P3": 0.013427734375
+  },
+  "reading": "survives"
+ },
+ "part2_ramp_fraction_low_median": 1.0026303086518844,
+ "part2_ramp_fraction_high_median": 0.8552654492080858,
+ "posthoc_1b_isolated_coupling": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": -1.322278716397996,
+  "median": -0.972297168351833,
+  "p": 0.9801025390625
+ },
+ "posthoc_slow_maximal": {
+  "available": true,
+  "elapsed_r2_original": 0.8412821191688408,
+  "elapsed_r2": 0.7825522992766506,
+  "fraction_of_original": 0.93019010085438,
+  "drift_flags": 14,
+  "n_sessions": 16,
+  "primary_holm": {
+   "P1": 0.003662109375,
+   "P2": 0.63232421875,
+   "P3": 0.010498046875
+  },
+  "reading": "survives"
+ },
+ "posthoc_ramp_fraction_slow_median": 0.852790445115013,
+ "part3_early_amp": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": -0.12413312523045567,
+  "median": -0.18772195957040394,
+  "p": 0.7462158203125
+ },
+ "part3_early_slow": {
+  "n_animals": 13,
+  "n_sessions": 16,
+  "mean": -0.016178973188153842,
+  "median": -0.00969864629239525,
+  "p": 0.5804443359375
+ },
+ "overall_reading": "amplitude cannot account for the mode"
+}
