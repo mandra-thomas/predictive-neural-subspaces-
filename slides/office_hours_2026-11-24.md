@@ -31,6 +31,26 @@ Panel b shows how much of the prior's variance is still predictable Δ ahead (ρ
 - **Is RRR the only model?** Yes. It is the only representation model; everything else is decoders, the trial-locked
   GLM and nulls.
 
+## Results so far (A17, post hoc; run 23 November)
+
+- **Variance shares** (16 sessions; median share of z-scored activity):
+
+  | Component | Median share |
+  |---|---|
+  | Slow component, periods of 20 min or more | 22.6% |
+  | Trial-locked responses | 8.6% |
+  | Block prior, pre-stimulus windows (pseudo-session corrected) | 0.20% |
+
+  The slow component is about 100 times larger than the prior. An upper bound on the prior's predictable variance
+  (its explained variance times ρ²) is below the 5th RRR eigenvalue in 16 of 16 sessions on raw data, at both 0.5 s
+  and 30 s. So the prior could not have entered a 5-D subspace even if perfectly decodable. After removing the slow
+  trend this still holds at 0.5 s in all 16 sessions, and at 30 s in 12 of 16.
+- **Lag sweep to 4 min on the two detrended copies.** No lag selects the prior (60 s vs 0.5 s: p = 0.29 and 0.55;
+  60 s vs PCA: p = 0.12 and 0.53). The prior I decode from these subspaces stays about the same from 0.5 s to 4 min.
+  Cosine copy: 0.03–0.05, similar to PCA (0.03) and to random subspaces (0.02). Quadratic copy: about 0 at every lag.
+  I had predicted a decline that follows the prior's own ρ². It did not appear. The small prior signal in these
+  subspaces is what any 5-D projection carries; it is not selected through the prior's predictability.
+
 ## What I am doing now (all labelled post hoc, amendment A17/A18)
 
 1. **Variance shares.** How much activity is low-frequency drift versus prior versus trial-locked.
