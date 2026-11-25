@@ -1,0 +1,14 @@
+{
+  "n_sessions": 16,
+  "session_median": {
+    "corr_prev_side_all": 0.6440134213019462,
+    "r2_last1_all": 0.4147539889839329,
+    "r2_last5_all": 0.8065157476542281,
+    "r2_last10_all": 0.8589571487188021,
+    "corr_prev_side_decoded": 0.6265926968256588,
+    "r2_last1_decoded": 0.3926196176305186,
+    "r2_last5_decoded": 0.8009240546646281,
+    "r2_last10_decoded": 0.8528560236116355
+  },
+  "note": "task data only; side coded as in the preprocessed trials; in-sample least squares with intercept"
+}

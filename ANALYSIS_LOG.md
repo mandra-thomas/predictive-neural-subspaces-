@@ -113,3 +113,5 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-24 | - | - | note | A18 independent audit (two reviewers): no leak found; wording, pairing and comparison-level corrections in RESULTS and AMENDMENTS (A18 audit note); 26_sim_A18 --stage audit adds task-level checks. |
 | 2026-11-24 20:58 | 1a233eb | 3d83323a46 | 27_lds_sim_A18 | A18 part B gate: does not retain the prior under calibrated drift: stop; reproduction diff 9.7e-17 |
 | 2026-11-24 | - | - | note | A18 part B gate ran at 1a233eb (code committed unchanged); reading "does not retain the prior under calibrated drift: stop". No real-data latent-model fit. |
+| 2026-11-25 08:36 | 9cd4a62 | 3d83323a46 | 28_sensitivity_A19 sensitivity | A19: P2 mouse-mean p with/without 4d8c7767 = 0.892/0.793; A16 full ridge mouse mean 0.159/0.101 |
+| 2026-11-25 08:36 | 9cd4a62-dirty | 3d83323a46 | 28_sensitivity_A19 sources | A19 sources: prior vs previous sides, median corr 0.64, R2 last 1/5/10 = 0.41/0.81/0.86 |
