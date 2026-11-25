@@ -11,6 +11,9 @@ Stages (run in order; each reads the previous stage's output from results/a18/):
              cell and the in-memory cosine detrend for four -> sim_seeds.csv
   summary    pre-specified readings, calibration diagnostics, profile comparison -> sim_summary.json, sim_cells.csv,
              a18_simulation.pdf
+  audit      (post hoc) task-level counts and intervals for four quantities -> audit_checks.json
+  task_intervals  (post hoc presentation fix) task-resampled intervals for the report's figure and table, from
+             sim_seeds.csv only -> task_intervals.csv
 
 Only the targets stage reads neural data. Nothing here fits a latent state-space model.
 """
@@ -46,7 +49,7 @@ SETS = ["rrr_1", "rrr_4", "rrr_16", "rrr_60", "pca", "random"]
 
 def extra(p):
     p.add_argument("--stage", required=True, choices=["targets", "calibrate", "calibrate_neg", "sweep", "summary",
-                                                         "audit"])
+                                                         "audit", "task_intervals"])
 
 
 def real_pres(cfg):
@@ -469,13 +472,47 @@ def stage_audit(cfg):
                                      "median-of-16 comparison")
 
 
+def stage_task_intervals(cfg):
+    """Post hoc presentation fix (2026-11-25, after an outside review; no reading changes, no simulation): 95%
+    intervals that resample the 16 tasks rather than the 32 seeds, for every cell and every quantity the report's
+    simulation figure and table show. The two seeds of a task are averaged first (their mean over tasks equals the
+    seed mean), then 10,000 task resamples (seed 0). Reads sim_seeds.csv only."""
+    df = pd.read_csv(OUT / "sim_seeds.csv")
+    df = df[df.pipeline == "raw"].copy()
+    df["task"] = (df.seed - SWEEP_SEEDS[0]) % 16
+    cols = ["prior_full", "prior_rrr_60", "prior_rrr_1", "p2_change"]
+    rng = np.random.default_rng(0)
+    rows = []
+    for cell, g in df.groupby("cell"):
+        assert g.groupby("task").size().eq(2).all() and g.task.nunique() == 16
+        tk = g.groupby("task")[cols].mean()
+        idx = rng.integers(0, 16, (10000, 16))
+        for k in cols:
+            x = tk[k].to_numpy()
+            b = x[idx].mean(1)
+            rows.append({"cell": cell, "quantity": k, "mean": float(x.mean()), "median_tasks": float(np.median(x)),
+                         "n_pos_tasks": int((x > 0).sum()), "ci_lo": float(np.percentile(b, 2.5)),
+                         "ci_hi": float(np.percentile(b, 97.5))})
+        # capture: ratio of the 30 s subspace's mean score to the full population's, under the same resamples
+        f, r = tk["prior_full"].to_numpy(), tk["prior_rrr_60"].to_numpy()
+        b = r[idx].mean(1) / f[idx].mean(1)
+        rows.append({"cell": cell, "quantity": "capture_rrr_60", "mean": float(r.mean() / f.mean()),
+                     "median_tasks": np.nan, "n_pos_tasks": np.nan, "ci_lo": float(np.percentile(b, 2.5)),
+                     "ci_hi": float(np.percentile(b, 97.5))})
+    out = pd.DataFrame(rows)
+    out.to_csv(OUT / "task_intervals.csv", index=False)
+    print(out.round(3).to_string(index=False))
+    log_run(cfg, "26_sim_A18 task_intervals", "A18 post hoc presentation fix: task-resampled 95% intervals for the "
+                                              "report's simulation figure and table (reads sim_seeds.csv only)")
+
+
 def main():
     args, cfg, n_jobs = setup(__doc__, extra)
     OUT.mkdir(parents=True, exist_ok=True)
     {"targets": lambda: stage_targets(cfg, n_jobs), "calibrate": lambda: stage_calibrate(cfg, n_jobs),
      "calibrate_neg": lambda: stage_calibrate_neg(cfg, n_jobs),
      "sweep": lambda: stage_sweep(cfg, n_jobs), "summary": lambda: stage_summary(cfg),
-     "audit": lambda: stage_audit(cfg)}[args.stage]()
+     "audit": lambda: stage_audit(cfg), "task_intervals": lambda: stage_task_intervals(cfg)}[args.stage]()
 
 
 if __name__ == "__main__":

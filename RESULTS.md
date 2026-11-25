@@ -8,7 +8,8 @@ gate on simulated sessions (A18 part B, which failed and stopped that line) on 2
 analysis for one session (A19) on 25 November. A17 part 6 was not done and is dropped. On 25 November six AI-agent
 reviews (Claude subagents; not independent human review) audited the repository; the corrections they led to are
 recorded at the end of `AMENDMENTS.md` and applied below. The report (`report/main.tex`) was rewritten on 25
-November to include A17 to A19 (draft; the AI-use statement is left for the author). Numbers for the
+November to include A17 to A19 (draft; the AI-use statement is left for the author), and revised the same day after
+an outside review (P2 wording, latent-model limits, task-resampled simulation intervals; `AMENDMENTS.md` note 10). Numbers for the
 registered analysis were re-checked against the result files on 2026-11-22; numbers from A17 to A19 were re-checked
 by an AI-agent number audit on 2026-11-25.
 
@@ -69,8 +70,10 @@ consistent across sessions, but which units carry it appears to change between s
 recording causes tested, none accounts for most of it; the strictest unit filter is the main unresolved challenge.
 One candidate explanation for why the hypothesis failed, tested only partly (A18), is variance ranking: lagged RRR keeps the
 directions that predict the most variance, and a large slow signal wins those dimensions before a small one like the
-prior. The registered P2 test was also weak: the interval for the mean change (−0.218 to 0.002) is wider than the prior's
-own full-population reference, so modest rises are not excluded.
+prior. The registered P2 test shows no evidence of a rise: the bootstrap interval for the mean change (−0.218 to
+0.002) lies almost entirely below zero, so rises larger than a few hundredths are unlikely, but 13 mice under-cover
+and the upper end depends on one session (−0.205 to 0.032 without `4d8c7767`; A19). An earlier wording here ("wider
+than the reference, so modest rises are not excluded") read the interval backwards and was corrected on 25 November.
 
 The post hoc timescale follow-ups (A17) sharpen this. The prior's own memory is short: its autocorrelation timescale
 is about 12 trials counted per trial (67 s, or about 17 trials, counted per 0.5 s bin), and only about 1% of its variance is still predictable 2 minutes ahead (median $\rho_\pi^2$), whereas
@@ -80,10 +83,12 @@ only falls with lag; that is a heuristic, not a property of the RRR objective. E
 drift-removed data selects no prior, and the small prior signal in the subspaces is flat across lags and about what
 PCA carries. A calibrated simulation (A18 part A) then showed that a prior of the recorded strength *is* picked up by
 the 30 s subspace when there is no drift, and that drift of the recorded strength removes the 30 s subspace's prior
-score (and the 0.5 s, PCA and random ones) while the full population still decodes it. It does not reproduce the
-recorded fall from 0.5 s to 30 s: at the recorded drift the horizon change is near zero (median +0.015, positive in 9
-of 16 tasks), so the pre-set reading is "intermediate". Drift is a sufficient explanation for the loss at 30 s in this
-model, not an established cause in the recordings, and the A17 outcome table had no row for an intermediate reading,
+score (and the 0.5 s, PCA and random ones) while the full population still decodes it. At the recorded drift the
+horizon change is near zero (median +0.015, positive in 9 of 16 tasks), so the pre-set reading is "intermediate". The
+recordings' own horizon change does not discriminate: it is −0.099 as a mouse mean, −0.041 as a median and +0.001
+under the Lasso decoder, and the no-prior conditions match the recordings' feature profile about as well as
+recorded-size drift. Drift is a sufficient explanation for the loss at 30 s in this model and consistent with the
+recordings, not an established cause in them, and the A17 outcome table had no row for an intermediate reading,
 so framing the project around drift is a post hoc choice. Stimulus memory: if there were no block prior and the population only remembered the last stimulus as strongly as the recordings require (the recorded previous-stimulus decodability, one-trial memory), the corrected prior score would be +0.078 (12 of 16 tasks, p = 0.038), 72% of the recordings' session median. A
 small memory trace of the size fitted alongside the prior adds nothing on its own (−0.012). So the recorded prior
 score cannot by itself separate a block prior from memory of recent stimuli, a known concern rather than a new
@@ -324,7 +329,7 @@ artifact of the bug. Pre-fix outputs are kept in `results/prefix_D10/` and `resu
 
 **The prior: no detectable rise.** The predicted rise of the prior with horizon does not appear in any variant: raw or
 residual, any d, any left-out mouse, either decoder, or either detrend. The claim is limited to that. A modest rise
-remains possible: the raw bootstrap upper bound is +0.002, the cosine-detrend rerun gives +0.020 [−0.025, 0.068], and
+remains possible: the raw bootstrap upper bound is +0.002 (+0.032 without session `4d8c7767`, A19), the cosine-detrend rerun gives +0.020 [−0.025, 0.068], and
 the prior is a small signal in MOs to begin with. Subspace-level prior estimates sit at the noise floor and are
 decoder-dependent, so nothing is claimed about where in the population the prior lives, and no decrease with horizon is
 claimed either. Comparisons of subspace scores with the full-population gate are only meaningful on a common decoder
@@ -792,21 +797,24 @@ principal component carries 21% of variance in simulation (calibrated low-rank d
 The calibrated history trace is tiny (gain 0.036 against 0.29 for the prior), because the prior alone already makes
 the previous stimulus as decodable as in the recordings.
 
-**Results.** Corrected prior $R^2$, mean over 32 seeds [95% interval], raw pipeline.
+**Results.** Corrected prior $R^2$, raw pipeline: mean over the 16 tasks (the two seeds of each task averaged; equal to
+the mean over 32 seeds) [95% interval resampling tasks, from `results/a18/task_intervals.csv`, script 26 stage
+`task_intervals`, added 25 November; earlier versions of this table resampled seeds, which gives intervals that are
+too narrow because the two seeds of a task are correlated].
 
 | Condition | Full population | 30 s subspace | 0.5 s subspace | 30 s minus 0.5 s (P2-style) |
 |---|---|---|---|---|
-| Strong prior (x3), no drift | 0.632 [0.555, 0.708] | 0.537 [0.479, 0.594] | 0.449 | +0.089 [0.057, 0.127] |
-| Calibrated prior, no drift | 0.170 [0.134, 0.209] | 0.069 [0.048, 0.092] | 0.019 | +0.050 [0.033, 0.067] |
-| Low-rank drift x 1/3 | 0.174 [0.136, 0.214] | 0.047 [0.028, 0.066] | 0.019 | +0.027 [0.011, 0.045] |
-| Low-rank drift x 1 (calibrated) | 0.167 [0.105, 0.235] | −0.006 [−0.055, 0.041] | −0.033 | +0.027 [−0.009, 0.067] |
-| Low-rank drift x 3 | 0.268 [−0.243, 0.999] | −0.205 [−0.542, 0.071] | −0.172 | −0.036 [−0.107, 0.028] |
-| Per-unit drift x 1/3 | 0.154 [0.105, 0.208] | 0.046 [0.020, 0.072] | 0.011 | +0.036 [0.015, 0.061] |
-| Per-unit drift x 1 | 0.063 [−0.056, 0.170] | −0.088 [−0.221, 0.030] | −0.038 | −0.052 [−0.144, 0.029] |
-| Per-unit drift x 3 | 0.084 [−0.381, 0.466] | 0.136 [−0.126, 0.381] | 0.028 | +0.097 [0.018, 0.183] |
-| No prior, no history (null) | −0.043 [−0.112, 0.023] | −0.036 | −0.053 | +0.017 |
-| No prior, history at calibrated strength | −0.012 [−0.063, 0.038] | −0.044 | −0.056 | +0.015 |
-| No prior, history alone matching the recordings | 0.078 [0.019, 0.132] | −0.010 | −0.023 | +0.016 |
+| Strong prior (x3), no drift | 0.632 [0.525, 0.741] | 0.537 [0.456, 0.615] | 0.449 [0.368, 0.533] | +0.089 [0.053, 0.130] |
+| Calibrated prior, no drift | 0.170 [0.123, 0.221] | 0.069 [0.043, 0.097] | 0.019 [0.009, 0.031] | +0.050 [0.028, 0.072] |
+| Low-rank drift x 1/3 | 0.174 [0.125, 0.228] | 0.047 [0.022, 0.071] | 0.019 [0.007, 0.033] | +0.027 [0.009, 0.046] |
+| Low-rank drift x 1 (calibrated) | 0.167 [0.097, 0.252] | −0.006 [−0.047, 0.041] | −0.033 [−0.066, −0.002] | +0.027 [−0.009, 0.069] |
+| Low-rank drift x 3 | 0.268 [−0.243, 0.948] | −0.205 [−0.518, 0.080] | −0.172 [−0.482, 0.113] | −0.036 [−0.107, 0.024] |
+| Per-unit drift x 1/3 | 0.154 [0.093, 0.226] | 0.046 [0.017, 0.080] | 0.011 [−0.014, 0.034] | +0.036 [0.012, 0.062] |
+| Per-unit drift x 1 | 0.063 [−0.080, 0.195] | −0.088 [−0.243, 0.048] | −0.038 [−0.107, 0.025] | −0.052 [−0.153, 0.037] |
+| Per-unit drift x 3 | 0.084 [−0.373, 0.476] | 0.136 [−0.123, 0.371] | 0.028 [−0.267, 0.288] | +0.097 [0.027, 0.177] |
+| No prior, no history (null) | −0.043 [−0.097, 0.008] | −0.036 [−0.073, 0.004] | −0.053 [−0.099, −0.010] | +0.017 [−0.010, 0.044] |
+| No prior, history at calibrated strength | −0.012 [−0.060, 0.040] | −0.044 [−0.088, −0.003] | −0.056 [−0.093, −0.020] | +0.015 [−0.012, 0.045] |
+| No prior, history alone matching the recordings | 0.078 [0.012, 0.154] | −0.010 [−0.063, 0.043] | −0.023 [−0.057, 0.010] | +0.016 [−0.026, 0.061] |
 | Recordings (mouse means; full population from the post hoc A16 reference) | 0.159 (session median 0.108; 0.101 and 0.087 without `4d8c7767`) | −0.046 | 0.054 | −0.099 [−0.218, 0.002] |
 
 **What it shows.**
@@ -839,7 +847,7 @@ the previous stimulus as decodable as in the recordings.
    after calibration, before the sweep) asks the no-prior case: no prior at all, and a one-trial stimulus memory strong enough to give
    *all* of the recordings' previous-side decodability on its own (gain 0.061; in the calibrated model with a prior,
    the prior accounts for most of it). This is the case the recordings would be in if MOs carried no prior. That
-   gives a corrected full-population prior score of 0.078 [0.019, 0.132], positive in 24 of 32 seeds (12 of 16
+   gives a corrected full-population prior score of 0.078 [0.012, 0.154; task-resampled], positive in 24 of 32 seeds (12 of 16
    tasks, p = 0.038, borderline; one post hoc condition among many uncorrected readings). Against the recordings'
    session median (0.108) that is 72%; against the mouse mean it was quoted as 49% of 0.159, a reference A19 shows is
    inflated by one session. Reading B2: **history alone can mimic the prior score**. The
@@ -904,8 +912,11 @@ stimulus memory, but it also keeps little of a genuine prior even without drift 
 its failure under drift says little about drift specifically. No positive control was run for this model, and B1's
 threshold (half the full-population score) is above what lagged RRR itself captures at 30 s without drift (0.41). The
 conclusion is limited to this specification (these inputs and the single-trial readout). An explanation offered in the
-result note (the previous-stimulus input absorbing prior-related activity) was checked by an AI-agent diagnostic
-outside the repository and is not supported. No latent model is run on the recordings and no variant is tried. See
+result note (the previous-stimulus input absorbing prior-related activity) is **untested**: an AI-agent diagnostic
+outside the repository subtracted only the drift inputs at readout and recovered little, but the latents were fitted
+with the previous-side input present, so that check cannot detect the mechanism (this file said "not supported" until
+25 November; see `AMENDMENTS.md`, note 10). The readout also discards the per-latent dynamics, by design (smoothing
+could manufacture a prior from stimulus memory), so the test is close to factor analysis with regressors. No latent model is run on the recordings and no variant is tried. See
 `AMENDMENTS.md` (A18 part B result note and the notes of 25 November).
 
 **AI-agent audit (24 November).** Two AI-agent reviewers (Claude subagents, briefed without the main session's

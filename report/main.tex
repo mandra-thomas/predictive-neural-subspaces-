@@ -19,7 +19,7 @@
 \usepackage{float}
 \captionsetup{font=small,labelfont=bf}
 
-\hypersetup{pdfauthor={Gunnar Andra-Thomas},pdftitle={Does a Longer Prediction Horizon Isolate the Block Prior? A Pre-registered Negative Result in Mouse Secondary Motor Cortex},colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\hypersetup{pdfauthor={Gunnar Andra-Thomas},pdftitle={Long Prediction Horizons Do Not Isolate the Block Prior in Mouse Secondary Motor Cortex},colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
 
 % Footer: this is a course project, not a NeurIPS paper.
 \makeatletter
@@ -41,7 +41,7 @@
 \newcommand{\holm}{p_{\mathrm{Holm}}}
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 
-\title{Does a Longer Prediction Horizon Isolate the Block Prior? A Pre-registered Negative Result in Mouse Secondary Motor Cortex}
+\title{Long Prediction Horizons Do Not Isolate the Block Prior in Mouse Secondary Motor Cortex}
 
 \author{%
   Gunnar Andra-Thomas\\
@@ -54,20 +54,15 @@
 
 \begin{abstract}
 Does the horizon of a predictive objective determine what a neural population subspace encodes? I fit lagged
-reduced-rank ridge regression to Neuropixels recordings from mouse secondary motor cortex (MOs; 16 sessions, 13 mice,
-International Brain Laboratory) at horizons of 0.5 to 30\,s, and tested with pre-registered statistics whether
-long-horizon subspaces carry the ideal observer's block prior and short-horizon subspaces the current stimulus. The
-prior was decodable from the full population, but the predicted rise of prior content with horizon was not supported
-(one-sided Wilcoxon over mice, Holm-corrected $p=0.89$), with an interval too wide to exclude modest rises; the
-stimulus prediction held because long horizons lose the stimulus, and the geometric difference held in one basis only.
-Post hoc measurements put the prior's own memory at about 12 trials (about a minute), far shorter than a block, while a
-session-long drift carries far more variance; extending horizons to 4\,min on drift-removed data selected no prior.
-A simulation calibrated to the recorded tasks showed that a prior of the recorded size is found at a 30\,s horizon
-when there is no drift and lost when drift of the recorded size is added, while the full population still decodes it,
-but it did not reproduce the recordings' horizon pattern, so drift is a partial, not an established, explanation. The
-same simulation showed that a short memory of recent stimuli, with no prior, can produce most of the recorded prior score,
-a known limit of pseudo-session-corrected prior decoding. A latent state-space model with an explicit drift term
-failed a pre-set gate on simulated data and was not applied to the recordings.
+reduced-rank regression to Neuropixels recordings from mouse secondary motor cortex (16 sessions, 13 mice) at horizons
+of 0.5 to 30\,s and tested, with pre-specified statistics, whether long-horizon subspaces carry the ideal observer's
+block prior. They did not: the prior was decodable from the full population, but there was no evidence that prior
+content rises with horizon (Holm-corrected $p = 0.89$). Post hoc measurements suggest why. The prior's own memory is
+about 12 trials, far shorter than a block, while a session-long drift carries about two orders of magnitude more
+variance, and horizons up to 4\,min selected no prior. In a simulation calibrated to the recorded tasks, a prior of
+the recorded size is found at a 30\,s horizon without drift and lost with drift of the recorded size, which is
+consistent with drift as the cause but does not establish it. The same simulation shows that a memory of recent
+stimuli, with no prior, can produce most of the recorded prior score.
 \end{abstract}
 
 % =====================================================================================================
@@ -89,16 +84,17 @@ appears on the left changes between uncued blocks, and an ideal observer's runni
 subspaces fit to predict activity 30\,s ahead would differ from those fit for 0.5\,s, would carry more of the prior,
 and would carry less of the current stimulus. Sections~\ref{sec:task} and~\ref{sec:methods} give the task, its
 timescales and the full formulation; Section~\ref{sec:results} the registered tests; Sections~\ref{sec:timescales}
-to~\ref{sec:sens} the post hoc analyses of why the hypothesis failed.
+and~\ref{sec:sim} the post hoc analyses of why the hypothesis failed.
 
-\paragraph{Status of each analysis.} \emph{Pre-registered} means written in a timestamped commit to the project
-repository (not a public registry) before the data it concerns were analysed; this covers the three primary tests
-(P1 to P3), nine deviations from the proposal (D1 to D9) and eleven additions (A1 to A11). \emph{Post hoc} means
-designed after the relevant results were seen; this covers a bug fix (D10), robustness checks (P1h and two A14 checks)
-and the follow-ups A16 to A19, whose specifications were committed before their main computations, with exceptions
-recorded in Appendix~\ref{app:prereg}. The exploratory pilots (A12 pre-registered; A13 to A15 documented in advance
-but after the analysis freeze) are summarised in Appendix~\ref{app:pilots}. Only P1 to P3 are corrected for multiplicity.
-Every entry is dated in the repository's amendment file (Appendix~\ref{app:prereg}).
+\paragraph{Status of each analysis.} Three labels are used. \emph{Pre-specified} means written in a timestamped
+commit to the project repository (not a public registry) before the data it concerns were analysed: the three primary
+tests (P1 to P3) and the analysis choices around them. \emph{Exploratory} means the pilots on the slow signal
+described in Section~\ref{sec:results}, documented in advance but outside the primary tests
+(Appendix~\ref{app:pilots}). \emph{Post hoc} means designed after the primary results were seen: one bug fix, some
+robustness checks, and the follow-ups in Sections~\ref{sec:timescales} and~\ref{sec:sim}, each specified in a commit
+before its main computation, with the exceptions recorded in Appendix~\ref{app:prereg}. Only P1 to P3 are corrected
+for multiplicity. Analyses were frozen on 20 November 2026 (bug fixes only), before the project's presentation; the
+repository state after the presentation is tagged, and all later work is post hoc.
 
 % =====================================================================================================
 \section{Related work}
@@ -160,8 +156,8 @@ about a minute, and the dominant slow variation unfolds over tens of minutes.
     Prior's integrated timescale, per trial & 12.2 trials (IQR 10.9--13.8) & same \\
     Prior's integrated timescale, per 0.5\,s bin & 67\,s (IQR 55--75), i.e.\ 16.9 trials & same \\
     Completed block & 46 trials, 3.6\,min & same \\
-    Post hoc horizons (A17) & 60\,s, 2\,min, 4\,min & A17 config \\
-    Slow component removed by detrending & periods $\ge 20$\,min & A16 \\
+    Post hoc horizons & 60\,s, 2\,min, 4\,min & post hoc config \\
+    Slow component removed by detrending & periods $\ge 20$\,min & post hoc detrending \\
     Task epoch & 66.5\,min (54--99) & \texttt{timescales.csv} \\
     \bottomrule
   \end{tabular}
@@ -172,7 +168,7 @@ about a minute, and the dominant slow variation unfolds over tens of minutes.
   \maybefig{rfig_timescales.pdf}{width=0.92\linewidth}{1.9in}
   \caption{\textbf{a}, timescales on one logarithmic clock (dots: sessions; bars: medians; shaded: registered
   horizons). \textbf{b}, the fraction of the prior's variance predictable $\Delta$ ahead, $\rho_\pi(\Delta)^2$
-  (median and IQR of the per-session values), against a session-long ramp. Post hoc (A17).}
+  (median and IQR of the per-session values), against a session-long ramp. Post hoc.}
   \label{fig:timescales}
 \end{figure}
 
@@ -191,7 +187,7 @@ Poisson variance) and z-scored with a floor on the standard deviation,
 \end{equation}
 where 0.218 is the standard deviation of $\sqrt{N}$ for a Poisson count from a unit firing at the 0.1\,Hz inclusion
 threshold. (The floor was $10^{-3}$ in the first run; that let a unit silent in one fold dominate another, and the fix
-is the disclosed post hoc bug fix D10.) The population vector in bin $t$ is $\bm z_t \in \RR^p$. Trial-aligned windows
+is a disclosed post hoc bug fix, Appendix~\ref{app:prereg}.) The population vector in bin $t$ is $\bm z_t \in \RR^p$. Trial-aligned windows
 of spike counts, transformed the same way, are written $\bm w_k \in \RR^p$.
 
 \subsection{The block prior}
@@ -239,7 +235,7 @@ trials). Observing $c_k$ and then predicting one trial ahead gives
   \label{eq:filter}
 \end{equation}
 So $\pi_k = P(c_k = +1 \mid c_{1:k-1})$ depends only on earlier stimulus sides, and every trial contributes, including
-trials later removed by the trial mask (no trials are skipped; deviation D3). Because it is built from past sides, the prior is tightly tied
+trials later removed by the trial mask (no trials are skipped). Because it is built from past sides, the prior is tightly tied
 to the most recent ones: across sessions (medians), its correlation with $c_{k-1}$ is 0.64, and linear regressions on
 the last 1, 5 and 10 sides explain 41\%, 81\% and 86\% of its variance (\texttt{results/a19/prior\_history.json}).
 This matters for interpretation (Section~\ref{sec:decode}).
@@ -267,7 +263,7 @@ $G$ is, up to the penalty term, the covariance of the predicted activity, the su
 \emph{predicted variance}: a large predictable signal takes the leading dimensions before a small one does. One
 $\alpha$ per session was chosen from 13 log-spaced values ($10^{-3}$ to $10^{3}$) by five contiguous folds with a
 10-bin embargo, averaging held-out rank-$d$ $R^2$ across the four horizons so the penalty cannot make horizons differ.
-The rank was $d=5$ ($d=3$ and $d=10$ were pre-registered sensitivity analyses). Baselines at the same $d$ were PCA,
+The rank was $d=5$ ($d=3$ and $d=10$ were pre-specified sensitivity analyses). Baselines at the same $d$ were PCA,
 and a covariance-matched random subspace $\orth(E\Lambda^{1/2}\Omega)$, with $E\Lambda E^\top$ the activity covariance
 and $\Omega$ a $p \times d$ standard Gaussian matrix \citep{elsayed2016}.
 
@@ -283,7 +279,7 @@ standardised features) with five contiguous folds of trials, scored by pooled ou
 The current side was decoded from the 0.5\,s after onset on nonzero-contrast trials by $L_2$ logistic regression
 ($C = 1$), scored by area under the ROC curve (AUC). Elapsed time was decoded from every bin with 20 contiguous chunks
 assigned round-robin to five folds; because subspaces are fit on the whole session, it measures how smoothly a fitted
-representation varies with session time, not held-out prediction. A pre-registered gate decoded the prior from the
+representation varies with session time, not held-out prediction. A pre-specified gate decoded the prior from the
 full population with the decoder of \citet{findling2025} (Lasso, nested interleaved cross-validation).
 
 \paragraph{Pseudo-session correction.} A slowly varying target can be ``decoded'' from any slowly varying activity.
@@ -300,8 +296,10 @@ the real score exceeds the null median by 0.05 on that decoder's scale; it is no
 \paragraph{Two limitations of the correction.} First, with contiguous folds a slowly varying target is extrapolated
 across fold boundaries, so raw $R^2$ is typically negative (session means $-0.13$ to $-0.29$ for the subspaces), and
 when both terms of \eqref{eq:corrected} are strongly negative the difference has no upper bound: one session has a
-corrected full-population score of 1.59 (Section~\ref{sec:sens}). Rank-based tests and medians are robust to this;
-means are not. Second, the pseudo targets come with pseudo sides, so the null removes what any block-like sequence
+corrected full-population score of 1.59. Rank-based tests and medians are robust to this; means are not. A
+sensitivity analysis specified before computing (Appendix~\ref{app:a19}) shows that the registered P2 conclusion does
+not depend on that session, while the post hoc full-population reference does (mouse mean 0.159, or 0.101 without it),
+so post hoc reference values are quoted as session medians (0.108). Second, the pseudo targets come with pseudo sides, so the null removes what any block-like sequence
 would score against the activity, but not what the \emph{real} recent stimuli explain. Since $\pi_k$ is largely a
 function of $c_{k-1},\dots,c_{k-5}$, a population that merely remembers recent stimuli predicts $\pi$ better than
 $\tilde\pi^{(b)}$, which shifts $R^2_{\mathrm c}$ upward without any representation of the block. This is a known
@@ -338,10 +336,10 @@ Descriptive intervals are 95\% percentile bootstraps over mice, which under-cove
 \label{sec:results}
 
 \begin{table}[t]
-  \caption{Pre-registered primary tests ($d=5$, 13 mice; one-sided Wilcoxon over mice, Holm over three tests). Effect:
+  \caption{Pre-specified primary tests ($d=5$, 13 mice; one-sided Wilcoxon over mice, Holm over three tests). Effect:
   P1, cross-horizon angle minus the 0.5\,s and 30\,s floors (degrees); P2, $\Delta_\pi$ \eqref{eq:p2}; P3, drop in
   corrected current-side AUC. Brackets: 95\% bootstrap over mice. Residual: after removing trial-locked responses
-  (pre-registered sensitivity analysis A11).}
+  (a pre-specified sensitivity analysis).}
   \label{tab:primary}
   \centering\small
   \begin{tabular}{llccc}
@@ -364,22 +362,25 @@ Fisher-combined $p$ over sessions was $1.2\times10^{-5}$. What this establishes 
 ideal observer's prior better than it predicts priors of redrawn block sequences; for the reason given in
 Section~\ref{sec:decode} it does not by itself establish a representation of the block as opposed to recent stimuli.
 
-\paragraph{P2: prior content did not rise with horizon.} The predicted rise was not supported
-(Table~\ref{tab:primary}; median change over mice $-0.041$; 4 of 13 mice positive). The interval for the mean change,
-$-0.218$ to $0.002$, is wider than the full-population prior signal itself, so the test can exclude only large rises.
-Subspace-level prior scores sit near the noise floor (Figure~\ref{fig:content}a; 0.054 at 0.5\,s, $-0.046$ at
-30\,s, 0.013 for PCA). Post hoc (A16), the same held under the Lasso decoder and after detrending every unit (P2
-$\holm = 0.58$ and 0.29 for quadratic and cosine detrends), though subspace-level estimates moved by about $\pm0.05$
-across these variants; only ``no detectable rise'' holds in all of them.
+\paragraph{P2: no evidence that prior content rises with horizon.} The predicted rise was not supported
+(Table~\ref{tab:primary}; 4 of 13 mice positive; median change $-0.041$). The bootstrap interval for the mean change,
+$-0.218$ to $0.002$, lies almost entirely below zero, so rises larger than a few hundredths are unlikely; but a
+bootstrap over 13 mice under-covers, and the upper end depends on one session ($-0.205$ to $0.032$ without it;
+Appendix~\ref{app:a19}). After trial-locked responses were removed the interval lies below zero ($-0.154$ to
+$-0.038$); the test was one-sided for a rise, so this is reported, not tested. Subspace-level prior scores sit near
+the noise floor (Figure~\ref{fig:content}a; 0.054 at 0.5\,s, $-0.046$ at 30\,s, 0.013 for PCA). Post hoc, no rise
+appeared with the Lasso decoder (median change $+0.001$, 7 of 13 mice positive) or after detrending every unit
+($\holm = 0.58$ and 0.29), though subspace-level estimates moved by about $\pm0.05$ across these variants.
 
 \paragraph{P3: long horizons lose the current stimulus.} Corrected current-side AUC fell from 0.218 at 0.5\,s to 0.144
 to 0.161 at longer horizons (Figure~\ref{fig:content}b), but the 0.5\,s subspace equals a random subspace (0.218) and is
 below PCA (0.240): long horizons lose the stimulus rather than short ones specialising in it. P3 failed at $d=3$.
 
-\paragraph{P1: a qualified geometric difference.} Mean principal angles between halves were $58.9^\circ$ (0.5\,s
-with 0.5\,s), $68.0^\circ$ (30\,s with 30\,s) and $71.6^\circ$ (across horizons), against chance $67.9^\circ$. The
-30\,s floor is at chance and the test fails in the loading basis, so the subspaces differ mainly because the
-short-horizon fit is reproducible and the long-horizon fit is not (Appendix Figure~\ref{fig:geometry}).
+\paragraph{P1: passed, but not evidence of distinct representations.} Mean principal angles between halves were
+$58.9^\circ$ (0.5\,s with 0.5\,s), $68.0^\circ$ (30\,s with 30\,s) and $71.6^\circ$ (across horizons), against chance
+$67.9^\circ$. The cross-horizon angle exceeds chance, the 30\,s floor is at chance, the test fails in the loading
+basis, and the 0.5\,s subspace contains most of the 30\,s subspace's leading direction (below): the subspaces differ
+because the short-horizon fit is reproducible and the long-horizon fit is not (Appendix Figure~\ref{fig:geometry}).
 
 \paragraph{Every summary is dominated by session time.} Elapsed time was strongly decodable from every
 five-dimensional summary (Figure~\ref{fig:content}c): $R^2$ 0.84 for the 30\,s subspace, 0.82 for 0.5\,s, 0.80 for
@@ -396,8 +397,9 @@ accounts for it; it is not established as neural or cognitive. P2 was non-signif
   \maybefig{rfig_content.pdf}{width=\linewidth}{1.9in}
   \caption{What the subspaces encode, by horizon, with PCA and random baselines (orange). Grey: individual mice;
   colour: mean over mice with 95\% bootstrap CI. \textbf{a}, \textbf{b}: pseudo-session-corrected scores; dotted
-  (\textbf{a}, post hoc): the full population on the same decoder, mouse mean 0.159, a value inflated by one session
-  (session median 0.108; Section~\ref{sec:sens}). \textbf{c}: elapsed-time $R^2$ of the fitted representations.}
+  (\textbf{a}, post hoc): the full population on the same decoder, session median 0.108 (the summary fixed in advance
+  for post hoc reference values; the mouse mean, 0.159, is inflated by one session, Appendix~\ref{app:a19}).
+  \textbf{c}: elapsed-time $R^2$ of the fitted representations.}
   \label{fig:content}
 \end{figure}
 
@@ -442,7 +444,7 @@ almost none of the prior is predictable (Appendix Table~\ref{tab:longlag}). The 
 \label{sec:sim}
 
 The timescale argument says what ranking by predicted variance would do; it does not show that this is what happened.
-Amendment A18 asked the question where the answer is known. The design, calibration rule and reading rules were
+A simulation asks the question where the answer is known. Its design, calibration rule and reading rules were
 committed before any simulated outcome was computed; the memory-only condition and its reading were added after the
 calibration, before the main runs.
 
@@ -475,63 +477,50 @@ Appendix Table~\ref{tab:simfull} give the results.
 \begin{figure}[t]
   \centering
   \maybefig{rfig_simulation.pdf}{width=0.95\linewidth}{2.0in}
-  \caption{Calibrated simulation (post hoc, A18). \textbf{a}, corrected prior $R^2$ for the full population and the
-  30\,s and 0.5\,s subspaces (seed means over 32 seeds, 95\% bootstrap intervals). Left three conditions: a prior of
-  the recorded size with no drift, a third of the recorded drift, and the recorded drift. Right two: no prior, with a
-  stimulus memory strong enough to reproduce the recorded previous-side decodability on its own, or with neither.
-  Dotted: the recordings' full-population session median. \textbf{b}, the P2 contrast $\Delta_\pi$ in simulation and in
-  the recordings (mouse mean, 95\% CI).}
+  \caption{Calibrated simulation (post hoc). \textbf{a}, corrected prior $R^2$ for the full population and the
+  30\,s and 0.5\,s subspaces (means over 16 tasks, two seeds each; 95\% intervals resampling tasks). Left three
+  conditions: a prior of the recorded size with no drift, a third of the recorded drift, and the recorded drift. Right
+  two: no prior, with a stimulus memory strong enough to reproduce the recorded previous-side decodability on its own,
+  or with neither. Dotted: the recordings' full-population session median. \textbf{b}, the P2 contrast $\Delta_\pi$ in
+  simulation and in the recordings (filled: mouse mean with 95\% CI; open: median over mice).}
   \label{fig:sim}
 \end{figure}
 
 \paragraph{Without drift, the hypothesis works.} A strong prior (three times the calibrated gain) was found by the
 full population and the 30\,s subspace in every seed (positive control). At the calibrated prior and no drift, the
-30\,s subspace carried 41\% [33, 48] of the full-population prior score (its \emph{capture}) and beat the 0.5\,s subspace
+30\,s subspace carried 41\% [31, 50] of the full-population prior score (its \emph{capture}) and beat the 0.5\,s subspace
 ($\Delta_\pi = +0.050$, positive in 13 of 16 tasks). A slow prior is preferred by long-horizon prediction when nothing
 slower competes.
 
-\paragraph{Drift of the recorded size removes it, but does not reproduce the recordings.} With low-rank drift
-calibrated to the recorded slow share, the 30\,s subspace's prior score fell to about zero ($-0.006$; positive in 8
-of 16 tasks against 14 of 16 without drift), as did the 0.5\,s, PCA and random scores, while the full population still
-decoded the prior (0.167, positive in 16 of 16 tasks). But $\Delta_\pi$ stayed near zero (median $+0.015$, mean $+0.027$; positive in
-9 of 16 tasks), unlike the recordings' $-0.099$. The pre-set rule read ``drift sufficient'' only if capture halved and
-the median $\Delta_\pi$ was at most zero; capture halved but $\Delta_\pi$ did not fall, so it read ``intermediate''. With drift independent
-across units (``per-unit''), the reading was ``drift sufficient'', but that regime matched the recordings poorly and its
-full-population score became unreliable. Drift of the recorded size is therefore sufficient, in this model, to remove
-a realistic prior from the 30\,s subspace, but the simulation does not reproduce the recordings' advantage for the
-0.5\,s subspace, and the outcome table committed in A17 had no row for an intermediate reading. Drift is a partial
-explanation, not an established cause.
+\paragraph{Drift of the recorded size removes it from the 30\,s subspace.} With low-rank drift calibrated to the
+recorded slow share, the 30\,s subspace's prior score fell to about zero ($-0.006$; positive in 8 of 16 tasks against
+14 of 16 without drift), as did the 0.5\,s, PCA and random scores, while the full population still decoded the prior
+(0.167, positive in 16 of 16 tasks). $\Delta_\pi$ stayed near zero (median $+0.015$, positive in 9 of 16 tasks). The
+pre-set rule read ``drift sufficient'' only if capture halved and the median $\Delta_\pi$ was at most zero; capture
+halved but $\Delta_\pi$ did not fall, so it read ``intermediate'', an outcome the table of readings committed before the
+follow-ups did not anticipate. (With drift independent across units the reading was ``drift sufficient'', but that
+regime matched the recordings poorly.) The recordings do not discriminate further. Their own $\Delta_\pi$ is
+$-0.099$ as a mouse mean, $-0.041$ as a median and $+0.001$ under the Lasso decoder, a range that includes the
+simulated value, and the no-prior conditions below match the recordings' profile of eight summary features about as
+well (6 and 5 of 8) as recorded-size drift (6 of 8; 7 of 8 without one session). A near-zero 30\,s score with a
+positive full-population score is what drift removing a small prior would produce; it is also what no prior at all
+would produce. Drift is consistent with the recordings, not established as the cause.
 
 \paragraph{Stimulus memory can mimic the prior score.} With no prior and no memory, the corrected full-population score
 was $-0.043$ (positive in 13 of 32 seeds): the null is calibrated, with a slightly negative baseline. A small memory
 trace of the size fitted jointly with the prior (gain 0.036) added nothing once the prior was removed ($-0.012$). But
 if there is no prior, the recorded previous-side decodability must come from memory alone; a one-trial memory strong
-enough to supply it (gain 0.061) gave a corrected prior score of $+0.078$ [0.019, 0.132] (positive in 12 of 16 tasks,
+enough to supply it (gain 0.061) gave a corrected prior score of $+0.078$ [0.012, 0.154] (positive in 12 of 16 tasks,
 $p = 0.038$), 72\% of the recordings' session median. Regressing each target on its own last five sides before decoding removes this leak but also most of a genuine
 prior (0.026 against 0.170), since the prior is 81\% predictable from those sides; in the recordings this
 history-controlled score is $-0.061$, indistinguishable from zero (6 of 16 sessions positive, $p = 0.70$). The recorded prior score therefore
 cannot by itself separate a belief about the block from a memory of recent stimuli.
 
-\paragraph{A latent state-space model with an explicit drift term failed its gate.} One bounded test (A18 part B),
-with a gate and stopping rule committed before any result, fit a trial-indexed linear-Gaussian model with eight
-autoregressive latents, each with its own timescale, and known inputs (the slow cosine basis and the previous trial's
-side, choice and reward) \citep{yu2009,macke2011}, and decoded the prior from each trial's own latent estimate
-(Appendix~\ref{app:sim}). The gate required, at the recorded drift, a positive score in at least 12 of 16 tasks and at
-least half the full-population score. It failed ($-0.003$, 8 of 16 tasks, against 0.167). Its memory and null checks passed, which is uninformative
-because it kept only about 15\% of the prior even without drift; no positive control was run, and the threshold was
-above what lagged RRR itself captures without drift (41\%). By
-the stopping rule it was not applied to the recordings; the conclusion concerns this specification only.
-
-% =====================================================================================================
-\section{Sensitivity to one session (post hoc)}
-\label{sec:sens}
-
-An AI-agent audit found one session (SWC\_038, 128 units) with a corrected full-population score of 1.59 on the ridge
-decoder (raw $R^2$ $-0.94$ against a null median near $-2.5$). A19, specified before computing, reports every variant
-(Appendix Table~\ref{tab:a19}). Without the session the registered P2 is
-unchanged in substance ($p = 0.79$ instead of 0.89; 5 instead of 4 of 13 mice positive); the post hoc full-population
-reference falls from 0.159 to 0.101 as a mouse mean and from 0.108 to 0.087 as a session median, so ratios are quoted on
-session medians.
+\paragraph{A latent model was tested once and failed.} A trial-indexed linear-Gaussian state-space model with
+per-latent timescales and an explicit drift input \citep{yu2009,macke2011}, tested on the simulated sessions with a
+gate written in advance, kept no prior at the recorded drift ($-0.003$ against 0.167) and was not applied to the
+recordings. Its specification had two handicaps, an input that absorbs prior-related activity and a readout that
+discards the dynamics, so it is a weak test of latent models (Appendix~\ref{app:lds}).
 
 % =====================================================================================================
 \section{Discussion}
@@ -539,8 +528,8 @@ session medians.
 
 \paragraph{What was learned.} The premise that 30\,s is ``slow'' for the prior was wrong: the prior's memory is
 about a minute, and a 30\,s horizon spans 8 trials. What is slow here is a session-long drift with about a hundred times more variance,
-which a variance-ranked objective puts first. The simulation shows this can happen at the recorded sizes but does not
-reproduce the recordings' horizon pattern, so the account is partial.
+which a variance-ranked objective puts first. The simulation shows this can happen at the recorded sizes; the
+recordings are consistent with it but do not establish it, and they are also consistent with no prior at all.
 
 \paragraph{The questions raised at the presentation.} \emph{Trials or blocks?} The relevant scale is the prior's own
 memory, about 12 trials, not the 46-trial block. \emph{Was there a loss on the prior?} No: the objective never sees the
@@ -549,28 +538,31 @@ prior, by design. Behaviour-aware alternatives exist, such as preferential subsp
 the task prior. \emph{Why not minutes?} Because the prior itself is unpredictable beyond about 2\,min; horizons to 4\,min
 were tested and selected nothing. \emph{Separate representations?} No: the 0.5\,s subspace contains 92\% of the 30\,s
 subspace's leading direction. \emph{Is RRR the only model?} PCA, random subspaces and full-rank ridge were baselines, and one
-latent state-space model failed its gate on simulated data; slow feature analysis \citep{wiskott2002} and DCA
-\citep{clark2019} were not run.
+latent state-space model failed its gate on simulated data in a handicapped specification; slow feature analysis
+\citep{wiskott2002} and DCA \citep{clark2019} were not run.
 
 \paragraph{Limitations.} The prior score cannot separate a block belief from stimulus memory (a known limit of prior
 decoding, quantified here), and the only memory control removes most of a genuine prior. The corrected $R^2$ is
-unbounded, so means can be driven by one session. P2 had limited power. The simulation depends on unvaried settings
-and an exactly identified calibration. The data are acute recordings from one region in 13 mice, with linear decoders.
+unbounded, so means can be driven by one session. P2 rests on 13 mice, and its interval depends on one session. The
+simulation depends on unvaried settings and an exactly identified calibration. The data are acute recordings from one region in 13 mice, with linear decoders.
 Post hoc analyses are uncorrected for multiplicity, and the reviews described in the repository were AI-agent
 reviews, not independent human review. A switch-aligned or behaviour-supervised analysis would address belief versus
-memory more directly than horizon selection can.
+memory more directly than horizon selection can. The timescales also suggest a band-pass rather than low-pass
+objective: directions predictable at 30\,s but not at 4\,min (generalized eigenvectors of the two predicted covariances)
+would cancel components predictable at both. It would need regularisation, since the prior is barely predictable at
+4\,min, and would favour any component with a one-minute timescale, so the calibrated simulation is where to test it.
 
 \paragraph{Conclusion.} From 0.5\,s to 4\,min, lagged reduced-rank regression in mouse MOs did not select the block
 prior, whose memory is about a minute and whose variance is small next to a session-long drift. In simulation such
-drift removes a realistic prior from a 30\,s subspace without fully reproducing the recordings, and the decoded prior
-score alone cannot distinguish a block belief from a memory of recent stimuli.
+drift removes a realistic prior from a 30\,s subspace, which the recordings are consistent with but do not establish,
+and the decoded prior score alone cannot distinguish a block belief from a memory of recent stimuli.
 
 \section*{Code and data availability}
 All recordings are from the public IBL Brain-Wide Map release \citep{ibl2025bwm} (aggregate tag
 \texttt{2024\_Q2\_IBL\_et\_al\_BWM}), accessed with the IBL ONE interface. Code, the dated pre-registration and
 amendment record (\texttt{AMENDMENTS.md}), the run log (\texttt{ANALYSIS\_LOG.md}) and all result files are in the
 repository \url{https://github.com/mandra-thomas/predictive-neural-subspaces-}: the registered analysis as frozen
-after the presentation is tag \texttt{freeze-2026-11-23-post-talk}, and the post hoc analyses A17 to A19 are on branch
+after the presentation is tag \texttt{freeze-2026-11-23-post-talk}, and the post hoc analyses are on branch
 \texttt{pilot-timescale-fix}. Every number in this report is traced to a result file in \texttt{RESULTS.md}.
 
 % AI-USE STATEMENT: TO BE WRITTEN BY THE AUTHOR after checking the course's disclosure requirements.
@@ -589,10 +581,14 @@ after the presentation is tag \texttt{freeze-2026-11-23-post-talk}, and the post
 \section{Pre-registration and amendments}
 \label{app:prereg}
 
-The amendment file was committed before any real-data fit. Table~\ref{tab:amend} summarizes every entry.
-\emph{Pre-reg.} means written in a timestamped commit before the relevant data were analysed; \emph{prospectively
-documented} means the same procedure for exploratory follow-ups written after the 20 November analysis freeze;
-\emph{post hoc} means designed after results were seen.
+The amendment file was committed before any real-data fit. Table~\ref{tab:amend} summarizes every entry with
+three labels. \emph{Pre-specified}: written in a timestamped commit before the relevant data were analysed (called
+pre-registered in the repository). \emph{Exploratory}: the pilots on the slow signal, each documented in a commit
+before it ran (A12 before the 20 November analysis freeze, A13 to A15 after it) but outside the primary tests.
+\emph{Post hoc}: designed after the primary results were seen; from A16 on, each was specified in a commit before
+its main computation, with the exceptions under Record-keeping below. The 20 November freeze (bug fixes only) governs
+the primary analysis; the tag \texttt{freeze-2026-11-23-post-talk} marks the repository after the presentation, and
+A17 to A19 come after it.
 
 \begin{table}[H]
   \caption{Deviations from the proposal (D), additions (A), and later amendments.}
@@ -602,36 +598,36 @@ documented} means the same procedure for exploratory follow-ups written after th
     \toprule
     \# & Change & Reason & Status \\
     \midrule
-    D1 & Bin the task epoch only, not the whole session & Excludes passive and spontaneous periods & pre-reg. \\
-    D2 & $\ge 400$ trials counted after the BWM trial mask & Unambiguous, stricter & pre-reg. \\
-    D3 & Bayes-optimal prior without skipping no-go trials & Prior depends only on earlier stimuli & pre-reg. \\
-    D4 & One cross-validated $\alpha$ per session, shared by all lags & Removes the $\lambda$ confound & pre-reg. \\
-    D5 & Current side decoded on nonzero-contrast trials only & Zero-contrast side carries only block information & pre-reg. \\
-    D6 & One-sided Wilcoxon tests & Directional hypotheses & pre-reg. \\
-    D7 & Geometry as intersection-union test; Holm over 3 tests & Proposal required both floors & pre-reg. \\
-    D8 & Halves use whole-session z-scoring and the session $\alpha$ & Same coordinates in both halves & pre-reg. \\
-    D9 & Drop units below 0.1\,Hz & Guards z-scoring & pre-reg. \\
-    A1 & Full-population prior gate (Lasso, pseudo-sessions) & Go/no-go before main analyses & pre-reg. \\
-    A2 & Covariance-matched random baseline & Chance level for angles and estimator & pre-reg. \\
-    A3--A4 & Nesting index; orthogonal-complement and single-dimension decoding & Distinguish nested from absent & pre-reg. \\
-    A5 & Side variables as AUC gain over a prior-only model & Side variables are confounded with the block & pre-reg. \\
-    A6 & Null shared across lags; paired-difference null; real minus null median (proposal: mean) & Valid lag contrasts; as Findling et al. & pre-reg. \\
-    A7 & Bootstrap CIs; Fisher-combined session $p$; Spearman trend over lags & Secondary summaries & pre-reg. \\
-    A8 & Purge, 10-bin embargo; 60-bin gap between halves & Leakage hygiene & pre-reg. \\
-    A9 & Choice and feedback probe windows & Unspecified in proposal & pre-reg. \\
-    A10 & Drift flag coded explicitly & Proposal's rule made explicit & pre-reg. \\
-    A11 & Trial-locked residual rerun & Sensitivity & pre-reg. \\
-    D10 & z-score SD floor raised from $10^{-3}$ to 0.218 & Bug (Section~\ref{sec:preproc}) & post hoc fix \\
+    D1 & Bin the task epoch only, not the whole session & Excludes passive and spontaneous periods & pre-specified \\
+    D2 & $\ge 400$ trials counted after the BWM trial mask & Unambiguous, stricter & pre-specified \\
+    D3 & Bayes-optimal prior without skipping no-go trials & Prior depends only on earlier stimuli & pre-specified \\
+    D4 & One cross-validated $\alpha$ per session, shared by all lags & Removes the $\lambda$ confound & pre-specified \\
+    D5 & Current side decoded on nonzero-contrast trials only & Zero-contrast side carries only block information & pre-specified \\
+    D6 & One-sided Wilcoxon tests & Directional hypotheses & pre-specified \\
+    D7 & Geometry as intersection-union test; Holm over 3 tests & Proposal required both floors & pre-specified \\
+    D8 & Halves use whole-session z-scoring and the session $\alpha$ & Same coordinates in both halves & pre-specified \\
+    D9 & Drop units below 0.1\,Hz & Guards z-scoring & pre-specified \\
+    A1 & Full-population prior gate (Lasso, pseudo-sessions) & Go/no-go before main analyses & pre-specified \\
+    A2 & Covariance-matched random baseline & Chance level for angles and estimator & pre-specified \\
+    A3--A4 & Nesting index; orthogonal-complement and single-dimension decoding & Distinguish nested from absent & pre-specified \\
+    A5 & Side variables as AUC gain over a prior-only model & Side variables are confounded with the block & pre-specified \\
+    A6 & Null shared across lags; paired-difference null; real minus null median (proposal: mean) & Valid lag contrasts; as Findling et al. & pre-specified \\
+    A7 & Bootstrap CIs; Fisher-combined session $p$; Spearman trend over lags & Secondary summaries & pre-specified \\
+    A8 & Purge, 10-bin embargo; 60-bin gap between halves & Leakage hygiene & pre-specified \\
+    A9 & Choice and feedback probe windows & Unspecified in proposal & pre-specified \\
+    A10 & Drift flag coded explicitly & Proposal's rule made explicit & pre-specified \\
+    A11 & Trial-locked residual rerun & Sensitivity & pre-specified \\
+    D10 & z-score SD floor raised from $10^{-3}$ to 0.218 & Bug (Section~\ref{sec:preproc}) & post hoc (bug fix) \\
     P1h & Leave-one-mouse-out and flagged-session robustness & Robustness only & post hoc \\
-    A12 & Pilot: stable units, probe motion, pupil (17 Nov) & What is the slow mode? & pre-reg., exploratory \\
-    A13 & Pilot: engagement, satiety, amplitude, multi-unit (21 Nov) & Ramp-independent evidence & prospectively documented, exploratory \\
-    A14 & Pilot: amplitude-rate coupling, corrected refits, timing (22 Nov) & Is amplitude loss sufficient? & prospectively documented, exploratory; 2 post hoc checks \\
-    A15 & Neighbouring areas, cross-area slow mode, behaviour (22 Nov) & Does it generalize? & prospectively documented, exploratory \\
-    A16 & Detrend-and-refit, same-scale prior reference, spatial reproducibility, step sessions (22 Nov) & Post hoc follow-up checks & post hoc; design written before running \\
-    A17 & Prior timescales, variance shares, horizons to 4\,min on detrended data (23 Nov) & Instructor's timescale questions & post hoc; design written before neural-data runs \\
-    A18 A & Calibrated simulation of the recorded tasks: prior, drift, stimulus memory (24 Nov) & Can drift explain the result? & post hoc; design before any outcome; memory-only condition added after calibration \\
-    A18 B & Latent state-space model with explicit drift, on simulated sessions only, with gate (24 Nov) & Is RRR the only model? & post hoc; gate written before any result; failed \\
-    A19 & Sensitivity of reported comparisons to one session (25 Nov) & Implausible corrected score & post hoc; written before computing \\
+    A12 & Pilot: stable units, probe motion, pupil (17 Nov) & What is the slow mode? & exploratory \\
+    A13 & Pilot: engagement, satiety, amplitude, multi-unit (21 Nov) & Ramp-independent evidence & exploratory \\
+    A14 & Pilot: amplitude-rate coupling, corrected refits, timing (22 Nov) & Is amplitude loss sufficient? & exploratory; 2 post hoc checks \\
+    A15 & Neighbouring areas, cross-area slow mode, behaviour (22 Nov) & Does it generalize? & exploratory \\
+    A16 & Detrend-and-refit, same-scale prior reference, spatial reproducibility, step sessions (22 Nov) & Post hoc follow-up checks & post hoc \\
+    A17 & Prior timescales, variance shares, horizons to 4\,min on detrended data (23 Nov) & Instructor's timescale questions & post hoc \\
+    A18 A & Calibrated simulation of the recorded tasks: prior, drift, stimulus memory (24 Nov) & Can drift explain the result? & post hoc; memory-only condition added after calibration \\
+    A18 B & Latent state-space model with explicit drift, on simulated sessions only, with gate (24 Nov) & Is RRR the only model? & post hoc; failed its gate \\
+    A19 & Sensitivity of reported comparisons to one session (25 Nov) & Implausible corrected score & post hoc \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -959,28 +955,29 @@ previous-side target, giving 0.061.
 
 \begin{table}[H]
   \setlength{\tabcolsep}{3pt}
-  \caption{Simulation results (A18 part A; corrected prior $R^2$, means over 32 seeds [95\% bootstrap over seeds];
-  16 tasks with two seeds each). Last row: the recordings (full population: session median of the post hoc ridge
-  reference; other columns: mouse means of the registered analysis).}
+  \caption{Simulation results (A18 part A; corrected prior $R^2$, means over 16 tasks with two seeds each [95\%
+  intervals resampling tasks; \texttt{results/a18/task\_intervals.csv}]). Last row: the recordings (full population:
+  session median of the post hoc ridge reference; other columns: mouse means of the registered analysis, and for
+  $\Delta_\pi$ also the median over mice).}
   \label{tab:simfull}
   \centering\scriptsize
   \begin{tabular}{lcccc}
     \toprule
     Condition & Full population & 30\,s subspace & 0.5\,s subspace & $\Delta_\pi$ \\
     \midrule
-    Strong prior ($\times 3$), no drift & 0.632 [0.555, 0.708] & 0.537 [0.479, 0.594] & 0.449 & $+0.089$ [0.057, 0.127] \\
-    Calibrated prior, no drift & 0.170 [0.134, 0.209] & 0.069 [0.048, 0.092] & 0.019 & $+0.050$ [0.033, 0.067] \\
-    Low-rank drift $\times 1/3$ & 0.174 [0.136, 0.214] & 0.047 [0.028, 0.066] & 0.019 & $+0.027$ [0.011, 0.045] \\
-    Low-rank drift $\times 1$ & 0.167 [0.105, 0.235] & $-0.006$ [$-0.055$, 0.041] & $-0.033$ & $+0.027$ [$-0.009$, 0.067] \\
-    Low-rank drift $\times 3$ & 0.268 [$-0.243$, 0.999] & $-0.205$ [$-0.542$, 0.071] & $-0.172$ & $-0.036$ [$-0.107$, 0.028] \\
-    Per-unit drift $\times 1/3$ & 0.154 [0.105, 0.208] & 0.046 [0.020, 0.072] & 0.011 & $+0.036$ [0.015, 0.061] \\
-    Per-unit drift $\times 1$ & 0.063 [$-0.056$, 0.170] & $-0.088$ [$-0.221$, 0.030] & $-0.038$ & $-0.052$ [$-0.144$, 0.029] \\
-    Per-unit drift $\times 3$ & 0.084 [$-0.381$, 0.466] & 0.136 [$-0.126$, 0.381] & 0.028 & $+0.097$ [0.018, 0.183] \\
-    No prior, no memory & $-0.043$ [$-0.112$, 0.023] & $-0.036$ & $-0.053$ & $+0.017$ \\
-    No prior, memory, joint gain & $-0.012$ [$-0.063$, 0.038] & $-0.044$ & $-0.056$ & $+0.015$ \\
-    No prior, memory alone & 0.078 [0.019, 0.132] & $-0.010$ & $-0.023$ & $+0.016$ \\
+    Strong prior ($\times 3$), no drift & 0.632 [0.525, 0.741] & 0.537 [0.456, 0.615] & 0.449 & $+0.089$ [0.053, 0.130] \\
+    Calibrated prior, no drift & 0.170 [0.123, 0.221] & 0.069 [0.043, 0.097] & 0.019 & $+0.050$ [0.028, 0.072] \\
+    Low-rank drift $\times 1/3$ & 0.174 [0.125, 0.228] & 0.047 [0.022, 0.071] & 0.019 & $+0.027$ [0.009, 0.046] \\
+    Low-rank drift $\times 1$ & 0.167 [0.097, 0.252] & $-0.006$ [$-0.047$, 0.041] & $-0.033$ & $+0.027$ [$-0.009$, 0.069] \\
+    Low-rank drift $\times 3$ & 0.268 [$-0.243$, 0.948] & $-0.205$ [$-0.518$, 0.080] & $-0.172$ & $-0.036$ [$-0.107$, 0.024] \\
+    Per-unit drift $\times 1/3$ & 0.154 [0.093, 0.226] & 0.046 [0.017, 0.080] & 0.011 & $+0.036$ [0.012, 0.062] \\
+    Per-unit drift $\times 1$ & 0.063 [$-0.080$, 0.195] & $-0.088$ [$-0.243$, 0.048] & $-0.038$ & $-0.052$ [$-0.153$, 0.037] \\
+    Per-unit drift $\times 3$ & 0.084 [$-0.373$, 0.476] & 0.136 [$-0.123$, 0.371] & 0.028 & $+0.097$ [0.027, 0.177] \\
+    No prior, no memory & $-0.043$ [$-0.097$, 0.008] & $-0.036$ [$-0.073$, 0.004] & $-0.053$ & $+0.017$ [$-0.010$, 0.044] \\
+    No prior, memory, joint gain & $-0.012$ [$-0.060$, 0.040] & $-0.044$ [$-0.088$, $-0.003$] & $-0.056$ & $+0.015$ [$-0.012$, 0.045] \\
+    No prior, memory alone & 0.078 [0.012, 0.154] & $-0.010$ [$-0.063$, 0.043] & $-0.023$ & $+0.016$ [$-0.026$, 0.061] \\
     \midrule
-    Recordings & 0.108 & $-0.046$ & 0.054 & $-0.099$ [$-0.218$, 0.002] \\
+    Recordings & 0.108 & $-0.046$ & 0.054 & $-0.099$; median $-0.041$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -998,14 +995,52 @@ at the joint gain; control valid); B2 ``mimics'' (24 of 32 seeds by the committe
 borderline); C 6 of 8 for low-rank drift, 2 of 8 for per-unit drift, and 6, 5 and 5 of 8 for the three no-prior
 conditions (memory alone, memory at the joint gain, neither).
 
-\paragraph{Latent model (A18 part B).} Observations $\bm y_k$ are square-root counts of each trial's pre-stimulus
-window, standardised per unit over trials with a finite window; initial state $\mathcal N(0, I)$; $\phi_i$ constrained
-to $[0, 1-10^{-4}]$; three restarts, at most 300 iterations (124 of 128 fits converged). Gate, at the task level (the
-two seeds of each task averaged): B1, in low-rank drift $\times 1$, positive in at least 12 of 16 tasks and mean at
-least half the full-population mean; B2, in the memory-alone condition, positive in fewer than 12 tasks and mean at
-most a quarter of the B1 mean; the no-prior, no-memory condition must not be positive in 12 or more tasks. Stop unless
-B1 and B2 pass. Results: B1 $-0.003$ (8 of 16 tasks); B2 $-0.020$ (6 of 16); null $-0.025$ (6 of 16); without drift
-0.026 (13 of 16).
+\subsection{The latent state-space model}
+\label{app:lds}
+
+One bounded test (A18 part B), with a gate and stopping rule committed before any result, asked whether a latent model
+with an explicit drift term keeps the prior where lagged RRR loses it. Observations $\bm y_k$ are square-root counts of
+trial $k$'s pre-stimulus window, standardised per unit over trials with a finite window, and
+\begin{equation}
+  \bm y_k = C \bm x_k + D \bm u_k + \bm d + \bm\varepsilon_k , \qquad
+  x_{k+1,i} = \phi_i\, x_{k,i} + \eta_{k,i} , \quad \eta_{k,i} \sim \mathcal N\big(0, 1 - \phi_i^2\big) ,
+\end{equation}
+with eight latents, each with its own timescale ($\phi_i \in [0, 1-10^{-4}]$), diagonal noise covariance $R$, initial
+state $\mathcal N(0, I)$, and known inputs $\bm u_k$: the slow cosine basis of session time (the explicit drift term)
+and the previous trial's side, choice and reward. It was fitted by expectation-maximisation with Kalman smoothing
+(three restarts, at most 300 iterations; 124 of 128 fits converged). The prior was decoded, as for the subspaces, from
+each trial's own latent estimate $\hat{\bm x}_k = (C^\top R^{-1} C)^{-1} C^\top R^{-1} (\bm y_k - D \bm u_k - \bm d)$.
+Gate, at the task level (the two seeds of each task averaged): B1, in low-rank drift $\times 1$, positive in at least
+12 of 16 tasks and mean at least half the full-population mean; B2, in the memory-alone condition, positive in fewer
+than 12 tasks and mean at most a quarter of the B1 mean; the no-prior, no-memory condition must not be positive in 12
+or more tasks. Stop unless B1 and B2 pass. Results: B1 $-0.003$ (8 of 16 tasks); B2 $-0.020$ (6 of 16); null
+$-0.025$ (6 of 16); without drift 0.026 (13 of 16), against a full-population 0.170. B1 failed, so the model was not
+applied to the recordings.
+
+Two features of this specification make it a weak test, so the result concerns this specification only. First, the
+previous side is an input. The prior correlates 0.64 with the previous side, which explains 41\% of its variance, so
+when $D$ is fitted jointly with the latents it absorbs the part of any prior-related activity that the previous side
+predicts before a latent can carry it. That is consistent with the model keeping only about 15\% of the prior even
+without drift. An AI-agent check outside the repository subtracted only the drift inputs at readout and recovered
+little, but that does not test this mechanism, because the fitted latents are unchanged; refitting without those
+inputs was not done. Second, the readout discards the dynamics: it uses each trial's own projection rather than
+smoothed latents, so the per-latent timescales enter only through the fitted parameters, and the test is close to
+factor analysis with regressors. This was deliberate, because smoothing integrates past stimulus responses and could
+manufacture an apparent prior from stimulus memory (Section~\ref{sec:decode}), but it gives up what makes a dynamical
+model useful here. In addition, latents are allocated by likelihood, so a component carrying 0.2\% of the variance need
+not receive one; no positive control was run; and B1's threshold exceeds what lagged RRR itself captures at 30\,s
+without drift (41\%).
+
+\subsection{Sensitivity to one session}
+\label{app:a19}
+
+An AI-agent audit found one session (SWC\_038, 128 units) with a corrected full-population score of 1.59 on the ridge
+decoder (raw $R^2$ $-0.94$ against a null median near $-2.5$). A sensitivity analysis (A19), specified before
+computing, reports every variant (Table~\ref{tab:a19}). Without the session the registered P2 is unchanged in
+substance; the post hoc full-population reference falls from 0.159 to 0.101 as a mouse mean and from 0.108 to 0.087 as
+a session median, so post hoc ratios are quoted on session medians. The P2 intervals in Table~\ref{tab:a19} were
+recomputed with the same bootstrap for both columns, which is why the first differs slightly from
+Table~\ref{tab:primary}.
 
 \begin{table}[H]
   \caption{Sensitivity of reported comparisons to session \texttt{4d8c7767} (SWC\_038; A19, specified before
@@ -1019,6 +1054,7 @@ B1 and B2 pass. Results: B1 $-0.003$ (8 of 16 tasks); B2 $-0.020$ (6 of 16); nul
     Registered P2: mouse-mean $\Delta_\pi$ & $-0.099$ & $-0.079$ \\
     Registered P2: one-sided Wilcoxon $p$ over mice (Holm the same) & 0.892 & 0.793 \\
     Registered P2: mice with a positive change & 4 of 13 & 5 of 13 \\
+    Registered P2: bootstrap 95\% interval, mean change & $[-0.217, 0.000]$ & $[-0.205, 0.032]$ \\
     Ridge full-population reference: mouse mean & 0.159 & 0.101 \\
     Ridge full-population reference: session median & 0.108 & 0.087 \\
     0.5\,s subspace / full population (session medians) & 0.62 & 0.72 \\

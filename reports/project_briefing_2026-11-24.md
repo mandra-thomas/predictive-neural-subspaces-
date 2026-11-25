@@ -12,7 +12,8 @@ yours.*
 
 The project asked whether predicting further ahead pulls out the slowly changing "block prior" that a mouse uses in
 the IBL task. In MOs it did not. The pre-registered test of that idea (P2) was not supported: the mean change was
-−0.099 with an interval of −0.218 to +0.002, which is wide, so a modest rise is not excluded. Every low-dimensional
+−0.099 with an interval of −0.218 to +0.002, which lies almost entirely below zero: there is no evidence of a rise,
+though 13 mice under-cover and the upper end reaches +0.032 without one outlying session. Every low-dimensional
 summary of the recordings turned out to be dominated by a slow drift over the session.
 
 Since the talk, the work has measured why it might have failed and what that means, with a partial (not
@@ -96,7 +97,7 @@ corrected $R^2$ 0.064, Fisher p = 1.2e-5), so there was something to look for.
 | Test | Result (mouse mean) | Holm p | Verdict |
 |---|---|---|---|
 | P1 geometry | cross-lag angle exceeds the 0.5 s floor by 12.7° and the 30 s floor by 3.6° | 0.0026 | passed, thinly |
-| P2 prior rises with lag | change −0.099 [−0.218, +0.002] | 0.89 | **not supported** (interval wide; modest rises not excluded) |
+| P2 prior rises with lag | change −0.099 [−0.218, +0.002] | 0.89 | **not supported** (no evidence of a rise; interval mostly below zero) |
 | P3 stimulus falls with lag | change +0.061 [0.028, 0.094] | 0.0061 | passed, but not as hoped |
 
 The qualifications matter. P1's margin at 30 s is a few degrees against a floor that is itself at chance, and it
@@ -104,7 +105,11 @@ holds only in the readout basis. P3 holds because long-lag subspaces *lose* the 
 better for the stimulus than a random subspace, so there is no "fast stimulus subspace". P2 is flat: no variant
 (either decoder, residualised data, any dimension, any left-out mouse, either detrend) shows a rise. It is also
 underpowered: with 13 mice and a per-mouse spread of about 0.21, a rise of the size the simulation produces without
-drift (+0.05) would be detected only about one time in five. So "not supported" is the right wording, not "refuted".
+drift (+0.05) would be detected only about one time in five. Low power describes the test before the data; after
+them, the interval for the mean change lies almost entirely below zero, so rises larger than a few hundredths are
+unlikely (its upper end, +0.002, rises to +0.032 without session `4d8c7767`, and a bootstrap over 13 mice
+under-covers). "Not supported, no evidence of a rise" is the right wording. (An earlier version said the interval was
+too wide to exclude modest rises, which read it backwards; corrected 25 November after an outside review.)
 
 What dominated every subspace instead was a slow **session-time mode**: a population direction whose activity
 changes steadily over the session. Elapsed time is decodable with $R^2$ 0.84 from the 30 s subspace, but also 0.82
@@ -355,9 +360,10 @@ the estimate. It is withdrawn and not used.
 - Its share of activity is about two orders of magnitude below the slow component (descriptive).
 - No lag up to 4 minutes selects it on drift-removed data (four pre-set tests, none significant).
 - In a simulation matched to the recordings (under assumptions that were not varied), drift of the recorded strength
-  removes a realistic prior from the 30 s subspace while the full population keeps it. It does not reproduce the
-  recordings' advantage for the 0.5 s subspace (pre-set verdict: "intermediate"), and conditions without any prior
-  match the recorded profile about as well.
+  removes a realistic prior from the 30 s subspace while the full population keeps it. Its horizon change stays near
+  zero (pre-set verdict: "intermediate"); the recordings' own horizon change is decoder-dependent (−0.099 mean,
+  −0.041 median, +0.001 Lasso), and conditions without any prior match the recorded profile about as well. Drift is
+  consistent with the recordings, not established.
 - In simulation, a population with no prior whose stimulus memory matches the recorded previous-stimulus
   decodability gives a corrected prior score of 72% of the recorded one, so that score alone cannot show a block
   prior.
@@ -373,7 +379,7 @@ the estimate. It is withdrawn and not used.
 
 **Failed or withdrawn:**
 
-- P2 (pre-registered): the predicted rise of the prior with lag was not supported (underpowered; not refuted).
+- P2 (pre-registered): the predicted rise of the prior with lag was not supported (no evidence of a rise).
 - The A17 prediction that prior content would fall with lag: it is flat.
 - The claim that the prior "could not have entered" a rank-5 subspace: withdrawn (it was not a real bound).
 - The ground-truth capture metric: withdrawn.
@@ -468,7 +474,10 @@ features). The report now says the simulation explains part of the pattern.
 *My explanation for the latent model's failure was wrong.* I had suggested that subtracting its previous-stimulus
 input removed the prior. An AI-agent diagnostic (scratch only, not committed) re-ran the readout on four simulated
 sessions subtracting only the slow time basis; the prior score barely changed (for example 0.017 to 0.050 against a
-full-population 0.25). So that is not the reason, and no reason is now offered. The failure is scoped to the
+full-population 0.25). I took that as ruling the explanation out. It does not: the latents were fitted with the
+previous-side input present, so the input had already absorbed the prior-related activity it predicts before any
+latent was fitted, and changing what is subtracted at readout cannot reveal that. The explanation is untested
+(corrected 25 November after an outside review; `AMENDMENTS.md` note 10). The failure is scoped to the
 specification tested; it keeps only about 15% of the prior even without drift; no positive control was run; and the
 gate's 50% threshold is above what lagged RRR itself keeps without drift (41%).
 
@@ -507,8 +516,10 @@ particular. And the gate's 50% threshold is above what lagged RRR itself keeps w
 
 I had suggested that subtracting the previous-stimulus input removed the prior. An AI-agent diagnostic on 25 November
 (run in a scratch folder, not committed) re-ran the readout on four simulated sessions subtracting only the slow time
-basis; the prior score barely changed (for example 0.017 to 0.050, against a full-population 0.25). So that is not
-the explanation, and no explanation is offered.
+basis; the prior score barely changed (for example 0.017 to 0.050, against a full-population 0.25). That check
+changes only the readout, not the fitted latents, so it cannot detect the input absorbing prior-related activity
+during fitting; the explanation is untested, not ruled out. The readout also discards the per-latent dynamics, by
+design, so the test is close to factor analysis with regressors.
 
 **What this means for the plan.** The analysis is finished apart from the A19 sensitivity check, which is done and
 committed (`9cd4a62` specification, `97b272b` results). All remaining time goes to the report:

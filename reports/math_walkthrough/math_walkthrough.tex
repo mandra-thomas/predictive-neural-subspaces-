@@ -199,9 +199,11 @@ P3 & $+0.061\,[0.028, 0.094]$ & 0.0061 \\
 \end{center}
 
 Per basis (registered, mouse means), $\Rc$ is $0.054$ ($V^{\mathrm{in}}_1$), $-0.027$, $-0.057$, $-0.046$
-($V^{\mathrm{in}}_{60}$), $0.013$ (PCA), $-0.030$ (random). P2 is \emph{not supported}: the interval for the mean
-change, $[-0.218, 0.002]$, is wider than the prior reference below, so modest rises are not excluded (13 mice give
-little power). What every summary does contain is session time: $R^2_{\mathrm{el}} = 0.84$ ($V^{\mathrm{in}}_{60}$),
+($V^{\mathrm{in}}_{60}$), $0.013$ (PCA), $-0.030$ (random). P2 is \emph{not supported}, with no evidence of a rise: the
+bootstrap interval for the mean change, $[-0.218, 0.002]$, lies almost entirely below zero, so rises larger than a
+few hundredths are unlikely. Thirteen mice give little power before the data and a bootstrap that under-covers, and
+the upper end depends on one session ($[-0.205, 0.032]$ without it; A19). (An earlier version said the interval was
+too wide to exclude modest rises, which read it backwards.) What every summary does contain is session time: $R^2_{\mathrm{el}} = 0.84$ ($V^{\mathrm{in}}_{60}$),
 $0.82$ ($V^{\mathrm{in}}_1$), $0.80$ (PCA), $0.64$ (random).
 
 \paragraph{A post hoc reference on the same scale (A16, not registered).} The registered prior gate used a different
@@ -491,7 +493,7 @@ median) without session \texttt{4d8c7767}.
   miss the same two discriminating features, the positive 0.5 s prior score and the negative $\Delta_\pi$. The profile
   therefore does not show that a prior is needed.
 \item \emph{Stimulus memory can mimic the prior when strong enough}: with $g_\pi = 0$ and $g_h = 0.061$, so that memory
-  alone reproduces the recorded previous-side AUC, $\Rc(I_p) = 0.078\,[0.019, 0.132]$, positive in 24 of 32 seeds (12
+  alone reproduces the recorded previous-side AUC, $\Rc(I_p) = 0.078\,[0.012, 0.154]$ (task-resampled), positive in 24 of 32 seeds (12
   of 16 tasks, $p = 0.038$). That is 72\% of the recorded session median 0.108 (49\% of the mouse mean 0.159, which one
   session inflates; 89\% of the session median 0.087 without that session). At the jointly calibrated gain
   $g_h = 0.036$, memory alone gives $-0.012$ (16 of 32), and the null is calibrated ($-0.043$, 13 of 32). B2 is post hoc
@@ -555,8 +557,12 @@ failure says little about drift in particular. There was no positive control for
 half the full-population score is above what lagged RRR itself captures at 30 s without drift ($\operatorname{cap} =
 0.41$). An earlier note suggested that subtracting the previous-stimulus input (which correlates 0.64 with $\pi$)
 removed the prior; an AI-agent audit diagnostic (run in scratch, not committed) recomputed the readout on four
-simulated sessions subtracting only the cosine inputs, and the scores did not change materially, so that explanation
-is not supported. With drift, the fitted timescales are dominated by slow latents (medians $\tau \approx 43, 31, 21, 9$
+simulated sessions subtracting only the cosine inputs, and the scores did not change materially. That check changes
+only the readout: the latents were fitted with the previous-side input in $\bm u$, so $D$ had already absorbed the part
+of any prior-related activity that $c_{k-1}$ predicts ($R^2 = 0.41$ of $\pi$) before the latents were fitted, and the
+check cannot detect that. The explanation is untested, not ruled out. The readout also discards the per-latent
+dynamics by design (smoothing could integrate stimulus memory into an apparent prior), so the test is close to factor
+analysis with regressors. With drift, the fitted timescales are dominated by slow latents (medians $\tau \approx 43, 31, 21, 9$
 trials) that absorb slow structure the cosine inputs do not. 124 of 128 fits converged within 300 iterations. The
 conclusion applies to this specification (these inputs and the single-trial GLS readout), not to latent models in
 general.

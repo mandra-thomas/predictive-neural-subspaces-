@@ -131,7 +131,7 @@ post hoc (`AMENDMENTS.md`, A17, including the review note of 24 November). Resul
 | `23_timescales_A17.py` | A17 part 0, post hoc; task data only | Session and block durations, the prior's autocorrelation and integrated timescale (per 0.5 s bin and per trial), and the prior's variance inside the cosine detrend span. Writes `results/a17/timescales.{csv,json}`, `blocks.csv`, `prior_acf.csv` |
 | `24_budget_A17.py` | A17 part 1, post hoc; descriptive | Population-level variance shares (>= 20 min component, trial-locked GLM, pseudo-session-corrected prior), and a descriptive scale comparison of the prior's predictable variance with the RRR eigenvalues (not a bound; see the review note). Reads the raw and cosine-detrended fits. Writes `results/a17/budget_sessions.csv`, `budget.json` |
 | `25_longlag_A17.py` | A17 part 2, post hoc | Reproduction check of the long-lag roots against A16, per-lag summary, and the four "band selection" tests (60 s against 0.5 s and against PCA, in each detrended copy). Writes `results/a17/longlag_{c,q}.csv`, `longlag.json` |
-| `26_sim_A18.py` | A18 part A, post hoc | Calibrated simulation. Stages: `targets` (real-data calibration statistics), `calibrate`, `calibrate_neg`, `sweep` (11 conditions x 32 paired seeds through the registered pipeline), `summary` (pre-set readings and figure). Writes `results/a18/` |
+| `26_sim_A18.py` | A18 part A, post hoc | Calibrated simulation. Stages: `targets` (real-data calibration statistics), `calibrate`, `calibrate_neg`, `sweep` (11 conditions x 32 paired seeds through the registered pipeline), `summary` (pre-set readings and figure), `audit` and `task_intervals` (post hoc task-level counts and intervals, from committed outputs only). Writes `results/a18/` |
 | `27_lds_sim_A18.py` | A18 part B, post hoc | The latent state-space model on simulated sessions only, with a pre-set gate and stopping rule (the gate failed; not run on real data). Writes `results/a18/lds_sim_seeds.csv`, `lds_gate.json` |
 | `28_sensitivity_A19.py` | A19, post hoc | Stages: `sensitivity` (registered P2, the A16 reference and the A18 comparisons with and without session `4d8c7767`; reads committed results only), `derived` (A18 profile reading for every simulated condition; committed results only), `sources` (prior against previous stimulus sides; task data only). Writes `results/a19/` |
 
@@ -154,7 +154,7 @@ for v in c q; do
 done
 unset PNS_DATA PNS_RESULTS PNS_FIGURES
 python scripts/25_longlag_A17.py
-for s in targets calibrate calibrate_neg sweep summary audit; do
+for s in targets calibrate calibrate_neg sweep summary audit task_intervals; do
   OMP_NUM_THREADS=1 python scripts/26_sim_A18.py --stage $s --n-jobs 14     # about 50 min in total on 14 cores
 done
 OMP_NUM_THREADS=1 python scripts/27_lds_sim_A18.py --n-jobs 14              # about 25 min

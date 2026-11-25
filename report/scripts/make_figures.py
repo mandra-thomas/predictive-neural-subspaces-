@@ -122,10 +122,13 @@ def fig_content():
             ax.axhline(0, color=INK_2, lw=0.8)
         if var == "prior":
             a16 = pd.read_csv(ROOT / "results/a16/sessions_d5.csv")
-            full = a16.groupby("subject").ridge_full_corr.mean().mean()
+            # session median: the summary A19 fixed in advance for post hoc reference values, because the corrected
+            # score is unbounded and one session (1.59) inflates the mouse mean (0.159)
+            full = a16.ridge_full_corr.median()
             ax.axhline(full, color=SERIES[2], lw=1.0, ls=":")
-            ax.text(5.75, full + 0.012, f"full pop. {full:.3f}", fontsize=6.0, color=SERIES[2], ha="right", va="bottom")
-            out["full_population"] = {"mouse_mean": full}
+            ax.text(3.7, full + 0.012, f"full pop.\n{full:.3f}", fontsize=6.0, color=SERIES[2], ha="center", va="bottom")
+            out["full_population"] = {"session_median": full,
+                                      "mouse_mean": a16.groupby("subject").ridge_full_corr.mean().mean()}
         ax.set_xticks(xs, xt, rotation=0)
         ax.tick_params(axis="x", labelsize=6.8)
         ax.set_title(title, loc="left")
@@ -262,9 +265,9 @@ GRID_C = "#e6e5e0"
 
 
 def fig_simulation():
-    """A18 part A, from results/a18/sim_cells.csv (seed means and 95% seed-bootstrap intervals, raw pipeline)."""
-    c = pd.read_csv(ROOT / "results" / "a18" / "sim_cells.csv")
-    c = c[c.pipeline == "raw"].set_index("cell")
+    """A18 part A: means over the 16 tasks (two seeds each, averaged) with 95% intervals resampling tasks, from
+    results/a18/task_intervals.csv (script 26, stage task_intervals); raw pipeline."""
+    ti = pd.read_csv(ROOT / "results" / "a18" / "task_intervals.csv").set_index(["cell", "quantity"])
     rt = json.load(open(ROOT / "results" / "a18" / "real_targets.json"))
     conds = [("nodrift", "no\ndrift"), ("lowrank_x0.33", "drift\n1/3"), ("lowrank_x1", "drift\nx1"),
              ("neg_history_strong", "memory\nonly"), ("neg_pure", "neither")]
@@ -274,8 +277,8 @@ def fig_simulation():
     ax = axs[0]
     x = np.arange(len(conds))
     for j, (col, lab, mk) in enumerate(series):
-        m = np.array([c.loc[k, f"{col}_mean"] for k, _ in conds])
-        ci = np.array([json.loads(c.loc[k, f"{col}_ci"]) for k, _ in conds])
+        m = np.array([ti.loc[(k, col), "mean"] for k, _ in conds])
+        ci = np.array([[ti.loc[(k, col), "ci_lo"], ti.loc[(k, col), "ci_hi"]] for k, _ in conds])
         xx = x + (j - 1) * 0.22
         ax.errorbar(xx, m, yerr=[m - ci[:, 0], ci[:, 1] - m], fmt=mk, color=SERIES[j], ms=4.5, lw=1.2,
                     capsize=0, label=lab)
@@ -295,13 +298,15 @@ def fig_simulation():
               handletextpad=0.2, columnspacing=0.8)
     ax = axs[1]
     pc = [("nodrift", "no\ndrift"), ("lowrank_x0.33", "drift\n1/3"), ("lowrank_x1", "drift\nx1")]
-    m = np.array([c.loc[k, "p2_change_mean"] for k, _ in pc])
-    ci = np.array([json.loads(c.loc[k, "p2_change_ci"]) for k, _ in pc])
+    m = np.array([ti.loc[(k, "p2_change"), "mean"] for k, _ in pc])
+    ci = np.array([[ti.loc[(k, "p2_change"), "ci_lo"], ti.loc[(k, "p2_change"), "ci_hi"]] for k, _ in pc])
     ax.errorbar(np.arange(3), m, yerr=[m - ci[:, 0], ci[:, 1] - m], fmt="o", color=SERIES[0], ms=4.5, lw=1.2)
     p2 = pd.read_csv(ROOT / "results" / "stats" / "d5" / "primary.csv")
     r = p2[p2.test.str.startswith("P2")].iloc[0]
     ax.errorbar([3.2], [r["mean"]], yerr=[[r["mean"] - r.ci_lo], [r.ci_hi - r["mean"]]], fmt="D", color=INK,
                 ms=4.5, lw=1.2)
+    # the recordings' median over mice (the mean is pulled down by a heavy tail)
+    ax.scatter([3.2], [r["median"]], marker="D", s=22, facecolors="white", edgecolors=INK, linewidths=1.0, zorder=4)
     ax.axhline(0, color=MUTED, lw=0.8)
     ax.set_xticks([0, 1, 2, 3.2])
     ax.set_xticklabels([l for _, l in pc] + ["record-\nings"], fontsize=6.8)

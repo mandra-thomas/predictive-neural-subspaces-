@@ -1036,3 +1036,39 @@ on 2026-11-25. No registered result changes. Recorded here:
    not an arbitrary extreme. So, if there is no prior, the memory the recordings require yields a corrected prior
    score of 72% of the recorded session median; the recorded score cannot by itself separate a block prior from
    memory of recent stimuli. The rest of note 6 stands.
+10. **After an outside review of the rewritten report (same day, later).** The author pasted a review of the report
+    and the TA deck (its authorship is not recorded here). Its factual claims were checked against the code and the
+    committed results. Recorded changes; no registered result and no pre-set reading changes:
+    - *P2 wording.* The report, deck, `RESULTS.md`, briefing and walkthrough said the interval for the mean change
+      (−0.218 to 0.002) was too wide to exclude modest rises. That read the interval backwards: it lies almost
+      entirely below zero, so there is no evidence of a rise and rises larger than a few hundredths are unlikely. The
+      qualifications are that a bootstrap over 13 mice under-covers and that the upper end depends on session
+      `4d8c7767` (−0.205 to 0.032 without it; `results/a19/sensitivity.json`). The residual-data interval (−0.154 to
+      −0.038) lies below zero; the test was one-sided for a rise, so this is reported, not tested. No equivalence test
+      was added, since any margin chosen now would be chosen after seeing the data.
+    - *Note 5 corrected.* The AI-agent diagnostic changed only what the readout subtracts; the latent model's
+      loadings were fitted with the previous-side input present, so that input had already absorbed the
+      prior-related activity it predicts (41% of the prior's variance) before any latent was fitted. The diagnostic
+      cannot detect this, so the explanation is **untested**, not "not supported". The readout also discards the
+      per-latent dynamics, by design (smoothing could integrate stimulus memory into an apparent prior), so the test is
+      close to factor analysis with regressors. Refitting without that input was not done (constraint: no further
+      latent-model experiments).
+    - *Drift wording.* "The simulation does not reproduce the recordings' horizon pattern" is replaced by "consistent
+      with the recordings, not established": the recordings' horizon change is −0.099 as a mouse mean, −0.041 as a
+      median and +0.001 under the Lasso decoder (A16), a range that includes the simulated median (+0.015), and the
+      no-prior conditions match the recorded profile about as well (note 7). The pre-set reading stays
+      "intermediate".
+    - *Simulation intervals.* The report's simulation figure and table, and the `RESULTS.md` table, now use 95%
+      intervals that resample the 16 tasks rather than the 32 seeds (seeds come in correlated pairs). New stage
+      `task_intervals` of `scripts/26_sim_A18.py` writes `results/a18/task_intervals.csv` from `sim_seeds.csv` only
+      (no simulation was run). Quoted intervals that changed: capture without drift 41% [31, 50] (was [33, 48]);
+      memory alone 0.078 [0.012, 0.154] (was [0.019, 0.132]).
+    - *Report Figure 2a.* Its dotted full-population line was the mouse mean (0.159), which one session inflates. It
+      now shows the session median (0.108), the summary A19 fixed in advance for post hoc reference values. The median
+      over mice (0.176) was also computed and not used: choosing it after seeing it would be choosing by value.
+    - *Report structure.* Retitled "Long Prediction Horizons Do Not Isolate the Block Prior in Mouse Secondary Motor
+      Cortex"; "pre-specified" replaces "pre-registered" in the report (the repository keeps its terms); three status
+      labels (pre-specified, exploratory, post hoc); amendment codes kept to the appendix; abstract shortened; the
+      sensitivity analysis and the latent model moved to the appendix with one main-text sentence each; one
+      sentence relating the 20 November freeze to the 23 November tag; a band-pass objective mentioned as future work
+      only (not run).
