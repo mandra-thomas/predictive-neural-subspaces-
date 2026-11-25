@@ -871,3 +871,52 @@ the inputs include the previous stimulus, which correlates 0.64 with the prior, 
 part of the prior-related activity. The regenerated sessions matched part A exactly (largest difference 1e-16); 124
 of 128 fits converged within 300 iterations. Per the stopping rule, no latent model is run on real data and no
 variant is tried.
+
+## A19 (post hoc): sensitivity of reported comparisons to one session (written 2026-11-25, before any A19 number was computed)
+
+**Why.** An AI-agent audit of the repository on 2026-11-25 (not human review) found that session `4d8c7767`
+(mouse SWC_038, 128 units, 562 decoded trials) has an implausible corrected full-population prior score in the A16
+same-scale reference: 1.59 (raw out-of-fold R² −0.94 against a pseudo-session median near −2.5; `results/a16/sessions_d5.csv`)
+and a history-controlled score of −6.30 (`results/a18/real_targets.csv`). The corrected score (real R² minus the
+median R² of 200 pseudo sessions) is not bounded above by 1 when both terms are strongly negative, so one session can
+move a mean. The session was identified *because* its value is extreme, so this analysis is data-driven and post hoc.
+
+**What is fixed now, before computing anything.**
+1. *Registered P2 is not changed.* The registered result (one-sided Wilcoxon over 13 mice of the paired-null
+   corrected difference R²(30 s) − R²(0.5 s), mouse means, Holm over P1–P3) stands as registered whatever this
+   analysis shows. A19 only reports how much it depends on this session.
+2. *Quantities, each computed with and without session `4d8c7767` (SWC_038 is then represented by its other session,
+   `1e45d992`), and each under three aggregations (mouse mean, as registered; median across mice; median across
+   sessions), with sign counts:*
+   - **S1, registered P2** from `results/decoding` and `results/null` with `pns.analysis.paired_null_diff`; the
+     with-session mouse-mean version must reproduce `results/stats/d5/primary.csv` (p = 0.892, mean −0.099) exactly,
+     otherwise the script stops. Wilcoxon p, bootstrap interval (same `bootstrap_ci`, seed 0), and the Holm-adjusted
+     P2 with P1 and P3 unchanged.
+   - **S2, the A16 same-scale reference** (`results/a16/sessions_d5.csv`): full population, 0.5 s subspace, 30 s
+     subspace and PCA, ridge and Lasso decoders, and the ratios subspace / full population.
+   - **S3, the registered profile used by the A18 comparison** (`results/stats/d5/session_scores.csv`, prior and
+     elapsed time for the reported feature sets) and the A18 reading C count of profile features within the
+     recordings' interval, recomputed against the profile without the session (intervals for both versions
+     recomputed by the same bootstrap, seed 0, so they are comparable).
+   - **S4, simulation comparisons quoted in the text:** history-alone full-population mean as a fraction of the
+     recordings' reference (mouse mean and session median); the recordings' session medians of the six calibration
+     statistics and of the history-controlled score over 15 versus 16 sessions; and the A18 audit's median-of-16
+     probability recomputed with the 15-session threshold. No simulation is re-run and the calibration is not redone;
+     the shift of each target is reported instead.
+   - **S5, transparency listing:** every session and quantity in `results/a16/sessions_d5.csv` and
+     `results/a18/real_targets.csv` whose corrected score exceeds 1 in absolute value. Listed, not excluded; only
+     `4d8c7767` is analysed.
+3. *Choice of summary fixed in advance, not by significance.* From now on the documents report, for every post hoc
+   descriptive quantity built on the corrected R² (the A16 reference and ratios derived from it), the session median
+   alongside the mouse mean, with the session median as the primary descriptive summary (the A18 calibration
+   already used session medians). For the registered P2 the registered statistic remains primary; the variants are
+   reported beside it whatever their p-values.
+4. *No other analysis.* No new neural-data, simulation or latent-model fit. Script `scripts/28_sensitivity_A19.py`
+   (stage `sensitivity`) reads committed result files only; outputs `results/a19/sensitivity.json` and
+   `results/a19/sensitivity_tables.csv`.
+
+**Also recorded in this entry: sources for numbers previously quoted without a committed file.** Stage `sources` of
+the same script computes, from task data only (no neural data), the statistics of the ideal observer's prior quoted
+in the A18 notes and the walkthrough: the correlation of the prior with the previous stimulus side and the in-sample
+R² of the prior on the last 1, 5 and 10 sides, per session (median over the 16 sessions), on the full trial sequence
+and on the decoded trials; output `results/a19/prior_history.csv` and `.json`.
