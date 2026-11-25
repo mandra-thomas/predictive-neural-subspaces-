@@ -788,3 +788,29 @@ sessions) and -0.061 in the recordings. One cell and one reading are added; noth
   controls). Presentation only.
 - **Provenance.** Targets ran at `3a81ba1`, calibration at `3a81ba1` with only result and log files modified, the
   history-only calibration and the sweep at `2f7611d` (likewise); the figure code was edited after the summary.
+
+**A18 audit note (written 2026-11-24, after two independent reviews of the committed code, results and text; post
+hoc).** No reading changes. Corrections:
+- *Wording.* RESULTS.md had overstated three things, now corrected: (1) that drift "is sufficient to reproduce the
+  loss"; the pre-set low-rank reading is "intermediate", because drift removes the 30 s prior score but not the 30 s
+  advantage over 0.5 s (21 of 32 seeds); (2) that stimulus history "produces most" of the recorded prior score; it is
+  about half to 70% depending on the summary, and only in the extreme case where history is given all of the
+  recorded previous-side decodability; (3) a claim that a variance-ranked objective has "no horizon" favouring the
+  prior, which rests on the same separable-components picture the A17 review note withdrew; now labelled a heuristic.
+  Also corrected: "a third of the drift halves the 30 s score" (it cuts it by a third), a missing table row (per-unit
+  drift x 3), principal-component fractions, and the comparison of the recordings' history-controlled score, which had
+  been made against single simulated sessions rather than medians of 16.
+- *Pairing.* Seeds s and s + 16 share a task, so there are 16 independent tasks, not 32. Spike-level Poisson noise is
+  not shared across cells, and `neg_pure` draws different evoked-response loadings than the other cells (the history
+  loading is drawn from the same generator only when history is on). The text said "same loadings and noise draws";
+  corrected. Task-level counts and task-resampled intervals are added (stage `audit`, `results/a18/audit_checks.json`);
+  every pre-set reading holds at the task level, the history-alone reading only borderline (12 of 16, p = 0.038).
+- *History-controlled score.* The target is regressed on its own previous sides over the whole session before
+  cross-validation, which gives the real target a small negative bias when neurons encode the real sides
+  (-0.01 to -0.03 in a toy model). Refitting within training folds moves the recordings' median from -0.061 to
+  -0.058, so it does not explain that value. Left as specified; noted.
+- *Tests.* `test_negative_control_has_no_prior_latent` uses the synthetic task path, and the decode-equivalence test
+  covers only the prior and elapsed-time scores of four subspaces. Their scope is narrower than their names suggest.
+  The reviewer checked the real-task path directly (prior switch timing, transients and movement against the
+  pre-stimulus window, on all 16 tasks) and found no leak; the first 0.05 s of the window carries the previous trial's
+  value in 4 of 8,752 trials.

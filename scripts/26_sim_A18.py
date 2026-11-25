@@ -45,7 +45,8 @@ SETS = ["rrr_1", "rrr_4", "rrr_16", "rrr_60", "pca", "random"]
 
 
 def extra(p):
-    p.add_argument("--stage", required=True, choices=["targets", "calibrate", "calibrate_neg", "sweep", "summary"])
+    p.add_argument("--stage", required=True, choices=["targets", "calibrate", "calibrate_neg", "sweep", "summary",
+                                                         "audit"])
 
 
 def real_pres(cfg):
@@ -426,12 +427,55 @@ def stage_summary(cfg):
                                        f"{out['recommend_lds']['proceed']}")
 
 
+def stage_audit(cfg):
+    """Post hoc checks added after the independent audit of 24 November (no reading changes):
+    task-level counts (seeds s and s+16 share a task: average them, binomial over 16 tasks), task-resampled
+    intervals, and how often a median of 16 simulated sessions is at or below the recordings' history-controlled
+    median, under two resampling schemes (16 of the 32 seeds at random; one seed per task)."""
+    from scipy.stats import binom
+    real = json.loads((OUT / "real_targets.json").read_text())["session_median"]
+    df = pd.read_csv(OUT / "sim_seeds.csv")
+    df = df[df.pipeline == "raw"].copy()
+    df["task"] = (df.seed - SWEEP_SEEDS[0]) % 16
+    rng = np.random.default_rng(0)
+    out = {"note": "post hoc, after the independent audit; no pre-set reading changes", "cells": {}}
+    thr = real["full_prior_hist_corr"]
+    for cell, g in df.groupby("cell"):
+        tk = g.groupby("task")[["prior_full", "priorhist_full", "prior_rrr_60", "p2_change"]].mean()
+        row = {}
+        for k in tk.columns:
+            x = tk[k].to_numpy()
+            npos = int((x > 0).sum())
+            b = x[rng.integers(0, 16, (4000, 16))].mean(1)
+            row[k] = {"task_mean": float(x.mean()), "task_npos": npos, "binom_p": float(binom.sf(npos - 1, 16, 0.5)),
+                      "task_boot_ci": [float(np.percentile(b, 2.5)), float(np.percentile(b, 97.5))]}
+        h = g.priorhist_full.to_numpy()
+        m1 = np.median(rng.choice(h, (20000, 16)), axis=1)
+        piv = g.pivot_table(index="task", columns=g.seed >= SWEEP_SEEDS[0] + 16, values="priorhist_full")
+        pick = rng.integers(0, 2, (20000, 16))
+        m2 = np.median(np.where(pick == 0, piv[False].to_numpy()[None], piv[True].to_numpy()[None]), axis=1)
+        row["p_median16_le_real_hist"] = {"random_16_of_32": float(np.mean(m1 <= thr)),
+                                          "one_seed_per_task": float(np.mean(m2 <= thr))}
+        a = g.sort_values("seed").groupby("task").prior_full.apply(list)
+        row["seed_pair_corr_prior_full"] = float(np.corrcoef([v[0] for v in a], [v[1] for v in a])[0, 1])
+        out["cells"][cell] = row
+    out["real_hist_session_median"] = thr
+    write_json(OUT / "audit_checks.json", out)
+    for c in ("nodrift", "lowrank_x1", "neg_history", "neg_history_strong", "favourable"):
+        r = out["cells"][c]
+        print(c, {k: (r[k]["task_npos"], round(r[k]["binom_p"], 4)) for k in ("prior_full", "priorhist_full")},
+              r["p_median16_le_real_hist"], round(r["seed_pair_corr_prior_full"], 2))
+    log_run(cfg, "26_sim_A18 audit", "A18 post hoc audit checks: task-level counts, task-resampled intervals, "
+                                     "median-of-16 comparison")
+
+
 def main():
     args, cfg, n_jobs = setup(__doc__, extra)
     OUT.mkdir(parents=True, exist_ok=True)
     {"targets": lambda: stage_targets(cfg, n_jobs), "calibrate": lambda: stage_calibrate(cfg, n_jobs),
      "calibrate_neg": lambda: stage_calibrate_neg(cfg, n_jobs),
-     "sweep": lambda: stage_sweep(cfg, n_jobs), "summary": lambda: stage_summary(cfg)}[args.stage]()
+     "sweep": lambda: stage_sweep(cfg, n_jobs), "summary": lambda: stage_summary(cfg),
+     "audit": lambda: stage_audit(cfg)}[args.stage]()
 
 
 if __name__ == "__main__":

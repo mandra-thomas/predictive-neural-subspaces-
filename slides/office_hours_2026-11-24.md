@@ -19,9 +19,9 @@ about 0.01 at 2 min. A linear session ramp has ρ² = 1 at every lag.
 - **Trials vs blocks.** One block is about 46 trials, or about 3.6 min. The longest lag, 30 s, is about 8 trials.
 - **"Why not minutes?"** I measured it. The prior's own autocorrelation is 0.77 at 30 s, 0.52 at 60 s, 0.10 at 2 min
   and −0.19 at 4 min, where it turns negative because blocks alternate. So the prior is mostly unpredictable beyond
-  about 2 min, while the session drift stays almost perfectly predictable. A variance-ranked predictive objective has
-  no horizon at which it favours the prior over the drift; longer lags make the prior less predictable, not more. That
-  is the design flaw, stated correctly.
+  about 2 min, while a session-long drift stays predictable. So longer lags make the prior less predictable, not more,
+  and, roughly speaking, cannot tip a variance-ranked objective toward it (a heuristic; a calibrated simulation
+  since then shows drift of the recorded strength is enough to remove a realistic prior from the 30 s subspace).
 - **Retraction.** In the talk I said a 30 s lag leaves only about 130 independent windows. That was wrong. RRR uses
   every overlapping pair of bins: a 66-min session has about 7,900 bins, and a 240 s lag gives up only 480 of them.
   The real limit on any slow signal is the number of blocks per session (about 13), and that is the same at every lag.
