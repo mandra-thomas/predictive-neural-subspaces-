@@ -258,8 +258,68 @@ def fig_timescales():
     plt.close(fig)
 
 
+GRID_C = "#e6e5e0"
+
+
+def fig_simulation():
+    """A18 part A, from results/a18/sim_cells.csv (seed means and 95% seed-bootstrap intervals, raw pipeline)."""
+    c = pd.read_csv(ROOT / "results" / "a18" / "sim_cells.csv")
+    c = c[c.pipeline == "raw"].set_index("cell")
+    rt = json.load(open(ROOT / "results" / "a18" / "real_targets.json"))
+    conds = [("nodrift", "no\ndrift"), ("lowrank_x0.33", "drift\n1/3"), ("lowrank_x1", "drift\nx1"),
+             ("neg_history_strong", "memory\nonly"), ("neg_pure", "neither")]
+    series = [("prior_full", "full population", "o"), ("prior_rrr_60", "30 s subspace", "s"),
+              ("prior_rrr_1", "0.5 s subspace", "^")]
+    fig, axs = plt.subplots(1, 2, figsize=(5.5, 2.5), gridspec_kw={"width_ratios": [1.9, 1]})
+    ax = axs[0]
+    x = np.arange(len(conds))
+    for j, (col, lab, mk) in enumerate(series):
+        m = np.array([c.loc[k, f"{col}_mean"] for k, _ in conds])
+        ci = np.array([json.loads(c.loc[k, f"{col}_ci"]) for k, _ in conds])
+        xx = x + (j - 1) * 0.22
+        ax.errorbar(xx, m, yerr=[m - ci[:, 0], ci[:, 1] - m], fmt=mk, color=SERIES[j], ms=4.5, lw=1.2,
+                    capsize=0, label=lab)
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ref = rt["session_median"]["full_prior_corr"]
+    ax.axhline(ref, color=INK_2, lw=0.9, ls=":")
+    ax.text(-0.45, ref - 0.006, "recordings (median)", fontsize=6.3, color=INK_2, ha="left", va="top")
+    ax.axvline(2.5, color=GRID_C, lw=0.8)
+    ax.text(1.0, -0.175, "prior present", fontsize=6.5, color=INK_2, ha="center")
+    ax.text(3.5, -0.175, "no prior", fontsize=6.5, color=INK_2, ha="center")
+    ax.set_ylim(-0.19, 0.31)
+    ax.set_xticks(x)
+    ax.set_xticklabels([l for _, l in conds], fontsize=6.8)
+    ax.set_ylabel("corrected prior $R^2$")
+    ax.set_title("a  Simulated prior score", loc="left")
+    ax.legend(frameon=False, fontsize=6.5, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.0),
+              handletextpad=0.2, columnspacing=0.8)
+    ax = axs[1]
+    pc = [("nodrift", "no\ndrift"), ("lowrank_x0.33", "drift\n1/3"), ("lowrank_x1", "drift\nx1")]
+    m = np.array([c.loc[k, "p2_change_mean"] for k, _ in pc])
+    ci = np.array([json.loads(c.loc[k, "p2_change_ci"]) for k, _ in pc])
+    ax.errorbar(np.arange(3), m, yerr=[m - ci[:, 0], ci[:, 1] - m], fmt="o", color=SERIES[0], ms=4.5, lw=1.2)
+    p2 = pd.read_csv(ROOT / "results" / "stats" / "d5" / "primary.csv")
+    r = p2[p2.test.str.startswith("P2")].iloc[0]
+    ax.errorbar([3.2], [r["mean"]], yerr=[[r["mean"] - r.ci_lo], [r.ci_hi - r["mean"]]], fmt="D", color=INK,
+                ms=4.5, lw=1.2)
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ax.set_xticks([0, 1, 2, 3.2])
+    ax.set_xticklabels([l for _, l in pc] + ["record-\nings"], fontsize=6.8)
+    ax.set_ylabel("change in corrected $R^2$")
+    ax.set_title("b  30 s minus 0.5 s", loc="left")
+    for a in axs:
+        a.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(OUT / "rfig_simulation.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     import sys as _sys
+    if _sys.argv[1:] == ["simulation"]:
+        rc()
+        fig_simulation()
+        raise SystemExit
     if _sys.argv[1:] == ["timescales"]:
         rc()
         fig_timescales()

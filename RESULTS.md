@@ -7,8 +7,8 @@ timescale follow-ups (A17 parts 0 to 2) ran on 23 November; the calibrated simul
 gate on simulated sessions (A18 part B, which failed and stopped that line) on 24 November; a post hoc sensitivity
 analysis for one session (A19) on 25 November. A17 part 6 was not done and is dropped. On 25 November six AI-agent
 reviews (Claude subagents; not independent human review) audited the repository; the corrections they led to are
-recorded at the end of `AMENDMENTS.md` and applied below. The report (`report/main.tex`) is being rewritten to
-include A17 to A19; until then it is authoritative only for the registered analysis and A12 to A16. Numbers for the
+recorded at the end of `AMENDMENTS.md` and applied below. The report (`report/main.tex`) was rewritten on 25
+November to include A17 to A19 (draft; the AI-use statement is left for the author). Numbers for the
 registered analysis were re-checked against the result files on 2026-11-22; numbers from A17 to A19 were re-checked
 by an AI-agent number audit on 2026-11-25.
 

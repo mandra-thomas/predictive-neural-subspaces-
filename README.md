@@ -24,7 +24,8 @@ Post hoc follow-ups on the `pilot-timescale-fix` branch (the registered study is
   drive one post hoc reference value.
 
 All reviews of this repository so far were AI-agent reviews (Claude subagents), not independent human review. The
-report (`report/main.tex`) is being rewritten to include A17 to A19.
+report (`report/main.tex`, `report/main.pdf`) was rewritten on 25 November to include A17 to A19 (draft; the AI-use
+statement is left for the author).
 
 ## Where to find what
 
