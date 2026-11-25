@@ -43,7 +43,7 @@ A17 (A17 executes extensions listed in the proposal, with post hoc specifics) an
 | A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
 | A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day; review note 2026-11-24 | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
-| A18 part A | 2026-11-24, before any calibration or simulation outcome | post hoc | Calibrated simulation (A18 part A) | `pns.sim_a18`, `pns.synth` task/rate/history/evoked options, `26_sim_A18.py` |
+| A18 part A | 2026-11-24 (`3a81ba1`), before any calibration or simulation outcome; addendum `2f7611d` after calibration, before the sweep; notes after the results | post hoc | Calibrated simulation (A18 part A) | `pns.sim_a18`, `pns.synth` task/rate/history/evoked options, `26_sim_A18.py` |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
 amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
@@ -775,3 +775,16 @@ sessions) and -0.061 in the recordings. One cell and one reading are added; noth
   full-population corrected prior is positive in 22 or more of 32 seeds and its mean is at least half the real
   target (0.108 / 2). Reported descriptively alongside: its history-controlled score, and how the real
   history-controlled score (-0.061) compares with every cell's.
+
+**A18 part A notes after the results (written 2026-11-24, after the sweep and summary; post hoc).**
+- **The ground-truth "capture" metric is withdrawn as uninterpretable.** It estimates the prior's loading by
+  regressing activity on the true per-bin prior. With only about 13 blocks per session, drift correlates with the
+  prior by chance, so the estimate picks up drift: in `neg_pure`, which encodes no prior, the 30 s subspace
+  "contains" 0.53 of the estimated prior readout (chance 0.11). The values stay in `sim_seeds.csv` but are not
+  reported as results. No reading depended on them; the pre-specified capture is the decoding ratio.
+- **The decoding-ratio capture is unstable where the full-population score is small** (per-unit cells, drift x 3),
+  so `RESULTS.md` reports the corrected scores with their intervals alongside it.
+- **The figure was redrawn** for legibility (panel a now shows corrected scores, not ratios; panel d added for the
+  controls). Presentation only.
+- **Provenance.** Targets ran at `3a81ba1`, calibration at `3a81ba1` with only result and log files modified, the
+  history-only calibration and the sweep at `2f7611d` (likewise); the figure code was edited after the summary.

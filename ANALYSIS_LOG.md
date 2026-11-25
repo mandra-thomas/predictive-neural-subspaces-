@@ -104,3 +104,8 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-24 | - | - | note | Documentation pass (README, RESULTS A17 section): every A17 number re-read from results/a17/{timescales,budget,longlag}.json and longlag_{c,q}.csv; office-hours note corrected (prior still predictable at 2 min is 0.013, not 0.02). No analysis rerun. |
 | 2026-11-24 18:18 | 3a81ba1 | 3d83323a46 | 26_sim_A18 targets | A18 real calibration targets: 16 sessions |
 | 2026-11-24 18:38 | 3a81ba1-dirty | 3d83323a46 | 26_sim_A18 calibrate | A18 calibration: lowrank accepted {'prior_gain': True, 'drift_gain': True, 'drift_mid': True, 'history_gain': True, 'evoked_gain': True, 'stim_gain': True}; per_unit accepted {'drift_gain': True, 'drift_mid': True} |
+| 2026-11-24 18:42 | 2f7611d-dirty | 3d83323a46 | 26_sim_A18 calibrate_neg | A18 addendum: history-only gain 0.061, ratio 1.019 |
+| 2026-11-24 19:40 | 2f7611d-dirty | 3d83323a46 | 26_sim_A18 sweep | A18 sweep: 11 cells x 32 seeds, 480 rows |
+| 2026-11-24 19:41 | 2f7611d-dirty | 3d83323a46 | 26_sim_A18 summary | A18 readings: G1 True; A lowrank 'intermediate', per-unit 'drift sufficient'; B leakage False, hist control valid True; proceed to LDS True |
+| 2026-11-24 19:43 | 2f7611d-dirty | 3d83323a46 | 26_sim_A18 summary | A18 readings: G1 True; A lowrank 'intermediate', per-unit 'drift sufficient'; B leakage False, hist control valid True; proceed to LDS True |
+| 2026-11-24 | - | - | note | A18 part A: the two 26_sim_A18 summary rows above are the same deterministic summary run twice (the second after the figure was redrawn); readings identical. Ground-truth capture metric withdrawn (see AMENDMENTS, A18 notes). |

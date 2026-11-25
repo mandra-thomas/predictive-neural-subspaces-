@@ -342,25 +342,31 @@ def summarise(df, real):
     return out, cdf
 
 
-def figure(cdf, real, path):
+def figure(cdf, real, path, seeds=None):
+    """Presentation only (redrawn 2026-11-24 after the first version's capture ratios were unreadable; no reading
+    depends on it). a: corrected prior vs drift scale; b, c: profile against the recordings; d: controls."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from pns.plotting import INK_2, SERIES
     R = {(r.cell, r.pipeline): r for r in cdf.itertuples()}
-    fig, ax = plt.subplots(1, 3, figsize=(10.5, 3.2), constrained_layout=True)
-    xs = [0, 1 / 3, 1, 3]
-    for i, fs in enumerate(("rrr_1", "rrr_60", "pca", "random")):
-        for regime, ls in (("lowrank", "-"), ("perunit", "--")):
+    fig, ax = plt.subplots(1, 4, figsize=(13, 3.3), constrained_layout=True)
+    a = ax[0]
+    for i, (fs, lab) in enumerate((("full", "full population"), ("rrr_60", "30 s subspace"),
+                                   ("rrr_1", "0.5 s subspace"))):
+        for regime, ls, off in (("lowrank", "-", 0.0), ("perunit", "--", 0.08)):
             cs = ["nodrift"] + [f"{regime}_{t}" for t in ("x0.33", "x1", "x3")]
-            y = [getattr(R[(c, "raw")], f"capture_{fs}") for c in cs]
-            ax[0].plot(range(4), y, ls, marker="o", ms=3, color=SERIES[i], label=fs if regime == "lowrank" else None)
-    ax[0].axhline(0, color=INK_2, lw=0.6)
-    ax[0].set_xticks(range(4), ["0", "1/3", "1", "3"])
-    ax[0].set_xlabel("drift scale (x calibrated; dashed = per-unit)")
-    ax[0].set_ylabel("prior captured / full population")
-    ax[0].set_title("a  capture vs drift", loc="left", fontsize=9)
-    ax[0].legend(fontsize=7, frameon=False)
+            y = [getattr(R[(c, "raw")], f"prior_{fs}_mean") for c in cs]
+            ci = np.array([getattr(R[(c, "raw")], f"prior_{fs}_ci") for c in cs])
+            a.errorbar(np.arange(4) + off + 0.03 * i, y, yerr=[np.array(y) - ci[:, 0], ci[:, 1] - np.array(y)], fmt=ls,
+                       marker="o", ms=3, lw=1, capsize=0, color=SERIES[i], label=lab if regime == "lowrank" else None)
+    a.axhline(0, color=INK_2, lw=0.6)
+    a.set_xticks(range(4), ["0", "1/3", "1", "3"])
+    a.set_xlabel("drift (x calibrated; dashed = per-unit)")
+    a.set_ylabel("corrected prior R² (mean, 95% CI)")
+    a.set_title("a  prior vs drift strength", loc="left", fontsize=9)
+    a.set_ylim(-0.45, 0.35)
+    a.legend(fontsize=6.5, frameon=False, loc="lower left")
     prof = real["real_profile"]
     sets = ["rrr_1", "rrr_4", "rrr_16", "rrr_60", "pca", "random"]
     for j, (var, title) in enumerate((("prior", "b  corrected prior R²"), ("elapsed", "c  elapsed-time R²"))):
@@ -369,7 +375,7 @@ def figure(cdf, real, path):
         rv = [prof[f"{rk}_{fs}"]["mean"] for fs in sets]
         ci = np.array([prof[f"{rk}_{fs}"]["ci"] for fs in sets])
         a.errorbar(range(6), rv, yerr=[np.array(rv) - ci[:, 0], ci[:, 1] - np.array(rv)], fmt="ko", ms=4,
-                   label="real (mouse mean, 95% CI)")
+                   label="recordings (mouse mean, 95% CI)")
         for i, (cell, lab) in enumerate((("lowrank_x1", "sim, low-rank drift"), ("perunit_x1", "sim, per-unit drift"),
                                          ("nodrift", "sim, no drift"))):
             v = [getattr(R[(cell, "raw")], f"{var}_{fs}_mean") for fs in sets]
@@ -377,7 +383,25 @@ def figure(cdf, real, path):
         a.set_xticks(range(6), ["0.5 s", "2 s", "8 s", "30 s", "PCA", "rand"], fontsize=7)
         a.axhline(0, color=INK_2, lw=0.6)
         a.set_title(title, loc="left", fontsize=9)
-    ax[1].legend(fontsize=6.5, frameon=False)
+    ax[1].legend(fontsize=6.5, frameon=False, loc="lower left")
+    a = ax[3]
+    cells_d = [("nodrift", "prior,\nno drift"), ("lowrank_x1", "prior,\ndrift"), ("neg_pure", "no prior,\nno history"),
+               ("neg_history_strong", "no prior,\nhistory")]
+    for i, (cell, lab) in enumerate(cells_d):
+        r = R[(cell, "raw")]
+        a.bar(i - 0.18, r.prior_full_mean, 0.34, color=SERIES[0], label="standard" if i == 0 else None)
+        a.bar(i + 0.18, r.priorhist_full_mean, 0.34, color=SERIES[3], label="history-controlled" if i == 0 else None)
+    a.axhline(real["session_median"]["full_prior_corr"], color=SERIES[0], ls=":", lw=1)
+    a.axhline(real["session_median"]["full_prior_hist_corr"], color=SERIES[3], ls=":", lw=1)
+    a.text(3.45, real["session_median"]["full_prior_corr"], "recordings (session median)", fontsize=6.5,
+           va="bottom", ha="right", color=SERIES[0])
+    a.text(3.45, real["session_median"]["full_prior_hist_corr"], "recordings, history-controlled", fontsize=6.5,
+           va="bottom", ha="right", color=SERIES[3])
+    a.set_ylabel("seed mean", fontsize=7)
+    a.axhline(0, color=INK_2, lw=0.6)
+    a.set_xticks(range(4), [l for _, l in cells_d], fontsize=6.5)
+    a.set_title("d  full-population prior: controls", loc="left", fontsize=9)
+    a.legend(fontsize=6.5, frameon=False, loc="upper right")
     fig.savefig(path)
 
 

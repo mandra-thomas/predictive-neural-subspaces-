@@ -4,7 +4,8 @@
 and has not changed since. The exploratory pilots ran on 17 November (A12) and 21 to 22 November (A13 to A15), and
 the post hoc checks (A16) on 22 November (commit `439e7dc`). The post hoc timescale follow-ups (A17 parts 0 to 2) ran
 on 23 November on the `pilot-timescale-fix` branch and were corrected after an outside review on 24 November; they
-are summarised in their own section below and are not yet in the report. The final, independently verified write-ups are the
+are summarised in their own section below and are not yet in the report. The calibrated simulation (A18 part A)
+ran on 24 November and has its own section. The final, independently verified write-ups are the
 report, `report/main.tex` and `report/main.pdf` (commit `4928ad2`), and the slides, `slides/slides.tex` (commit
 `b3b60d2`). Where this file and those disagree in framing, the report is authoritative. Every number below was
 re-checked against the result files in the documentation pass of 2026-11-22 (see `ANALYSIS_LOG.md`).
@@ -40,7 +41,7 @@ smoothly with session time, interpolated within the session. It is not end-to-en
 registry) before the relevant data were analysed. That covers the three primary tests, the deviations D1 to D9, the
 additions A1 to A11 and the first pilot A12. A13 to A15 are *prospectively documented exploratory follow-ups*: each
 design and reading rule was committed before its data were analysed, but after the 20 November analysis freeze. D10
-(a bug fix), P1h (robustness), the two A14 post hoc checks, A16 and A17 are *post hoc*: designed after the relevant results
+(a bug fix), P1h (robustness), the two A14 post hoc checks, A16, A17 and A18 are *post hoc*: designed after the relevant results
 were seen. Nothing outside the three primary tests is corrected for multiplicity. `AMENDMENTS.md` has an index of
 every entry.
 
@@ -72,8 +73,13 @@ The post hoc timescale follow-ups (A17) sharpen this. The prior's own memory is 
 is about 12 trials (about a minute), and only about 1% of its variance is still predictable 2 minutes ahead, whereas
 the slow component stays almost fully predictable. So no horizon favours the prior: a longer lag makes it less
 predictable, not more. Extending the lags to 4 minutes on drift-removed data selects no prior, and the small prior
-signal in the subspaces is flat across lags and about what PCA carries. This makes variance ranking better
-characterised, but it is still not established as the cause; a calibrated simulation (A18) is the planned test.
+signal in the subspaces is flat across lags and about what PCA carries. A calibrated simulation (A18 part A) then
+showed that a prior of the recorded strength *is* picked up by the 30 s subspace when there is no drift, and that
+drift of the recorded strength removes it, while the full population still decodes it. So variance competition with
+drift is sufficient to reproduce the loss in simulation (it reproduces 6 of 8 features of the recorded profile, but
+not the recorded fall from 0.5 s to 30 s). The same simulation showed that a one-trial stimulus memory with no prior
+at all produces about 70% of the recorded pseudo-session-corrected prior score, so that score does not by itself show
+a block prior.
 
 ## Data and design
 
@@ -732,6 +738,102 @@ alignment (part 6), and, under amendment A18 (to be committed before it runs), a
 prior and a drift of the measured sizes compete, with a no-prior negative control, and a latent state-space model
 with an explicit drift term and a learned timescale per latent.
 
+## Calibrated simulation: prior against drift (amendment A18 part A, post hoc, run locally)
+
+A17 showed the prior is small and short-lived next to the slow component, but not that this causes the failure. A18
+part A asks the causal question where the answer is known. Simulated sessions reuse each recorded session's task
+(trial timing, stimulus sides, choices, outcomes, block probabilities, trial mask), its number of units and each
+unit's firing rate, and encode a block prior, a slow drift, stimulus history, evoked and stimulus responses and noise
+in Poisson spiking. The registered pipeline (rank-5 lagged RRR at 0.5 to 30 s, PCA, random subspaces, the same
+z-scoring, folds, decoder and 200 pseudo sessions) is then run unchanged. The design, calibration rule and readings
+were committed (`3a81ba1`) before any calibration or simulation outcome was computed; one control was added
+(`2f7611d`) after calibration and before the sweep. Values are from `results/a18/` (`real_targets.json`,
+`calibration.json`, `sim_seeds.csv`, `sim_cells.csv`, `sim_summary.json`); the figure is
+`results/a18/a18_simulation.pdf`. Each condition has 32 seeds, paired across conditions (same tasks, loadings and
+noise draws).
+
+**Calibration.** Six gains were tuned so that the medians of 16 simulated sessions (one per recorded task) match six
+recorded session medians. All six were matched within 10%:
+
+| Target (session median) | Recordings | Simulation |
+|---|---|---|
+| Full-population corrected prior R² | 0.108 | 0.111 |
+| ≥ 20 min share | 22.6% | 22.6% |
+| 5 to 20 min share | 4.7% | 4.7% |
+| Trial-locked share | 8.6% | 8.6% |
+| Previous-side AUC, full population | 0.563 | 0.558 |
+| Current-side AUC, full population | 0.869 | 0.866 |
+
+The per-unit drift regime matched its two drift targets within 10% as well. Not matched, reported: the leading
+principal component carries 21% of variance in simulation and 16% in the recordings (five components: 45% and 43%).
+The calibrated history trace is tiny (gain 0.036 against 0.29 for the prior), because the prior alone already makes
+the previous stimulus as decodable as in the recordings.
+
+**Results.** Corrected prior $R^2$, mean over 32 seeds [95% interval], raw pipeline.
+
+| Condition | Full population | 30 s subspace | 0.5 s subspace | 30 s minus 0.5 s (P2-style) |
+|---|---|---|---|---|
+| Strong prior (x3), no drift | 0.632 [0.555, 0.708] | 0.537 [0.479, 0.594] | 0.449 | +0.089 [0.057, 0.127] |
+| Calibrated prior, no drift | 0.170 [0.134, 0.209] | 0.069 [0.048, 0.092] | 0.019 | +0.050 [0.033, 0.067] |
+| Low-rank drift x 1/3 | 0.174 [0.136, 0.214] | 0.047 [0.028, 0.066] | 0.019 | +0.027 [0.011, 0.045] |
+| Low-rank drift x 1 (calibrated) | 0.167 [0.105, 0.235] | −0.006 [−0.055, 0.041] | −0.033 | +0.027 [−0.009, 0.067] |
+| Low-rank drift x 3 | 0.268 [−0.243, 0.999] | −0.205 [−0.542, 0.071] | −0.172 | −0.036 [−0.107, 0.028] |
+| Per-unit drift x 1/3 | 0.154 [0.105, 0.208] | 0.046 [0.020, 0.072] | 0.011 | +0.036 [0.015, 0.061] |
+| Per-unit drift x 1 | 0.063 [−0.056, 0.170] | −0.088 [−0.221, 0.030] | −0.038 | −0.052 [−0.144, 0.029] |
+| No prior, no history (null) | −0.043 [−0.112, 0.023] | −0.036 | −0.053 | +0.017 |
+| No prior, history at calibrated strength | −0.012 [−0.063, 0.038] | −0.044 | −0.056 | +0.015 |
+| No prior, history alone matching the recordings | 0.078 [0.019, 0.132] | −0.010 | −0.023 | +0.016 |
+| Recordings (mouse means) | 0.159 | −0.046 | 0.054 | −0.099 [−0.218, 0.002] |
+
+**What it shows.**
+
+1. *The positive control passes.* A strong prior is found by the full population and the 30 s subspace in all 32
+   seeds, and the 30 s subspace keeps 85% of it.
+2. *Without drift, the original hypothesis works in simulation.* At the recorded prior strength and no drift, the 30
+   s subspace carries about 40% of the full-population prior score (capture 0.41 [0.33, 0.48]) and beats the 0.5 s
+   subspace (+0.050). A slow prior is preferred by long-lag prediction when nothing slower competes.
+3. *Drift at the recorded strength removes it.* With low-rank drift calibrated to the recorded slow share, the 30 s
+   subspace's prior falls to about zero (−0.006 [−0.055, 0.041]; the paired drop from no drift is positive in 23 of 32
+   seeds, one-sided Wilcoxon p = 0.002), while the full population still decodes it (0.167, positive in 27 of 32).
+   A third of the drift already halves the 30 s score. The pre-specified reading is **"intermediate"** for the
+   low-rank regime: the capture criterion is met (30 s capture below half its no-drift value), but the P2-style change
+   is not negative (median +0.015, mean +0.027 [−0.009, 0.067]), whereas in the recordings it was −0.099. For the
+   per-unit regime the reading is **"drift sufficient"**, but that regime also degrades the full-population decoder
+   (positive in only 19 of 32) and fits the recordings' profile poorly (point 5).
+4. *Stimulus history can mimic the prior score.* With no prior at all, a one-trial stimulus memory strong enough to
+   reproduce the recordings' previous-side decodability gives a pseudo-session-corrected full-population prior score of
+   0.078 [0.019, 0.132], positive in 24 of 32 seeds: 72% of the recorded 0.108. The pseudo-session null redraws the
+   block sequence, so it does not protect against neurons that remember the last real stimuli. The null itself is
+   calibrated (no prior, no history: positive in 13 of 32). Reading B2: **history alone can mimic the prior score**.
+   This concerns the decoding method generally, including the original gate, and depends on the assumed history
+   kernel.
+5. *The low-rank simulation reproduces most of the recorded profile.* At calibrated low-rank drift, 6 of 8 pre-set
+   features fall inside the recordings' 95% intervals, including elapsed-time decoding (30 s 0.79 against 0.84; PCA
+   0.75 against 0.80; random 0.65 against 0.64), the near-zero 30 s, PCA and random prior scores. It misses the
+   recordings' positive 0.5 s prior score (0.054) and their negative P2 change. Per-unit drift matches 2 of 8 (its
+   elapsed-time decoding is too high, 0.92). A match shows the mechanism *can* produce the recorded pattern, not that
+   it *does*.
+6. *The history-controlled score separates history from prior, but with little power.* Regressing each target on its
+   own previous 5 sides removes the history leak (no prior, matching history: −0.017, positive in 17 of 32), and by the
+   pre-set rule the score is valid (23 of 32 positive with the prior and no drift). At recorded drift it is positive
+   in only 18 of 32. In the recordings it is −0.061 (session median; 6 of 16 sessions positive, IQR −0.135 to 0.125),
+   which lies within the spread of every realistic simulated condition, with or without a prior (19 to 38% of
+   simulated sessions are at least as low). It cannot tell whether the recorded prior signal is a block prior or
+   stimulus memory.
+7. *Detrending partly restores the 30 s prior* (cosine detrend, calibrated low-rank drift: 0.021 [−0.015, 0.059];
+   per-unit 0.045), at magnitudes like the recordings' cosine copy in A16/A17 (0.03 to 0.05).
+
+**Recommendation for the latent model.** The pre-set rule says proceed (positive control passed, history control
+valid, prior decodable at recorded drift). The results qualify that. Drift is what blocks rank-5 RRR in this
+simulation, which is the situation an explicit-drift latent model is built for, so the model has something to find.
+But a stimulus memory alone produces most of the recorded prior score, and the only control that removes it has
+little power at recorded drift. A real-data latent-model result would therefore be hard to read either way. Part B
+should first run the model on these simulated conditions, including the history-only one, and go to the recordings
+only if its readout separates "prior with drift" from "history alone" there.
+
+**Withdrawn metric.** The ground-truth "capture" of the true prior direction is uninterpretable (it reports 0.53 in
+the no-prior condition; see the A18 notes in `AMENDMENTS.md`) and is not used.
+
 ## Where the session-time mode stands
 
 Taking A12 to A16 together:
@@ -763,9 +865,10 @@ cognitive, and it is not explained by any single recording artifact tested.
 3. **Independent sessions and regions**, which need new downloads. MOp has 14 sessions from 12 mice under the census
    rule.
 4. **Testing the variance-ranking account directly**: comparisons with Dynamical Components Analysis and slow feature
-   analysis, a ground-truth simulation with known drift and a known prior, and a drift-robust objective. In progress:
-   the simulation and an explicit-drift latent state-space model are built and tested on synthetic data (A18, not
-   yet committed as an amendment or run on real data).
+   analysis, a ground-truth simulation with known drift and a known prior, and a drift-robust objective. The
+   simulation is done (A18 part A). The explicit-drift latent state-space model is built and tested on synthetic data
+   only; its specification (A18 part B) is not yet written, and it should be run on the simulated conditions,
+   including the history-only control, before any real data.
 5. **A block-transition-aligned analysis**, asking how the population prior signal changes trial by trial after a
    switch, since fixed-horizon prediction cannot separate a static from a dynamical belief code. Specified as A17
    part 6 (`28_switch_A17.py`, not yet written).

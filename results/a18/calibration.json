@@ -108,5 +108,33 @@
     914,
     915
   ],
-  "note": "AUC statistics are AUC - 0.5"
+  "note": "AUC statistics are AUC - 0.5",
+  "neg_history_strong": {
+    "params": {
+      "prior_gain": 0.0,
+      "drift_gain": 1.1456734131594624,
+      "drift_mid": 0.363925363567822,
+      "history_gain": 0.06053289369661116,
+      "evoked_gain": 2.4460251678577176,
+      "stim_gain": 1.0816266886155272
+    },
+    "achieved": {
+      "lowfreq_cos": 0.22528472058179072,
+      "midband": 0.04714304666787117,
+      "triallocked": 0.0856161688602119,
+      "pc1_frac": 0.204377704837374,
+      "pc5_frac": 0.4519495122611277,
+      "full_prior_corr": 0.07064849116545452,
+      "full_prior_hist_corr": 0.002214116749827133,
+      "prior_trial_share_corr": 0.0007626629982509356,
+      "full_prev_side_auc": 0.06437684837522678,
+      "full_cur_side_auc": 0.3622120082535058
+    },
+    "ratio": {
+      "history_gain": 1.0190861220630556
+    },
+    "accepted": {
+      "history_gain": true
+    }
+  }
 }

@@ -105,7 +105,7 @@ script that applies the reading rule written in `AMENDMENTS.md`.
 | `21_build_detrend.py` | A16, post hoc | Builds `data_detrend_q/` (quadratic detrend) and `data_detrend_c/` (cosine detrend, periods of at least 20 min) |
 | `22_pilot_A16.py` | A16, post hoc | Detrend-and-refit reading, same-scale prior reference, split-half reproducibility of the leading 30 s direction, step sessions. Writes `results/a16/` |
 
-### Timescale follow-ups (A17, post hoc; scripts 23 to 25) and the planned A18
+### Timescale follow-ups (A17, post hoc; scripts 23 to 25) and the calibrated simulation (A18 part A, script 26)
 
 A17 asks whether any prediction horizon could have favoured the block prior over the slow drift. Everything in it is
 post hoc (`AMENDMENTS.md`, A17, including the review note of 24 November). Results are summarised in `RESULTS.md`.
@@ -115,7 +115,8 @@ post hoc (`AMENDMENTS.md`, A17, including the review note of 24 November). Resul
 | `23_timescales_A17.py` | A17 part 0, post hoc; task data only | Session and block durations, the prior's autocorrelation and integrated timescale (per 0.5 s bin and per trial), and the prior's variance inside the cosine detrend span. Writes `results/a17/timescales.{csv,json}`, `blocks.csv`, `prior_acf.csv` |
 | `24_budget_A17.py` | A17 part 1, post hoc; descriptive | Population-level variance shares (>= 20 min component, trial-locked GLM, pseudo-session-corrected prior), and a descriptive scale comparison of the prior's predictable variance with the RRR eigenvalues (not a bound; see the review note). Reads the raw and cosine-detrended fits. Writes `results/a17/budget_sessions.csv`, `budget.json` |
 | `25_longlag_A17.py` | A17 part 2, post hoc | Reproduction check of the long-lag roots against A16, per-lag summary, and the four "band selection" tests (60 s against 0.5 s and against PCA, in each detrended copy). Writes `results/a17/longlag_{c,q}.csv`, `longlag.json` |
-| `26_sim_A18.py`, `27_lds_A18.py` | A18, not yet written | Calibrated simulation (prior and drift competing, with a no-prior negative control) and the latent state-space model on real data. A18 is committed in `AMENDMENTS.md` before either runs |
+| `26_sim_A18.py` | A18 part A, post hoc | Calibrated simulation. Stages: `targets` (real-data calibration statistics), `calibrate`, `calibrate_neg`, `sweep` (11 conditions x 32 paired seeds through the registered pipeline), `summary` (pre-set readings and figure). Writes `results/a18/` |
+| `27_lds_A18.py` | A18 part B, not yet written | The latent state-space model; to be specified before it runs, and run on the simulated conditions before any real data |
 | `28_switch_A17.py` | A17 part 6, not yet written | Decoded prior aligned to block switches, against a pseudo-session chance band |
 
 Part 2 refits scripts 04 and 05 (not 06 to 08, whose first/last-lag logic would compare 0.5 s with 4 min) on both
@@ -132,6 +133,9 @@ for v in c q; do
 done
 unset PNS_DATA PNS_RESULTS PNS_FIGURES
 python scripts/25_longlag_A17.py
+for s in targets calibrate calibrate_neg sweep summary; do
+  OMP_NUM_THREADS=1 python scripts/26_sim_A18.py --stage $s --n-jobs 14     # about 50 min in total on 14 cores
+done
 ```
 
 Each long-lag refit takes about 15 to 20 minutes on a laptop. Do not run script 21 in a scratch setting: it writes
@@ -228,7 +232,7 @@ On a laptop this takes about 3 minutes.
 
 | Path | Contents |
 |---|---|
-| `src/pns/` | Library modules: `prior`, `binning`, `transform`, `lagged`, `rrr`, `geometry`, `decode`, `stats`, `pipeline`, `analysis`, `slowmode` (slow-mode definition used by A12 to A16), `ampcorr` (A14 amplitude helpers), `timescales` (A17: task timescales, prior per bin, in-memory detrend, variance-share helpers), `lds` (A18: linear-Gaussian state-space model with explicit drift inputs, EM and Kalman smoothing; tested on synthetic data only), `synth` (with the A18 drift modes; default output unchanged), `plotting`, `io_ibl` (the only IBL-importing module), `runner`, `config` |
+| `src/pns/` | Library modules: `prior`, `binning`, `transform`, `lagged`, `rrr`, `geometry`, `decode`, `stats`, `pipeline`, `analysis`, `slowmode` (slow-mode definition used by A12 to A16), `ampcorr` (A14 amplitude helpers), `timescales` (A17: task timescales, prior per bin, in-memory detrend, variance-share helpers), `sim_a18` (A18 part A: calibration statistics and the simulated-session analysis), `lds` (A18: linear-Gaussian state-space model with explicit drift inputs, EM and Kalman smoothing; tested on synthetic data only), `synth` (with the A18 drift modes; default output unchanged), `plotting`, `io_ibl` (the only IBL-importing module), `runner`, `config` |
 | `scripts/` | Numbered pipeline, pilot and figure scripts (above) |
 | `config.yaml` | Frozen constants. Change them only through a logged amendment |
 | `config_a17_longlag.yaml` | A17 part 2: `config.yaml` with lags extended to 0.5 s to 4 min and `model.alpha_lags` fixed to the registered four lags. Pass it with `--config`; never export `PNS_CONFIG` |
