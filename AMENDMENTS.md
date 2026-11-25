@@ -11,7 +11,8 @@ exploratory* applies to A13, A14 and A15. Their designs and reading rules were l
 data were analysed, and their headings below say "pre-registered", but they were written on 21 and 22 November, after
 the 20 November analysis freeze in the proposal, so the report and `RESULTS.md` use the narrower label. *Post hoc*
 means designed after the relevant results were seen: D10 (a bug fix), P1h, the two A14 post hoc additions, A16,
-A17 (A17 executes extensions listed in the proposal, with post hoc specifics) and A18.
+A17 (A17 executes extensions listed in the proposal, with post hoc specifics), A18 and A19. *AI-agent review*
+means a review by Claude subagents, not by a person; no independent human review of the analysis has taken place.
 
 | # | First recorded | Status | RESULTS.md section | Code |
 |---|---|---|---|---|
@@ -42,9 +43,11 @@ A17 (A17 executes extensions listed in the proposal, with post hoc specifics) an
 | A14 | 2026-11-22 10:16 (`f3008e7`); post hoc additions 10:25 (`7d0172d`) | prospectively documented exploratory; two post hoc checks | Third pilot (A14) | `15_build_A14.py`, `16_pilot_A14.py`, `pns.ampcorr`, `slurm/pilot_A14.sbatch` |
 | A15 | 2026-11-22 10:49 (`30d2c3f`) | prospectively documented exploratory | Fourth pilot (A15) | `17_build_region2.py`, `18_pilot_A15.py` |
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
-| A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day; review note 2026-11-24 | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
+| A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day; review note 2026-11-24 | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py` (part 6, `28_switch_A17.py`, never written; dropped 2026-11-25) |
 | A18 part A | 2026-11-24 (`3a81ba1`), before any calibration or simulation outcome; addendum `2f7611d` after calibration, before the sweep; notes after the results | post hoc | Calibrated simulation (A18 part A) | `pns.sim_a18`, `pns.synth` task/rate/history/evoked options, `26_sim_A18.py` |
-| A18 part B | 2026-11-24, before any latent-model result | post hoc | Calibrated simulation (A18 part B) | `pns.sim_a18.lds_readout`, `pns.lds`, `27_lds_sim_A18.py` |
+| A18 part B | 2026-11-24 (`1a233eb`), before any latent-model result; result note `371a43c` | post hoc | Calibrated simulation (A18 part B) | `pns.sim_a18.lds_readout`, `pns.lds`, `27_lds_sim_A18.py` |
+| A19 | 2026-11-25 (`9cd4a62`), before any A19 number; results `97b272b` | post hoc (sensitivity, one session) | Sensitivity to one session (A19) | `28_sensitivity_A19.py` |
+| Notes | 2026-11-25 | record-keeping and corrections after AI-agent reviews | (throughout) | none |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
 amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
@@ -920,3 +923,108 @@ the same script computes, from task data only (no neural data), the statistics o
 in the A18 notes and the walkthrough: the correlation of the prior with the previous stimulus side and the in-sample
 R² of the prior on the last 1, 5 and 10 sides, per session (median over the 16 sessions), on the full trial sequence
 and on the decoded trials; output `results/a19/prior_history.csv` and `.json`.
+
+**A19 result note (written 2026-11-25, after the run; post hoc).** The with-session registered P2 was reproduced
+exactly (p = 0.892, mouse mean −0.099), so the script proceeded. All values are in `results/a19/sensitivity.json`.
+- *S1, registered P2 (unchanged as the registered result).* The session's own paired-null value is −0.27, the fourth
+  lowest of 16, so it is not an outlier on this quantity. Without it: mouse mean −0.079 (was −0.099), median across
+  mice and across sessions about −0.04 either way, 5 of 13 mice positive (was 4), one-sided Wilcoxon p = 0.793 (was
+  0.892), Holm-adjusted p the same. The registered conclusion does not depend on the session.
+- *S2, the A16 same-scale ridge reference (post hoc).* Full population: mouse mean 0.159 with the session, 0.101
+  without; session median 0.108 with, 0.087 without. Ratios to the full population, by session median (the primary
+  descriptive summary fixed in A19 before the run): 0.5 s subspace 0.62 (0.72 without), 30 s subspace 0.06 (0.17),
+  PCA 0.18 (0.25). By mouse mean: 0.34, −0.29 and 0.08 with the session. The earlier statements "the 0.5 s subspace
+  captures about a third, the 30 s subspace none, PCA 8%" are mouse-mean ratios driven by one session; on the
+  session-median scale the 0.5 s subspace captures most of the full-population score and the 30 s subspace little.
+  The Lasso (Findling) decoder values barely move (for example 30 s subspace 0.038 to 0.036).
+- *S3, the registered profile and A18 reading C.* Profile means move little except the prior at 0.5 s (0.054 to
+  0.036) and PCA (0.013 to 0.027). With intervals recomputed by the same bootstrap, the low-rank regime matches 6 of
+  8 features with the session (as committed) and 7 of 8 without; the per-unit regime 3 of 8 with (committed: 2; the
+  difference is an interval-boundary effect of recomputing the bootstrap) and 2 of 8 without.
+- *S4, simulation comparisons.* The strong history-alone condition's full-population score (0.078) is 49% of the
+  mouse-mean reference and 72% of the session median with the session; 77% and 89% without. The memory condition
+  at the recorded strength scores −0.012 (below zero) under every reference. Dropping the session would move the
+  calibration target for the full-population prior score from 0.108 to 0.087 (−19%; outside the 10% stopping
+  tolerance, inside the 25% acceptance band); the other five targets move by 10% or less. The simulation was not
+  re-run. The recordings' history-controlled session median is −0.061 with the session (6 of 16 positive, one-sided
+  Wilcoxon p = 0.70) and −0.050 without (6 of 15, p = 0.55): indistinguishable from zero either way. The A18 audit's
+  median-of-16 probabilities change little (for example `lowrank_x1` 0.003 to 0.007 under random 16-of-32
+  resampling, 0 under one seed per task; `perunit_x1` 0.12 to 0.17 and 0.017 to 0.038).
+- *S5.* Only this session exceeds 1 in absolute value in the listed files (three quantities).
+- *Sources stage.* Prior against previous sides, median over 16 sessions on the full trial sequence: correlation
+  with the previous side 0.64; in-sample R² of the prior on the last 1, 5 and 10 sides 0.41, 0.81 and 0.86 (decoded
+  trials: 0.63, 0.39, 0.80, 0.85). `results/a19/prior_history.json`. The earlier "0.42" for the last side is 0.41.
+
+## Corrections and record-keeping notes (written 2026-11-25, after AI-agent reviews of the whole repository; post hoc)
+
+Six AI-agent reviewers (Claude subagents briefed separately, without the main session's conclusions; not independent
+human review) audited code, statistics, numbers, the mathematical walkthrough, the course report and the repository
+on 2026-11-25. No registered result changes. Recorded here:
+
+1. **Who reviewed.** Every review described in this file, `RESULTS.md`, `ANALYSIS_LOG.md` and the reports as
+   "independent" (the A17 review note, the A18 audit note "after two independent reviews", and the 25 November
+   round) was an AI-agent review, not human review. Reviews the author pasted into the working session are recorded
+   as pasted reviews; their authorship is not recorded here. No part of this project has had independent human
+   review of the code or analysis.
+2. **A17 part 6 was not completed.** The block-switch alignment (Part 6, script `28_switch_A17.py`) was never
+   written or run. It is dropped as of this date and will not be run before the report deadline; its variant (b)
+   depended on the latent model, which failed its gate (A18 part B). The script number 28 is used instead by A19.
+3. **Provenance.**
+   - A17 part 0 (`23_timescales_A17`, task data only) ran at 18:34 on 2026-11-23 at commit `4dee202`, five minutes
+     before the A17 entry was committed (`0dbca28`, 18:39). The log row is not marked dirty because the new files
+     were untracked. Part 0 has no reading rule.
+   - The A17 part 1 addendum states it was written after one session and "before running the other 15". The
+     16-session run is logged at 18:44 and the addendum was first committed at 19:08 (`8486770`), so the ordering is
+     the author's working-session record and cannot be verified from git. The addendum governs descriptive
+     quantities only.
+   - A17 parts 1 and 2 ran on uncommitted code (`0dbca28-dirty`), committed unchanged in `8486770` (already noted in
+     `ANALYSIS_LOG.md`); their reading rules were committed beforehand in `0dbca28`.
+   - A19 ran with its script untracked (log rows at `9cd4a62`); the script was committed unchanged in `97b272b`.
+4. **Numbers with no committed source.** The A18 audit note's toy-model bias ("−0.01 to −0.03"), the refitted
+   history-controlled median ("−0.058") and "4 of 8,752 trials" come from AI-agent checks run outside the repository.
+   They are kept above as part of the dated record but are not cited elsewhere. The prior-history statistics now have
+   a source (A19 sources stage).
+5. **A18 part B result note.** Its "one plausible contributor" (the previous-stimulus input absorbing prior-related
+   activity) was checked by an AI-agent diagnostic outside the repository: on four simulated sessions, subtracting
+   only the cosine inputs changed the readout little (`lowrank_x1` seeds 1000 and 1001: 0.017 to 0.050 and −0.048 to
+   −0.060, against full-population scores of 0.25 and 0.16). It is not supported as the explanation. The conclusion
+   is limited to this specification (inputs and single-trial readout); the model retained about 15% of the prior even
+   without drift, no positive control was run for it, and B1's threshold (half the full-population score) exceeds
+   what lagged RRR itself captures at 30 s without drift (0.41).
+6. **Interpretation, corrected wherever it appears.**
+   - *Stimulus memory.* The derivation shows memory raises the corrected score relative to the null baseline; it
+     does not guarantee a positive score. In simulation, memory at the strength the recordings imply scored −0.012
+     (16 of 32 seeds positive); only a deliberately strong memory scored +0.078 (24 of 32; 12 of 16 tasks, p =
+     0.038). The no-prior, no-memory baseline is −0.043, because raw out-of-fold R² is strongly negative and the
+     pseudo-session distribution is skewed. Prior decodability that could come from memory of recent stimuli is a
+     known concern (the ideal observer's prior is itself a function of past stimuli, and subjective priors are often
+     modelled as kernels over past events); it is not presented as a new finding.
+   - *The recordings' history-controlled score* (−0.061) is indistinguishable from zero (above); its low position
+     against medians of 16 simulated sessions mainly reflects that the simulator varies less across sessions than the
+     recordings on this quantity (interquartile range of the history-controlled score: −0.135 to 0.125 in the recordings,
+     −0.126 to 0.137 without session `4d8c7767`, against −0.04 to 0.06 in `lowrank_x1`). For the full-population
+     score the difference is small once that session is excluded (SD 0.24 recorded against 0.19 simulated; 0.43 with
+     it).
+   - *Framing.* The A17 outcome table had no row for an "intermediate" simulation reading, which is what A18 gave.
+     Any framing of the report around variance ranking and drift is therefore a post hoc choice. Drift is not
+     established as the cause: without drift, longer horizons help (+0.050); at the recorded drift the 30 s
+     subspace's prior score is removed while the full population keeps it, and the horizon change is near zero
+     (median +0.015, positive in 9 of 16 tasks).
+   - *Calibration.* Six gains fitted to six targets leave no degrees of freedom, so the match is by construction; the
+     fixed settings (slow-noise timescale about 50 s, drift rank 3, decay 0.3, one-trial memory length) were not
+     varied.
+   - *Counts.* The drift drop "p = 0.002" was computed over 32 seeds that share 16 tasks; at the task level the 30 s
+     prior score is positive in 14 of 16 tasks without drift and 8 of 16 at the recorded drift
+     (`results/a18/audit_checks.json`). The two seeds of a task correlate between −0.34 and 0.92 depending on the
+     condition (not 0.52 to 0.92); task-resampled intervals are 19 to 39% wider than seed-resampled ones for the
+     full-population score in conditions with a prior, and narrower in some others (not "10 to 25% wider").
+   - *P2.* "Not supported" rather than "failed": the interval for the mean change (−0.218 to 0.002) is wider than the
+     prior reference itself, so modest rises are not excluded.
+7. **Derived check added to A19's script.** Stage `derived` of `28_sensitivity_A19.py` applies A18 reading C (profile
+   features inside the recordings' intervals) to every simulated condition, reading committed files only
+   (`results/a19/profile_all_cells.json`; it reproduces the committed counts for the two drift regimes). The
+   no-prior conditions match 6 of 8 (strong history alone) and 5 of 8 (calibrated history; no prior and no history),
+   against 6 of 8 for calibrated low-rank drift.
+8. **Prior timescale units.** The integrated timescale of the prior is 67 s when computed on 0.5 s bins (16.9 trials
+   at the median trial interval) and 12.2 trials when computed on the trial sequence (`results/a17/timescales.json`).
+   Text that wrote "67 s, about 12 trials" mixed the two; both are now given with their basis.

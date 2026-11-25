@@ -6,6 +6,9 @@ Stages
                 results/stats/d5/primary.csv), S2 A16 same-scale reference and ratios, S3 the registered profile used
                 by A18 reading C, S4 simulation comparisons quoted in the text, S5 listing of |corrected| > 1.
                 -> results/a19/sensitivity.json, results/a19/sensitivity_tables.csv
+  derived     : reads committed A18 files only: A18 reading C (profile features within the recordings' intervals)
+                applied to every simulated condition, not only the two drift regimes.
+                -> results/a19/profile_all_cells.json
   sources     : task data only (prior and stimulus sides; no neural data): correlation of the prior with the previous
                 side and in-sample R^2 of the prior on the last 1, 5 and 10 sides, per session.
                 -> results/a19/prior_history.csv, results/a19/prior_history.json
@@ -26,7 +29,7 @@ AGGS = ("mouse_mean", "mouse_median", "session_median")
 
 
 def extra(p):
-    p.add_argument("--stage", choices=("sensitivity", "sources"), required=True)
+    p.add_argument("--stage", choices=("sensitivity", "sources", "derived"), required=True)
 
 
 def aggregate(df, col):
@@ -256,9 +259,34 @@ def stage_sources(cfg):
                 summ["session_median"]["r2_last5_all"], summ["session_median"]["r2_last10_all"]))
 
 
+def stage_derived(cfg):
+    summ = json.loads((ROOT / "results" / "a18" / "sim_summary.json").read_text())
+    prof = json.loads((ROOT / "results" / "a18" / "real_targets.json").read_text())["real_profile"]
+    cells = pd.read_csv(ROOT / "results" / "a18" / "sim_cells.csv")
+    cells = cells[cells.pipeline == "raw"].set_index("cell")
+    feats = list(summ["C_profile"]["lowrank_x1"]["features"])
+    out = {}
+    for cell, r in cells.iterrows():
+        n, det = 0, {}
+        for f in feats:
+            key = (f.replace("elapsed_time_", "elapsed_") + "_mean") if f != "p2_change" else "p2_change_mean"
+            lo, hi = prof[f]["ci"]
+            w = bool(lo <= r[key] <= hi)
+            n += w
+            det[f] = {"sim": float(r[key]), "within": w}
+        out[cell] = {"n_within": n, "n_features": len(feats), "features": det}
+    for c in ("lowrank_x1", "perunit_x1"):
+        assert out[c]["n_within"] == summ["C_profile"][c]["n_within"], c
+    OUT.mkdir(parents=True, exist_ok=True)
+    write_json(OUT / "profile_all_cells.json", {"note": "A18 reading C against the committed recordings' intervals, every "
+                                                "cell; reproduces the committed counts for the two drift regimes", "cells": out})
+    print({c: v["n_within"] for c, v in out.items()})
+    log_run(cfg, "28_sensitivity_A19 derived", "A19 derived: reading C profile counts for every simulated condition")
+
+
 def main():
     args, cfg, _ = setup(__doc__, extra)
-    {"sensitivity": stage_sensitivity, "sources": stage_sources}[args.stage](cfg)
+    {"sensitivity": stage_sensitivity, "sources": stage_sources, "derived": stage_derived}[args.stage](cfg)
 
 
 if __name__ == "__main__":

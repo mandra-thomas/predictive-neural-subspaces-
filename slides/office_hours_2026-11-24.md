@@ -1,3 +1,7 @@
+> **Snapshot of 24 November, superseded.** The simulation and latent-model items below have since been done (A18; the
+> latent model failed its gate on simulated data), A17 part 6 was dropped, and several statements were corrected on
+> 25 November; see `RESULTS.md` and the notes at the end of `AMENDMENTS.md`.
+
 # Office hours, 24 November 2026: notes
 
 Bring `figures/slide_timescales.pdf`. The report version is `report/figures/rfig_timescales.pdf`. Both are built from

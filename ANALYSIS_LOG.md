@@ -115,3 +115,5 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-24 | - | - | note | A18 part B gate ran at 1a233eb (code committed unchanged); reading "does not retain the prior under calibrated drift: stop". No real-data latent-model fit. |
 | 2026-11-25 08:36 | 9cd4a62 | 3d83323a46 | 28_sensitivity_A19 sensitivity | A19: P2 mouse-mean p with/without 4d8c7767 = 0.892/0.793; A16 full ridge mouse mean 0.159/0.101 |
 | 2026-11-25 08:36 | 9cd4a62-dirty | 3d83323a46 | 28_sensitivity_A19 sources | A19 sources: prior vs previous sides, median corr 0.64, R2 last 1/5/10 = 0.41/0.81/0.86 |
+| 2026-11-25 08:42 | 97b272b-dirty | 3d83323a46 | 28_sensitivity_A19 derived | A19 derived: reading C profile counts for every simulated condition |
+| 2026-11-25 | - | - | note | The two 28_sensitivity_A19 rows at 9cd4a62 ran with the script untracked; it was committed unchanged in 97b272b. The `derived` stage was added afterwards (reads committed A18 files only). All reviews referred to in this log as independent were AI-agent reviews (Claude subagents), not human review. A17 part 6 was not run and is dropped. |

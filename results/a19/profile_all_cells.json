@@ -1,0 +1,423 @@
+{
+  "note": "A18 reading C against the committed recordings' intervals, every cell; reproduces the committed counts for the two drift regimes",
+  "cells": {
+    "favourable": {
+      "n_within": 0,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": 0.4487283006614484,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": 0.5373701123678314,
+          "within": false
+        },
+        "prior_pca": {
+          "sim": 0.2060491189059896,
+          "within": false
+        },
+        "prior_random": {
+          "sim": 0.1278171305537608,
+          "within": false
+        },
+        "elapsed_time_rrr_60": {
+          "sim": -0.010902500982891,
+          "within": false
+        },
+        "elapsed_time_pca": {
+          "sim": 0.0024681783103604,
+          "within": false
+        },
+        "elapsed_time_random": {
+          "sim": 0.0035039036979936,
+          "within": false
+        },
+        "p2_change": {
+          "sim": 0.0888210084505654,
+          "within": false
+        }
+      }
+    },
+    "lowrank_x0.33": {
+      "n_within": 3,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": 0.0193343454087405,
+          "within": true
+        },
+        "prior_rrr_60": {
+          "sim": 0.0466191012132957,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": 0.0098948888561474,
+          "within": true
+        },
+        "prior_random": {
+          "sim": 0.0080554377665678,
+          "within": false
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.6068566987559797,
+          "within": false
+        },
+        "elapsed_time_pca": {
+          "sim": 0.4810259484815524,
+          "within": false
+        },
+        "elapsed_time_random": {
+          "sim": 0.2499568990972155,
+          "within": false
+        },
+        "p2_change": {
+          "sim": 0.027415468477674,
+          "within": false
+        }
+      }
+    },
+    "lowrank_x1": {
+      "n_within": 6,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": -0.0331432473916306,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": -0.006113897243381,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": -0.0119115679788009,
+          "within": true
+        },
+        "prior_random": {
+          "sim": -0.0011160563384834,
+          "within": true
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.7905319334518229,
+          "within": true
+        },
+        "elapsed_time_pca": {
+          "sim": 0.7540603506502187,
+          "within": true
+        },
+        "elapsed_time_random": {
+          "sim": 0.6453583986085561,
+          "within": true
+        },
+        "p2_change": {
+          "sim": 0.027081508278245,
+          "within": false
+        }
+      }
+    },
+    "lowrank_x3": {
+      "n_within": 5,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": -0.1720923539326274,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": -0.2053424669478899,
+          "within": false
+        },
+        "prior_pca": {
+          "sim": -0.0702581266426701,
+          "within": false
+        },
+        "prior_random": {
+          "sim": -0.0363830614151252,
+          "within": true
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.8342413679719017,
+          "within": true
+        },
+        "elapsed_time_pca": {
+          "sim": 0.8011305176773869,
+          "within": true
+        },
+        "elapsed_time_random": {
+          "sim": 0.7469813149743589,
+          "within": true
+        },
+        "p2_change": {
+          "sim": -0.0360783814915972,
+          "within": true
+        }
+      }
+    },
+    "neg_history": {
+      "n_within": 5,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": -0.0555177977557687,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": -0.0441094465711699,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": -0.0294012188056093,
+          "within": false
+        },
+        "prior_random": {
+          "sim": -0.006182138743914,
+          "within": true
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.7904682107417405,
+          "within": true
+        },
+        "elapsed_time_pca": {
+          "sim": 0.7535461966188497,
+          "within": true
+        },
+        "elapsed_time_random": {
+          "sim": 0.6392699567007329,
+          "within": true
+        },
+        "p2_change": {
+          "sim": 0.0150580773920011,
+          "within": false
+        }
+      }
+    },
+    "neg_history_strong": {
+      "n_within": 6,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": -0.0234606151823937,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": -0.0096233211419532,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": -0.0164418521646027,
+          "within": true
+        },
+        "prior_random": {
+          "sim": -0.0074301142330748,
+          "within": true
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.7892711472806866,
+          "within": true
+        },
+        "elapsed_time_pca": {
+          "sim": 0.7540204206961081,
+          "within": true
+        },
+        "elapsed_time_random": {
+          "sim": 0.6475656862157051,
+          "within": true
+        },
+        "p2_change": {
+          "sim": 0.0156143057253426,
+          "within": false
+        }
+      }
+    },
+    "neg_pure": {
+      "n_within": 5,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": -0.0533528062760723,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": -0.0360074422566199,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": -0.0280933205204498,
+          "within": false
+        },
+        "prior_random": {
+          "sim": -0.0146581399213262,
+          "within": true
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.7901475236446283,
+          "within": true
+        },
+        "elapsed_time_pca": {
+          "sim": 0.7568304352838429,
+          "within": true
+        },
+        "elapsed_time_random": {
+          "sim": 0.6309881596811219,
+          "within": true
+        },
+        "p2_change": {
+          "sim": 0.0168137190745222,
+          "within": false
+        }
+      }
+    },
+    "nodrift": {
+      "n_within": 2,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": 0.0194243287904062,
+          "within": true
+        },
+        "prior_rrr_60": {
+          "sim": 0.0693307222454779,
+          "within": false
+        },
+        "prior_pca": {
+          "sim": 0.0170584695079329,
+          "within": true
+        },
+        "prior_random": {
+          "sim": 0.0132693052428673,
+          "within": false
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.0009279609218265,
+          "within": false
+        },
+        "elapsed_time_pca": {
+          "sim": 0.0072426489456937,
+          "within": false
+        },
+        "elapsed_time_random": {
+          "sim": 0.0058673241890436,
+          "within": false
+        },
+        "p2_change": {
+          "sim": 0.0499154134466793,
+          "within": false
+        }
+      }
+    },
+    "perunit_x0.33": {
+      "n_within": 4,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": 0.0106370201094742,
+          "within": true
+        },
+        "prior_rrr_60": {
+          "sim": 0.0461539431975147,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": 0.0160552543591872,
+          "within": true
+        },
+        "prior_random": {
+          "sim": 0.0177091164057184,
+          "within": false
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.7542358176813202,
+          "within": true
+        },
+        "elapsed_time_pca": {
+          "sim": 0.6706639402113534,
+          "within": false
+        },
+        "elapsed_time_random": {
+          "sim": 0.3022417893615236,
+          "within": false
+        },
+        "p2_change": {
+          "sim": 0.0357276751287656,
+          "within": false
+        }
+      }
+    },
+    "perunit_x1": {
+      "n_within": 2,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": -0.0383317834330518,
+          "within": false
+        },
+        "prior_rrr_60": {
+          "sim": -0.0876371958330196,
+          "within": true
+        },
+        "prior_pca": {
+          "sim": -0.0269785212870977,
+          "within": false
+        },
+        "prior_random": {
+          "sim": 0.011287124210079,
+          "within": false
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.9226046588079424,
+          "within": false
+        },
+        "elapsed_time_pca": {
+          "sim": 0.9090916016136796,
+          "within": false
+        },
+        "elapsed_time_random": {
+          "sim": 0.7855326249922776,
+          "within": false
+        },
+        "p2_change": {
+          "sim": -0.0515071065742121,
+          "within": true
+        }
+      }
+    },
+    "perunit_x3": {
+      "n_within": 2,
+      "n_features": 8,
+      "features": {
+        "prior_rrr_1": {
+          "sim": 0.028435207149922,
+          "within": true
+        },
+        "prior_rrr_60": {
+          "sim": 0.1361953308572378,
+          "within": false
+        },
+        "prior_pca": {
+          "sim": -0.0283431484854121,
+          "within": false
+        },
+        "prior_random": {
+          "sim": -0.0008857576514099,
+          "within": true
+        },
+        "elapsed_time_rrr_60": {
+          "sim": 0.9646833497050916,
+          "within": false
+        },
+        "elapsed_time_pca": {
+          "sim": 0.9581535008230104,
+          "within": false
+        },
+        "elapsed_time_random": {
+          "sim": 0.9193988423344674,
+          "within": false
+        },
+        "p2_change": {
+          "sim": 0.0974229874865875,
+          "within": false
+        }
+      }
+    }
+  }
+}

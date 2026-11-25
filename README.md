@@ -7,27 +7,40 @@ recordings from mouse secondary motor cortex (MOs; 16 sessions from 13 mice) at 
 compares the resulting subspaces' geometry and what can be decoded from each: the Bayes-optimal block prior, stimulus
 side, choice, feedback, wheel speed and elapsed time. The short answer is that the block prior shows no detectable rise
 with horizon, and every low-dimensional summary, long-horizon or not, is dominated by a slow "session-time mode".
-Post hoc follow-ups (A17, on the `pilot-timescale-fix` branch) measure why a longer horizon could not have helped: the
-prior's own memory is about 12 trials (about a minute), far shorter than a block, and extending the lags to 4 minutes on
-drift-removed data selects no prior. A latent state-space model and a calibrated simulation (A18) are written and tested
-on synthetic data but have not yet been run on real data.
+Post hoc follow-ups on the `pilot-timescale-fix` branch (the registered study is frozen on `master` and at tag
+`freeze-2026-11-23-post-talk`):
+- **A17** measures the timescales: the prior's own autocorrelation timescale is about 12 trials counted per trial
+  (67 s counted per 0.5 s bin), far shorter than a block, and extending the lags to 4 minutes on drift-removed data
+  selects no prior.
+- **A18** is a calibrated simulation on the recorded tasks. Without drift, a prior of the recorded size is picked up
+  by the 30 s subspace; drift of the recorded size removes it while the full population still decodes it. The pre-set
+  reading is "intermediate", so drift is a sufficient explanation in the model, not an established cause. A strong
+  memory of recent stimuli can mimic a corrected prior score; memory at the recorded strength does not. A latent
+  state-space model with an explicit drift term failed its pre-set gate on simulated sessions and was not run on the
+  recordings.
+- **A19** checks one session with an implausible score (SWC_038): it does not drive the registered result, but did
+  drive one post hoc reference value.
+
+All reviews of this repository so far were AI-agent reviews (Claude subagents), not independent human review. The
+report (`report/main.tex`) is being rewritten to include A17 to A19.
 
 ## Where to find what
 
 | File or folder | Contents |
 |---|---|
 | `RESULTS.md` | Every reported number, with its source file, the averaging used, and the interpretation |
-| `AMENDMENTS.md` | The dated pre-registration record: deviations from the proposal (D1 to D10), additions (A1 to A17) and the post hoc robustness check (P1h). An index at the top gives each entry's date and status |
+| `AMENDMENTS.md` | The dated pre-registration record: deviations from the proposal (D1 to D10), additions (A1 to A19), the post hoc robustness check (P1h) and dated correction notes. An index at the top gives each entry's date and status |
 | `ANALYSIS_LOG.md` | Append-only log; every script run adds a row |
 | `report/` | Final report (`main.tex`, `main.pdf`) |
 | `slides/` | Final presentation (`slides.tex`, `slides.pdf`, `slides_notes.pdf`) and the office-hours notes of 24 November (`office_hours_2026-11-24.md`) |
-| `reports/`, `research_notes/` | Literature review on slow neural modes |
+| `reports/` | Literature review on slow neural modes; `math_walkthrough/` (a mathematical explainer) and `project_briefing_2026-11-24.md` (a working briefing). Both were prepared by Claude (an AI assistant) for the author and are not part of the course report |
+| `research_notes/` | Literature notes |
 
 Three labels are used throughout. **Pre-registered** means written in a timestamped commit before the relevant data
 were analysed; it applies to the primary tests, the deviations, and additions A1 to A12. **Prospectively documented
 exploratory** applies to A13 to A15: each design and reading rule was committed before its data were analysed, but
 after the 20 November analysis freeze. **Post hoc** applies to D10 (a bug fix), P1h, the two A14 post hoc checks, A16,
-A17 and A18, which were designed after the relevant results were seen.
+A17, A18 and A19, which were designed after the relevant results were seen.
 
 ## Setup
 
@@ -105,7 +118,7 @@ script that applies the reading rule written in `AMENDMENTS.md`.
 | `21_build_detrend.py` | A16, post hoc | Builds `data_detrend_q/` (quadratic detrend) and `data_detrend_c/` (cosine detrend, periods of at least 20 min) |
 | `22_pilot_A16.py` | A16, post hoc | Detrend-and-refit reading, same-scale prior reference, split-half reproducibility of the leading 30 s direction, step sessions. Writes `results/a16/` |
 
-### Timescale follow-ups (A17, post hoc; scripts 23 to 25) and the calibrated simulation (A18 part A, script 26)
+### Timescale follow-ups (A17, scripts 23 to 25), the calibrated simulation (A18, scripts 26 and 27) and the sensitivity check (A19, script 28); all post hoc
 
 A17 asks whether any prediction horizon could have favoured the block prior over the slow drift. Everything in it is
 post hoc (`AMENDMENTS.md`, A17, including the review note of 24 November). Results are summarised in `RESULTS.md`.
@@ -117,7 +130,12 @@ post hoc (`AMENDMENTS.md`, A17, including the review note of 24 November). Resul
 | `25_longlag_A17.py` | A17 part 2, post hoc | Reproduction check of the long-lag roots against A16, per-lag summary, and the four "band selection" tests (60 s against 0.5 s and against PCA, in each detrended copy). Writes `results/a17/longlag_{c,q}.csv`, `longlag.json` |
 | `26_sim_A18.py` | A18 part A, post hoc | Calibrated simulation. Stages: `targets` (real-data calibration statistics), `calibrate`, `calibrate_neg`, `sweep` (11 conditions x 32 paired seeds through the registered pipeline), `summary` (pre-set readings and figure). Writes `results/a18/` |
 | `27_lds_sim_A18.py` | A18 part B, post hoc | The latent state-space model on simulated sessions only, with a pre-set gate and stopping rule (the gate failed; not run on real data). Writes `results/a18/lds_sim_seeds.csv`, `lds_gate.json` |
-| `28_switch_A17.py` | A17 part 6, not yet written | Decoded prior aligned to block switches, against a pseudo-session chance band |
+| `28_sensitivity_A19.py` | A19, post hoc | Stages: `sensitivity` (registered P2, the A16 reference and the A18 comparisons with and without session `4d8c7767`; reads committed results only), `derived` (A18 profile reading for every simulated condition; committed results only), `sources` (prior against previous stimulus sides; task data only). Writes `results/a19/` |
+
+A17 part 6 (block-switch alignment, planned as `28_switch_A17.py`) was never written and is dropped. Scripts 26 and 27
+use no recorded spikes in the simulation itself, but they read each recorded session's task and unit firing rates
+from `data/interim/` (and `targets` reads the recordings), so they need the downloaded data; `26_sim_A18.py` also
+reads the committed `results/stats/d5/` and `results/a16/`.
 
 Part 2 refits scripts 04 and 05 (not 06 to 08, whose first/last-lag logic would compare 0.5 s with 4 min) on both
 detrended copies with the long-lag config, then runs script 25. Script 24 reads `results/a17/timescales.csv`, so run
@@ -133,10 +151,11 @@ for v in c q; do
 done
 unset PNS_DATA PNS_RESULTS PNS_FIGURES
 python scripts/25_longlag_A17.py
-for s in targets calibrate calibrate_neg sweep summary; do
+for s in targets calibrate calibrate_neg sweep summary audit; do
   OMP_NUM_THREADS=1 python scripts/26_sim_A18.py --stage $s --n-jobs 14     # about 50 min in total on 14 cores
 done
 OMP_NUM_THREADS=1 python scripts/27_lds_sim_A18.py --n-jobs 14              # about 25 min
+for s in sensitivity derived sources; do python scripts/28_sensitivity_A19.py --stage $s; done   # seconds
 ```
 
 Each long-lag refit takes about 15 to 20 minutes on a laptop. Do not run script 21 in a scratch setting: it writes
@@ -169,7 +188,7 @@ PNS_RESULTS=results_X`. Region 2 also runs script 03.
 | `data_detrend_q/`, `data_detrend_c/`, refit with `config_a17_longlag.yaml` | 21 (A16) | `results_a17_longlag_q/`, `results_a17_longlag_c/` | 25 (A17) |
 
 Pilot summaries are written into the main results root: `results/pilot/` (A12), `results/a13/`, `results/a14/`,
-`results/a15/`, `results/a16/` and `results/a17/`. Runs on a copied data folder log into `results_X/ANALYSIS_LOG.md` (marked
+`results/a15/`, `results/a16/`, `results/a17/`, `results/a18/` and `results/a19/`. Runs on a copied data folder log into `results_X/ANALYSIS_LOG.md` (marked
 `[results: results_X]`), and those rows were merged into the root log afterwards.
 
 ## Running on PACE ICE
