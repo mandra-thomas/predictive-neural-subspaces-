@@ -84,10 +84,10 @@ score (and the 0.5 s, PCA and random ones) while the full population still decod
 recorded fall from 0.5 s to 30 s: at the recorded drift the horizon change is near zero (median +0.015, positive in 9
 of 16 tasks), so the pre-set reading is "intermediate". Drift is a sufficient explanation for the loss at 30 s in this
 model, not an established cause in the recordings, and the A17 outcome table had no row for an intermediate reading,
-so framing the project around drift is a post hoc choice. Stimulus memory: with memory at the strength the recordings
-imply and no prior, the corrected prior score is not positive (−0.012); only a deliberately strong memory (all of the
-recorded previous-stimulus decodability) produces a positive score (+0.078, 72% of the recordings' session median).
-So the recorded score could in principle be partly memory, a known concern rather than a new finding. One session
+so framing the project around drift is a post hoc choice. Stimulus memory: if there were no block prior and the population only remembered the last stimulus as strongly as the recordings require (the recorded previous-stimulus decodability, one-trial memory), the corrected prior score would be +0.078 (12 of 16 tasks, p = 0.038), 72% of the recordings' session median. A
+small memory trace of the size fitted alongside the prior adds nothing on its own (−0.012). So the recorded prior
+score cannot by itself separate a block prior from memory of recent stimuli, a known concern rather than a new
+finding. One session
 (SWC_038, `4d8c7767`) has an implausible corrected score (1.59); A19 shows it does not drive the registered P2 result
 but does drive the earlier mouse-mean reference of 0.159 (0.101 without it).
 
@@ -832,16 +832,17 @@ the previous stimulus as decodable as in the recordings.
    full-population score itself becomes unreliable (positive in only 19 of 32), the median change is −0.003 (16 of 32
    positive), the regime fits the recordings' profile poorly (point 5), and at three times the drift the 30 s
    advantage returns (+0.097 [0.018, 0.183]).
-4. *Stimulus memory can raise the corrected prior score, and in an extreme case mimic it.* The pre-set reading B
-   came out negative: at the calibrated (tiny) history strength there is no leak (−0.012, positive in 16 of 32), and
+4. *Stimulus memory alone can mimic the prior score.* The pre-set reading B came out negative: at the history
+   strength fitted jointly with the prior (gain 0.036), memory with the prior removed gives no leak (−0.012, positive in 16 of 32), and
    the null is calibrated (no prior, no history: −0.043, positive in 13 of 32; the baseline is below zero because raw
    out-of-fold R² is strongly negative and the pseudo-session distribution is skewed). The added reading B2 (written
-   after calibration, before the sweep) asks the extreme case: no prior at all, and a one-trial stimulus memory given
-   *all* of the recordings' previous-side decodability (in the calibrated model the prior alone accounts for it). That
+   after calibration, before the sweep) asks the no-prior case: no prior at all, and a one-trial stimulus memory strong enough to give
+   *all* of the recordings' previous-side decodability on its own (gain 0.061; in the calibrated model with a prior,
+   the prior accounts for most of it). This is the case the recordings would be in if MOs carried no prior. That
    gives a corrected full-population prior score of 0.078 [0.019, 0.132], positive in 24 of 32 seeds (12 of 16
    tasks, p = 0.038, borderline; one post hoc condition among many uncorrected readings). Against the recordings'
    session median (0.108) that is 72%; against the mouse mean it was quoted as 49% of 0.159, a reference A19 shows is
-   inflated by one session. Reading B2: **in this extreme case, history alone can mimic the prior score**. The
+   inflated by one session. Reading B2: **history alone can mimic the prior score**. The
    pseudo-session null redraws the block sequence, so it does not protect against neurons that remember the real
    stimuli; memory raises the corrected score relative to the null baseline, and makes it positive only when strong
    enough. This is a known concern for prior decoding (the ideal observer's prior is itself a function of past
@@ -876,7 +877,7 @@ the previous stimulus as decodable as in the recordings.
 
 **Recommendation for the latent model.** The pre-set rule says proceed (positive control passed, history control
 valid with 23 of 32, and the full population decodes the prior in 27 of 32 seeds at recorded drift, so there is
-something for a model to find). The results qualify that. A stimulus memory alone, in the extreme case, produces a
+something for a model to find). The results qualify that. A stimulus memory alone, in the no-prior case, produces a
 prior score of comparable size to the recorded one; the only control that removes it also removes most of a genuine
 prior; and the recordings' controlled score is indistinguishable from zero. A real-data latent-model result
 would therefore be hard to read either way. A18 already requires part B's own simulation gate first; in addition

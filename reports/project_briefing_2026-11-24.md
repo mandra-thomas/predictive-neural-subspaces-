@@ -33,8 +33,8 @@ conclusive) answer:
 - **A known measurement issue applies here.** The ideal observer's prior is a function of past stimuli, so neurons
   that only remember recent stimuli also correlate with it, and the pseudo-session correction does not remove that.
   This is a known feature of the literature (subjective priors are commonly modelled as weighted sums over past
-  events), not a discovery of this project. In the simulation, memory at the strength the recordings imply produced
-  no false prior score (−0.012); only a deliberately strong memory did (+0.078). Removing stimulus memory also
+  events), not a discovery of this project. In the simulation, if there were no block prior and the population only remembered the last stimulus as strongly as the recordings require (the recorded previous-stimulus decodability, one-trial memory), the corrected prior score would be +0.078 (12 of 16 tasks, p = 0.038), 72% of the recordings' session median. A small memory trace of the
+  size fitted alongside a prior adds nothing (−0.012). Removing stimulus memory also
   removes about 80% of the prior's variance, so the data cannot separate a belief from memory of recent stimuli.
 - **The latent model did not help, so it stops.** Tested on the simulated sessions with a gate fixed in advance, this
   specification of a latent model with an explicit drift term kept none of the prior under realistic drift (and only
@@ -311,13 +311,13 @@ would discriminate: the recordings' positive prior score in the 0.5 s subspace a
 change. Most of the match is the elapsed-time pattern, which any drift produces. (Recomputed without SWC_038 in A19,
 the low-rank count is 7 of 8; the count moves with interval edges, so it is descriptive only.)
 
-**Stimulus memory can produce a positive score, but only when it is strong.** The baseline first: with no prior and
+**Stimulus memory alone can produce most of the recorded score.** The baseline first: with no prior and
 no memory, the corrected full-population score averages −0.043 (positive in 13 of 32 seeds), not zero. Out-of-fold
 $R^2$ values are strongly negative here, and subtracting the median of a skewed fake-session distribution leaves a
-negative offset. With memory at the strength the recordings imply (the previous stimulus as decodable as in the
-recordings, no prior), the score is −0.012, positive in 16 of 32 seeds: no false prior. Only in the deliberately
-strong case, with memory given *all* of the recorded previous-stimulus decodability by a one-trial trace, is the
-score positive: 0.078 (24 of 32 seeds; 12 of 16 tasks, a borderline p = 0.038, from one post hoc condition among
+negative offset. With a small memory trace of the size fitted jointly with the prior (gain 0.036), and the prior
+then removed, the score is −0.012, positive in 16 of 32 seeds: that trace adds nothing on its own. But if there is
+no prior, the recorded previous-stimulus decodability has to come from memory alone; a one-trial trace strong enough
+to give it (gain 0.061) makes the score positive: 0.078 (24 of 32 seeds; 12 of 16 tasks, a borderline p = 0.038, from one post hoc condition among
 more than ten uncorrected readings). That is 72% of the recordings' session-median reference (49% of the inflated
 mouse mean). The mechanism: the pseudo-session correction compares against *fake* block sequences, and neurons that
 remember the *real* recent stimuli correlate with the real prior (which is built from those stimuli) but not with
@@ -358,8 +358,9 @@ the estimate. It is withdrawn and not used.
   removes a realistic prior from the 30 s subspace while the full population keeps it. It does not reproduce the
   recordings' advantage for the 0.5 s subspace (pre-set verdict: "intermediate"), and conditions without any prior
   match the recorded profile about as well.
-- In simulation, strong stimulus memory with no prior can produce a positive pseudo-session-corrected prior score;
-  memory at the strength the recordings imply did not.
+- In simulation, a population with no prior whose stimulus memory matches the recorded previous-stimulus
+  decodability gives a corrected prior score of 72% of the recorded one, so that score alone cannot show a block
+  prior.
 - The registered P2 result does not depend on the one outlying session (A19).
 
 **Not established:**
@@ -397,7 +398,7 @@ catch many mistakes but are not independent human verification. Their findings, 
   reproduced from the result files, except those listed next.
 - **My wording overstated three things,** then corrected: I had written that drift "is sufficient to reproduce the
   loss" (the pre-set verdict is "intermediate"); that stimulus memory "produces most" of the recorded prior score
-  (in an extreme case it is 72% of the session-median reference); and, left over from A17, that a variance-ranked
+  (with no prior, the memory the recordings require gives 72% of the session-median reference); and, left over from A17, that a variance-ranked
   objective has "no horizon" that favours the prior (a heuristic, not a fact). One arithmetic slip ("a third of the
   drift halves it"; it cuts it by a third) and a missing table row were fixed.
 - **The seeds are not 32 independent draws.** Pairs of seeds reuse the same recorded task, so there are 16
@@ -448,9 +449,12 @@ entry before its numbers existed.
 
 *The stimulus-memory caution was overstated.* I had written that the corrected score is positive for any population
 that encodes recent stimuli, and that memory could fake "half to 70%" of the recorded score. The simulation itself
-says otherwise: with no prior and no memory the score averages −0.043; with memory at the recorded strength it is
-−0.012 (no leak); only deliberately strong memory gives +0.078. The correct statement is that memory pushes the score
-upward and, if strong enough, can make it positive without a prior. It is also a known issue, not a discovery.
+says something more specific: with no prior and no memory the score averages −0.043; a small memory trace of the
+size fitted alongside a prior gives −0.012 (no leak); with no prior and memory strong enough to explain the recorded
+previous-stimulus decodability, +0.078 (72% of the recorded median). The correct statement is that memory pushes the
+score upward and, at the strength the recordings would need if they had no prior, makes it positive. (A draft of
+this correction on 25 November wrongly called the +0.078 condition "deliberately strong" and said memory at the
+recorded strength gave no leak; that was itself corrected the same day.) It is also a known issue, not a discovery.
 
 *The recordings' history-controlled score is not evidence of anything.* I had called −0.061 an "unexplained feature"
 and suggested asking the instructor about it. It is positive in 6 of 16 sessions (one-sided Wilcoxon p = 0.70),

@@ -15,7 +15,9 @@ Post hoc follow-ups on the `pilot-timescale-fix` branch (the registered study is
 - **A18** is a calibrated simulation on the recorded tasks. Without drift, a prior of the recorded size is picked up
   by the 30 s subspace; drift of the recorded size removes it while the full population still decodes it. The pre-set
   reading is "intermediate", so drift is a sufficient explanation in the model, not an established cause. A strong
-  memory of recent stimuli can mimic a corrected prior score; memory at the recorded strength does not. A latent
+  memory of the last stimulus, as strong as the recorded previous-stimulus decodability requires if there is no prior,
+  produces a corrected prior score of 72% of the recorded one, so that score alone cannot separate a block prior from
+  stimulus memory. A latent
   state-space model with an explicit drift term failed its pre-set gate on simulated sessions and was not run on the
   recordings.
 - **A19** checks one session with an implausible score (SWC_038): it does not drive the registered result, but did

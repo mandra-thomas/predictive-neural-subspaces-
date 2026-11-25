@@ -1028,3 +1028,11 @@ on 2026-11-25. No registered result changes. Recorded here:
 8. **Prior timescale units.** The integrated timescale of the prior is 67 s when computed on 0.5 s bins (16.9 trials
    at the median trial interval) and 12.2 trials when computed on the trial sequence (`results/a17/timescales.json`).
    Text that wrote "67 s, about 12 trials" mixed the two; both are now given with their basis.
+9. **Correction to note 6 (same day).** Note 6 calls the history conditions "memory at the strength the
+   recordings imply" (−0.012) and "a deliberately strong memory" (+0.078). That labelling is wrong. The −0.012
+   condition (`neg_history`) is the history gain fitted jointly with the prior (0.036), with the prior then removed.
+   The +0.078 condition (`neg_history_strong`) is memory alone, at the gain (0.061) that reproduces the recorded
+   previous-side decodability without any prior: it is what the recordings would require if MOs carried no prior,
+   not an arbitrary extreme. So, if there is no prior, the memory the recordings require yields a corrected prior
+   score of 72% of the recorded session median; the recorded score cannot by itself separate a block prior from
+   memory of recent stimuli. The rest of note 6 stands.
