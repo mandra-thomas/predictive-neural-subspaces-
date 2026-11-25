@@ -8,6 +8,13 @@ compares the resulting subspaces' geometry and what can be decoded from each: th
 side, choice, feedback, wheel speed and elapsed time. The short answer is that the block prior shows no detectable rise
 with horizon, and every low-dimensional summary, long-horizon or not, is dominated by a slow "session-time mode".
 
+> **Where the current work is (added 2026-11-25).** This branch, `master`, holds the registered study as it stood at
+> the presentation (tag `freeze-2026-11-23-post-talk`, plus the committed result folders). The post hoc follow-ups
+> (A17 timescales, A18 calibrated simulation and latent-model gate, A19 one-session sensitivity check), the dated
+> correction notes of 25 November and the rewritten report are on branch
+> [`pilot-timescale-fix`](../../tree/pilot-timescale-fix). Start with its `README.md`, `RESULTS.md` and
+> `report/main.pdf`. Reviews described in this repository were AI-agent reviews, not independent human review.
+
 ## Where to find what
 
 | File or folder | Contents |
