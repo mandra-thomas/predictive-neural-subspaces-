@@ -44,6 +44,7 @@ A17 (A17 executes extensions listed in the proposal, with post hoc specifics) an
 | A16 | 2026-11-22 17:29 (`246fddb`); part 3 addendum 17:32 (`73ffa82`) | post hoc | Post hoc follow-ups (A16) | `21_build_detrend.py`, `22_pilot_A16.py` |
 | A17 | 2026-11-23 (`0dbca28`); part 1 addendum later the same day; review note 2026-11-24 | post hoc | Timescale follow-ups (A17) | `pns.timescales`, `23_timescales_A17.py` to `25_longlag_A17.py`, `28_switch_A17.py` |
 | A18 part A | 2026-11-24 (`3a81ba1`), before any calibration or simulation outcome; addendum `2f7611d` after calibration, before the sweep; notes after the results | post hoc | Calibrated simulation (A18 part A) | `pns.sim_a18`, `pns.synth` task/rate/history/evoked options, `26_sim_A18.py` |
+| A18 part B | 2026-11-24, before any latent-model result | post hoc | Calibrated simulation (A18 part B) | `pns.sim_a18.lds_readout`, `pns.lds`, `27_lds_sim_A18.py` |
 
 The figure scripts `19_talk_figures.py` and `20_slide_figures.py` read existing results only and implement no
 amendment (the `timescales` option of script 20 plots A17 part 0 results). The entries below are the original dated record and are left exactly as written.
@@ -814,3 +815,48 @@ hoc).** No reading changes. Corrections:
   The reviewer checked the real-task path directly (prior switch timing, transients and movement against the
   pre-stimulus window, on all 16 tasks) and found no leak; the first 0.05 s of the window carries the previous trial's
   value in 4 of 8,752 trials.
+
+## A18 part B: the latent state-space model, on simulated sessions only (post hoc; written 2026-11-24, after the A18 part A results and audit, before any latent-model fit on simulated or real data was inspected)
+
+**Why.** Part A showed that drift of the recorded strength erases a realistic prior from the 30 s RRR subspace while
+the full population still decodes it, and that a stimulus memory with no prior can produce a pseudo-corrected prior
+score of comparable size. A latent model with an explicit drift term is only worth running on the recordings if, on
+simulated sessions where the truth is known, it (1) keeps the prior when drift is present and (2) does not report a
+comparable "prior" when only stimulus memory is present. Part B is that one bounded test, with a stopping rule. It
+follows an outside review of the briefing (24 November) that recommended exactly this test and nothing more. No real
+neural data is used; whether to run the model on the recordings is a separate decision after the gate.
+
+**What was seen before writing.** All part A results and the audit. One timing run of the readout on one simulated
+session (cell `lowrank_x1`, seed 1000), with its output not printed. No latent-model result has been looked at.
+
+**Model (pns.lds, tested on synthetic data in `tests/test_lds.py`).** Trial-indexed: one observation per trial, the
+square-root pre-stimulus window counts of every trial with a valid window, z-scored per unit. Known inputs: the
+>= 20 min cosine basis of the window time (explicit drift term) and the previous trial's side, choice and reward. 8
+latents, each with its own AR(1) timescale (q = 1 - phi²); EM with 3 restarts, at most 300 iterations, tolerance
+1e-6; restart seed [s, 97]. Fixed in advance: no choice of K, inputs or settings is made from results.
+
+**Readout.** Each trial's instantaneous latent estimate (generalised least squares on that trial's window alone, inputs
+subtracted), so the model cannot build a prior by accumulating past stimuli through its dynamics. The prior is
+decoded from the 8 estimates on the decoder's trials with the subspace decoder (ridge, alpha 1, five contiguous
+folds) and the same 200 pseudo sessions as part A; the corrected score is the primary readout ("all latents").
+Secondary, descriptive: the same from the latents whose timescale lies within a factor of 3 of the session's
+trial-indexed prior timescale ("band").
+
+**Sessions.** Cells `nodrift` (reference), `lowrank_x1`, `neg_history_strong` and `neg_pure` of part A, seeds 1000 to
+1031, regenerated deterministically (checked: the full-population prior score must equal part A's). Judged at the task
+level: the two seeds of each task are averaged, giving 16 tasks; "positive in enough tasks" means at least 12 of 16
+(one-sided binomial p = 0.038).
+
+**Gate.**
+- *B1, prior retained under drift:* in `lowrank_x1`, the all-latent score is positive in at least 12 of 16 tasks and
+  its mean is at least half the full-population mean in the same sessions.
+- *B2, stimulus memory not mimicked:* in `neg_history_strong`, the all-latent score is positive in fewer than 12 of 16
+  tasks and its mean is at most a quarter of the `lowrank_x1` all-latent mean.
+- *Null:* in `neg_pure`, positive in fewer than 12 of 16 tasks; otherwise the readout is miscalibrated and the work
+  stops.
+
+**Reading and stopping rule.** B1 and B2 pass: "gate passed"; running the model on the recordings may then be
+considered, as a separate decision with its own specification. B1 passes and B2 fails: "recovers a correlated signal
+but does not separate belief from stimulus memory"; stop. B1 fails: stop. In every case no further model variants,
+inputs or settings are tried. Script `scripts/27_lds_sim_A18.py`; outputs `results/a18/lds_sim_seeds.csv` and
+`lds_gate.json`.

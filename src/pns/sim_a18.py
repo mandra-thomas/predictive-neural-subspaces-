@@ -183,3 +183,47 @@ def analyse_session(pre: dict, cfg: dict, side_null: np.ndarray, prior_null: np.
         for lag in lags:
             out[f"capture_out_rrr_{lag}"] = _capture(fits[f"Vout_full_{lag}"], g)
     return out
+
+
+# ----------------------------------------------------------------------------- A18 part B: latent model on simulations
+def lds_inputs(pre: dict, cfg: dict, tr: np.ndarray) -> np.ndarray:
+    """Known inputs per trial: the >= 20 min cosine basis of the pre-stimulus window time (explicit drift term) and the
+    previous trial's side, choice and reward (0 for the first trial)."""
+    tc, _, t0, length = epoch_minutes(pre)
+    spec = cfg["windows"]["pre_stim"]
+    tw = (np.asarray(pre[spec["event"]], float)[tr] + 0.5 * sum(spec["win"])) / 60.0
+    prev = []
+    for key in ("side", "choice", "feedbackType"):
+        v = np.nan_to_num(np.asarray(pre[key], float), nan=0.0)
+        prev.append(np.where(tr > 0, v[np.maximum(tr - 1, 0)], 0.0))
+    return np.column_stack([cosine_design(tw, t0, length), *prev])
+
+
+def lds_readout(pre: dict, cfg: dict, side_null: np.ndarray, prior_null: np.ndarray, rng: np.random.Generator,
+                K: int = 8, n_restarts: int = 3, max_iter: int = 300) -> dict:
+    """Fit the trial-indexed latent model to the pre-stimulus windows of every trial with a valid window, then decode
+    the prior from each trial's instantaneous latent estimate (no filtering across trials), exactly as the subspace
+    scores are decoded (ridge, contiguous folds, the same pseudo sessions)."""
+    from .lds import fit_lds, instantaneous_scores
+    from .timescales import integrated_timescale
+    W = window_S(pre, "pre_stim")
+    rows = np.flatnonzero(~np.any(np.isnan(W), axis=1))
+    Y = W[rows]
+    Y = (Y - Y.mean(0)) / np.where(Y.std(0) > 1e-9, Y.std(0), 1.0)
+    U = lds_inputs(pre, cfg, rows)
+    fit = fit_lds(Y, U, K, n_restarts=n_restarts, max_iter=max_iter, rng=rng)
+    Zs = instantaneous_scores(Y, U, fit.params)
+    tau = fit.params.tau()
+    side, prior = np.asarray(pre["side"], float), np.asarray(pre["prior"], float)
+    tau_pi = integrated_timescale(prior[rows], 1.0, 300)[0]
+    band = (tau >= tau_pi / 3) & (tau <= 3 * tau_pi)
+    _, tr, _ = _trial_targets(pre, cfg)["prior"]
+    pos = np.searchsorted(rows, tr)
+    folds = contiguous_folds(len(tr), cfg["cv"]["n_folds"])
+    Ytar = np.column_stack([prior[tr], prior_null[:, tr].T])
+    ra = cfg["decode"]["ridge_alpha"]
+    out = {"lds_converged": bool(fit.converged), "lds_tau": [float(x) for x in tau], "tau_pi_trials": float(tau_pi),
+           "lds_n_band": int(band.sum()), "lds_restart_ll_spread": float(np.ptp(fit.restart_lls)),
+           "lds_all": corrected(r2_cv(Zs[pos], Ytar, folds, ra))}
+    out["lds_band"] = corrected(r2_cv(Zs[pos][:, band], Ytar, folds, ra)) if band.any() else np.nan
+    return out
