@@ -111,3 +111,5 @@ Scripts append a row automatically. Add manual notes for any config change, with
 | 2026-11-24 | - | - | note | A18 part A: the two 26_sim_A18 summary rows above are the same deterministic summary run twice (the second after the figure was redrawn); readings identical. Ground-truth capture metric withdrawn (see AMENDMENTS, A18 notes). |
 | 2026-11-24 19:53 | a42056b-dirty | 3d83323a46 | 26_sim_A18 audit | A18 post hoc audit checks: task-level counts, task-resampled intervals, median-of-16 comparison |
 | 2026-11-24 | - | - | note | A18 independent audit (two reviewers): no leak found; wording, pairing and comparison-level corrections in RESULTS and AMENDMENTS (A18 audit note); 26_sim_A18 --stage audit adds task-level checks. |
+| 2026-11-24 20:58 | 1a233eb | 3d83323a46 | 27_lds_sim_A18 | A18 part B gate: does not retain the prior under calibrated drift: stop; reproduction diff 9.7e-17 |
+| 2026-11-24 | - | - | note | A18 part B gate ran at 1a233eb (code committed unchanged); reading "does not retain the prior under calibrated drift: stop". No real-data latent-model fit. |

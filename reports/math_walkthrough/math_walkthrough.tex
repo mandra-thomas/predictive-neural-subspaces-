@@ -1,0 +1,491 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,bm,booktabs,graphicx,hyperref,enumitem,xcolor}
+\usepackage[T1]{fontenc}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
+\setlist{itemsep=2pt,topsep=3pt}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\corr}{\operatorname{corr}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\orth}{\operatorname{orth}}
+\newcommand{\med}{\operatorname{med}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Rc}{R^2_{\mathrm{c}}}
+\newtheorem*{remark}{Remark}
+\title{Predictive neural subspaces: the whole project in mathematical terms}
+\author{Written for Gunnar Andra-Thomas \\ \small Branch \texttt{pilot-timescale-fix}, state of 24 November 2026}
+\date{}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section*{How to read this}
+
+Every analysis in the project is written down here as the exact quantity the code computes, with the file that
+computes it, and then every result is stated and interpreted in those terms. Part I is the original, pre-registered
+study; Part II the post hoc follow-ups after the talk (A17); Part III the calibrated simulation and the latent model
+(A18). Section~\ref{sec:synthesis} pulls the mathematics of the failure together. Numbers are mouse means over 13
+mice unless they are called session medians (over 16 sessions) or seed means (over simulated sessions).
+
+%======================================================================
+\part{The registered study}
+%======================================================================
+
+\section{Data and preprocessing}
+
+\paragraph{Sessions, units, bins.} Session $\sigma$ (16 sessions, 13 mice; $m(\sigma)$ is its mouse) has $p$ units
+(22 to 128, median 48.5) that fire at least $0.1$ Hz over the task epoch. The epoch is cut into $T$ bins of
+$\delta = 0.5$ s (median $T \approx 7{,}980$, about 66 min). Let $n_{tu}$ be the spike count of unit $u$ in bin $t$.
+
+\paragraph{Variance-stabilised, z-scored activity.} With $s_{tu} = \sqrt{n_{tu}}$,
+\begin{equation}
+z_{tu} = \frac{s_{tu} - \mu_u}{\max(\hat\sigma_u, \sigma_{\min})},
+\qquad \sigma_{\min} = \operatorname{SD}\!\big[\sqrt{N}\big],\ N \sim \mathrm{Poisson}(0.1 \cdot 0.5) \approx 0.218,
+\label{eq:z}
+\end{equation}
+where $\mu_u, \hat\sigma_u$ are fitted on the bins a model is fitted on and then reused unchanged for everything that
+model touches (the D10 fix: the floor stops a unit silent in one fold from exploding in another;
+\texttt{transform.py}). The population vector is $\bm z_t \in \R^p$.
+
+\paragraph{Trial windows.} For trial $k$ with stimulus onset $t^{\mathrm{on}}_k$, the pre-stimulus window is
+$[t^{\mathrm{on}}_k - 0.6,\ t^{\mathrm{on}}_k - 0.1)$ s; $\bm w_k \in \R^p$ is its square-rooted count vector,
+z-scored with the session fit's $\mu,\hat\sigma$. Post-stimulus, choice and feedback windows are defined the same way.
+The decoder uses the trials that pass the IBL Brain-Wide-Map mask and have a finite window (413 to 700 per session).
+
+\section{The task and the Bayes-optimal prior}
+
+\paragraph{Generative process.} Stimulus side $c_k \in \{+1, -1\}$ (left, right). The session starts with 90
+unbiased trials ($P(c_k = +1) = 0.5$), then alternates blocks with $P(c_k = +1) = \beta \in \{0.2, 0.8\}$ whose lengths
+are drawn from an exponential with mean 60, truncated to $(20, 100)$ trials.
+
+\paragraph{Ideal observer.} The hidden state is $(\ell_k, \beta_k)$: the number of trials into the current block and
+the block type. With hazard $h(\ell) \propto e^{-\ell/60}\,\mathbf 1[20 \le \ell \le 100]$ (normalised over the
+remaining support), a forward filter over the $100 \times 3$ states gives the predictive distribution
+$P(\beta_k \mid c_{1:k-1})$ and the \emph{block prior}
+\begin{equation}
+\pi_k \;=\; P(c_k = +1 \mid c_{1:k-1}) \;=\; \sum_{\beta} P(\beta_k = \beta \mid c_{1:k-1})\, \beta,
+\label{eq:prior}
+\end{equation}
+a deterministic function $\pi_k = f(c_1, \dots, c_{k-1})$ of the \emph{past} stimuli only (\texttt{prior.py}, a port of
+the IBL \texttt{optimal\_Bayesian}). The last stimulus alone explains $R^2 = 0.42$ of $\Var(\pi)$
+($\corr(\pi_k, c_{k-1}) = 0.64$), the last five explain $0.81$ and the last ten $0.86$ (session medians,
+recorded tasks). This fact returns in Part III.
+
+\paragraph{Pseudo sessions.} The null redraws the whole block structure from the generative process:
+$\tilde c^{(b)}_{1:n}$, $b = 1, \dots, 200$, independent of the real $c$, and $\tilde\pi^{(b)} = f(\tilde c^{(b)})$.
+
+\section{Lagged reduced-rank ridge regression}
+
+\paragraph{Pairs and objective.} For lag $\Delta$ (in bins; registered $\Delta \in \{1, 4, 16, 60\}$, i.e.\ 0.5, 2,
+8, 30 s), stack valid pairs $(t, t+\Delta)$ into $X = [\bm z_t^\top]$, $Y = [\bm z_{t+\Delta}^\top] \in \R^{N\times p}$
+(centred). Reduced-rank ridge regression solves
+\begin{equation}
+\hat B_\Delta \;=\; \arg\min_{\rank B \le d}\ \|Y - XB\|_F^2 + \lambda \|B\|_F^2,
+\qquad \lambda = \alpha\, \tr(X^\top X)/p, \quad d = 5.
+\label{eq:rrr}
+\end{equation}
+Its solution (Mukherjee \& Zhu 2011; \texttt{rrr.py}) is built from the full-rank ridge solution
+$B_R = (X^\top X + \lambda I)^{-1} X^\top Y$ and the $p\times p$ matrix
+\begin{equation}
+G \;=\; B_R^\top X^\top X B_R + \lambda B_R^\top B_R \;=\; \hat Y^\top \hat Y + \lambda B_R^\top B_R,
+\qquad G = V \Lambda V^\top,\ \lambda_1 \ge \dots \ge \lambda_p,
+\label{eq:G}
+\end{equation}
+as $\hat B_\Delta = B_R V_d V_d^\top$ with $V_d$ the top $d$ eigenvectors. Two bases follow:
+\begin{align}
+V^{\mathrm{out}}_\Delta &= V_d && \text{(loading basis: where the prediction lives)},\\
+V^{\mathrm{in}}_\Delta &= \orth(B_R V_d) && \text{(readout basis: which current directions are used)}.
+\end{align}
+The key structural fact is in \eqref{eq:G}: $V^{\mathrm{out}}$ consists of the directions of \emph{largest predicted
+variance} of $\bm z_{t+\Delta}$. Nothing in \eqref{eq:rrr} refers to the prior; the objective is unsupervised and
+variance-ranked.
+
+\paragraph{Choosing $\alpha$.} Over the grid $\alpha \in \{10^{-3}, \dots, 10^{3}\}$ (13 values), the held-out pooled
+$R^2$ of predicting $\bm z_{t+\Delta}$ is computed with 5 contiguous folds over pairs, purging any training pair within
+10 bins of a test block, z-scoring within training bins. One $\alpha$ per session maximises the mean of these curves
+over the registered lags. Comparison subspaces: PCA (top $d$ principal directions of $Z$) and covariance-matched random
+subspaces $\orth(E \Lambda_C^{1/2} \Gamma)$, $\Gamma_{ij} \sim \mathcal N(0,1)$, with $C = E\Lambda_C E^\top$ the
+covariance of $Z$ (Elsayed et al.\ 2016).
+
+\section{Decoding, nulls and tests}
+
+\paragraph{Decoder.} For a basis $V \in \R^{p \times d}$ (or $V = I_p$, the full population), features are
+$\bm x_k = V^\top \bm w_k$. A ridge regression with penalty 1 on standardised features is fitted on 4 of 5 contiguous
+blocks of trials and predicts the fifth; the score is the pooled out-of-fold
+\begin{equation}
+R^2(y; V) \;=\; 1 - \frac{\sum_f \sum_{k \in \mathcal T_f} (y_k - \hat y_k)^2}{\sum_f \sum_{k\in\mathcal T_f} (y_k - \bar y_{\mathcal S_f})^2},
+\end{equation}
+with $\bar y_{\mathcal S_f}$ the training mean of fold $f$. Binary targets use L2 logistic regression and the mean
+per-fold AUC.
+
+\paragraph{Pseudo-session correction.} For the prior,
+\begin{equation}
+\Rc(V) \;=\; R^2(\pi; V) \;-\; \med_{b}\, R^2\big(\tilde\pi^{(b)}; V\big).
+\label{eq:Rc}
+\end{equation}
+Contiguous folds make raw $R^2$ of a slow target strongly negative (extrapolating a block structure across folds);
+the correction removes what any block-like sequence would score. The same 200 pseudo sequences are used for every
+basis and lag, so differences get a paired null.
+
+\paragraph{The three primary tests.} Let $\bar{(\cdot)}$ denote averaging sessions within mouse; tests are one-sided
+Wilcoxon signed-rank over the 13 mouse means, Holm-corrected over the three.
+\begin{itemize}
+\item \textbf{P1 (geometry).} Principal angles $\theta_j = \arccos s_j$, with $s_j$ the singular values of
+  $\orth(A)^\top \orth(B)$; summary $\bar\theta = \frac1d \sum_j \theta_j$. With readout bases fitted on the two
+  session halves, $D_{\mathrm{short}} = \bar\theta(\text{cross}) - \bar\theta(0.5\text{ s}, 0.5\text{ s})$ and
+  $D_{\mathrm{long}} = \bar\theta(\text{cross}) - \bar\theta(30\text{ s}, 30\text{ s})$; P1 is the intersection-union
+  test $p = \max(p_{\mathrm{short}}, p_{\mathrm{long}})$.
+\item \textbf{P2 (prior).} $\Delta_\pi = [R^2(\pi; V^{\mathrm{in}}_{60}) - R^2(\pi; V^{\mathrm{in}}_{1})] -
+  \med_b[R^2(\tilde\pi^{(b)}; V^{\mathrm{in}}_{60}) - R^2(\tilde\pi^{(b)}; V^{\mathrm{in}}_{1})]$; test $\bar\Delta_\pi > 0$.
+\item \textbf{P3 (current stimulus).} The same with corrected AUC of $c_k$ on the post-stimulus window, short minus long.
+\end{itemize}
+
+\paragraph{Elapsed time.} The bin time $t$ is decoded from $V^\top \bm z_t$ with 20 contiguous chunks assigned
+round-robin to 5 folds; a high $R^2_{\mathrm{el}}$ means the subspace's activity varies smoothly with session time.
+
+\section{Results of the registered study}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Test & Statistic (mouse mean [95\% CI]) & Holm $p$ \\
+\midrule
+P1 & $\bar D_{\mathrm{short}} = 12.7^\circ\,[10.2, 15.1]$, $\bar D_{\mathrm{long}} = 3.6^\circ\,[2.2, 4.9]$ & 0.0026 \\
+P2 & $\bar\Delta_\pi = -0.099\,[-0.218, 0.002]$ & 0.89 \\
+P3 & $+0.061\,[0.028, 0.094]$ & 0.0061 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Per basis, $\Rc$ is $0.054$ ($V^{\mathrm{in}}_1$), $-0.027$, $-0.057$, $-0.046$ ($V^{\mathrm{in}}_{60}$), $0.013$
+(PCA), $-0.030$ (random); the full population scores $\Rc(I_p) = 0.159$ (session median 0.108). So the prior is
+decodable from the population but not concentrated in any 5-dimensional summary, and P2 fails. What every summary
+does contain is session time: $R^2_{\mathrm{el}} = 0.84$ ($V^{\mathrm{in}}_{60}$), $0.82$ ($V^{\mathrm{in}}_1$),
+$0.80$ (PCA), $0.64$ (random).
+
+\begin{remark}
+P1 holds mostly through $D_{\mathrm{short}}$; the 30 s split-half angle is itself at the covariance-matched chance
+level, so $D_{\mathrm{long}}$ is measured against noise. P3 holds because long-lag bases lose the stimulus (evoked
+responses decay within a second), not because the 0.5 s basis is specialised for it: its corrected AUC equals the
+random basis's.
+\end{remark}
+
+%======================================================================
+\part{Why the objective could not be expected to find the prior (A17, post hoc)}
+%======================================================================
+
+\section{The prior's timescale}
+
+\paragraph{Definitions.} Assign $\pi_k$ to the bins between stimulus onsets $(t^{\mathrm{on}}_{k-1}, t^{\mathrm{on}}_k]$
+to get a per-bin series $\pi(t)$, and define
+\begin{equation}
+\rho_\pi(\Delta) = \corr\big(\pi(t), \pi(t+\Delta)\big), \qquad
+\tau_\pi = \delta\Big(\sum_{j=0}^{j_0 - 1} \rho_\pi(j\delta) - \tfrac12\Big),
+\end{equation}
+with $j_0$ the first lag where $\rho_\pi \le 0$ (for $\rho = e^{-t/\tau}$ this returns $\approx \tau$). The
+trial-indexed version uses $\pi_k$ directly with lags in trials. $\rho_\pi(\Delta)^2$ is the fraction of $\Var(\pi)$
+that is linearly predictable $\Delta$ ahead from the current value.
+
+\paragraph{Results (task data only; session medians).}
+\begin{center}
+\begin{tabular}{lccccccc}
+\toprule
+$\Delta$ & 0.5 s & 2 s & 8 s & 30 s & 60 s & 2 min & 4 min \\
+$\rho_\pi(\Delta)^2$ & 0.99 & 0.97 & 0.88 & 0.59 & 0.27 & 0.01 & 0.04 \\
+\bottomrule
+\end{tabular}
+\end{center}
+$\tau_\pi = 67$ s (IQR 55 to 75 s); trial-indexed $\tau_\pi = 12.2$ trials (IQR 10.9 to 13.8), first zero crossing at
+27 trials. Blocks last 46 trials (3.6 min); sessions 66.5 min. The per-bin timescale is longer in trials (16.9)
+because $\pi$ is constant through long inter-trial gaps.
+
+\section{Variance shares}
+
+On whole-session $Z$ (rows: bins), with $P^\perp_D$ the projection off $[\bm 1, D]$:
+\begin{equation}
+S_{\mathrm{low}} = 1 - \frac{\|P^\perp_{D_{20}} Z\|_F^2}{\|Z - \bar Z\|_F^2},
+\qquad
+S_\pi = \frac{\sum_u (\bm x^\top \bm w_u)^2 / (\bm x^\top \bm x)}{\sum_u \bm w_u^\top \bm w_u},
+\end{equation}
+where $D_{20}$ is the cosine basis $\cos(\pi j u)$, $u \in [0,1]$ the normalised session time, $j \le \lfloor 2L/20
+\rfloor$ ($L$ in minutes: periods of at least 20 min), and for $S_\pi$ the columns $\bm w_u$ (activity) and $\bm x$
+(prior) are first residualised on the same nuisance design. $S_\pi$ is corrected as $S_\pi(\pi) - \med_b S_\pi(\tilde
+\pi^{(b)})$. Session medians: $S_{\mathrm{low}} = 22.6\%$, trial-locked share (A11 GLM) $8.6\%$, $S_\pi = 0.20\%$
+(pre-stimulus windows; positive in 14 of 16) or $0.09\%$ (per bin). These are measured on different data, so they are
+scales, not one additive budget: ``about two orders of magnitude''.
+
+\section{The variance-ranking heuristic, and why it is not a theorem}
+
+Suppose activity were a sum of independent components, $\bm z_t = \sum_j \bm a_j x_j(t) + \bm\epsilon_t$, each
+$x_j$ with variance $\sigma_j^2$ and autocorrelation $\rho_j$. If the predictor could read each component perfectly, the
+predictable variance it contributes at lag $\Delta$ is
+\begin{equation}
+\Var\big(\E[\bm a_j x_j(t+\Delta) \mid x_j(t)]\big) = \|\bm a_j\|^2 \sigma_j^2 \rho_j(\Delta)^2 .
+\label{eq:heur}
+\end{equation}
+For a ramp-like drift $\rho_D(\Delta) \approx 1$ at every lag tested, while $\rho_\pi(\Delta)^2$ falls from 0.99 to
+0.01; and $\sigma_\pi^2 \ll \sigma_D^2$. Under \eqref{eq:heur} the prior's share of predictable variance relative to
+the drift therefore only falls with lag: longer lags should not help. A17 compared the prior's term
+$\widehat{SS}_\pi\, \rho_\pi(\Delta)^2$ with $\lambda_5(G)$ (median ratio 0.05 to 0.66; below 1 in 16, 16, 16 and 12
+of 16 sessions for raw/detrended at 0.5 s/30 s).
+
+\paragraph{Why this is not an upper bound (withdrawn claim).} It was first called an upper bound implying that the
+prior ``could not'' enter $V_d$. Four reasons it is not:
+\begin{enumerate}
+\item The best predictor of $\pi(t+\Delta)$ uses all of the past, $\E[\pi(t+\Delta) \mid \mathcal F_t]$, whose explained
+  fraction can exceed $\rho_\pi(\Delta)^2$ (e.g.\ the run length $\ell_k$ predicts a switch).
+\item Components are not separable in $G$: for a direction $\bm v = \bm v_\pi + \bm v_D$,
+  $\bm v^\top G \bm v$ contains cross terms, so a weak component can tilt $V_d$ without its own term exceeding
+  $\lambda_5$.
+\item $G$ ranks \emph{output} directions; the prior is decoded through the \emph{input} basis
+  $V^{\mathrm{in}} = \orth(B_R V_d)$.
+\item $\widehat{SS}_\pi$ is a noisy, null-subtracted estimate, not a decomposition.
+\end{enumerate}
+Equation \eqref{eq:heur} is a guide to intuition, and Part III tests the intuition directly.
+
+\section{Lag sweep to 4 minutes on drift-removed data}
+
+Activity was detrended per unit, $Z \mapsto P^\perp_{D} Z$ with $D = D_{20}$ (cosine) or $D = [u, u^2]$ (quadratic),
+and RRR refitted for $\Delta \in \{1, 4, 16, 60, 120, 240, 480\}$ bins with $\alpha$ fixed to the A16 value. A
+reproduction check matched the original lags to $2\times10^{-14}$. Committed reading: ``band selection'' iff, in
+both copies, $\Rc(V^{\mathrm{in}}_{120}) > \Rc(V^{\mathrm{in}}_{1})$ and $> \Rc(\mathrm{PCA})$ (paired null,
+one-sided Wilcoxon, $p < 0.05$).
+
+\begin{center}
+\begin{tabular}{lccccccc}
+\toprule
+$\Delta$ & 0.5 s & 2 s & 8 s & 30 s & 60 s & 2 min & 4 min \\
+\midrule
+$\rho_\pi^2$ & 0.99 & 0.97 & 0.88 & 0.59 & 0.27 & 0.01 & 0.04 \\
+$\Rc$, cosine copy & 0.031 & 0.043 & 0.037 & 0.051 & 0.049 & 0.032 & 0.038 \\
+$\Rc$, quadratic copy & $-0.002$ & $-0.054$ & $-0.003$ & $-0.015$ & $-0.018$ & $-0.010$ & 0.008 \\
+\bottomrule
+\end{tabular}
+\end{center}
+All four tests fail ($p = 0.29, 0.12$ cosine; $0.55, 0.53$ quadratic): ``no band selection''. The committed
+prediction $\Rc(\Delta) \propto \rho_\pi(\Delta)^2$ fails too: Spearman correlation $-0.14$ ($p = 0.76$). The prior
+content is flat in $\Delta$ even where $\rho_\pi^2 \approx 0$, which is what one expects if the small $\Rc$ is
+incidental to any 5-dimensional summary (PCA 0.028, random 0.020) rather than selected by predictability.
+
+%======================================================================
+\part{Testing the mechanism where the truth is known (A18, post hoc)}
+%======================================================================
+
+\section{The generative model}
+
+Each simulated session copies one recorded session's task exactly (all $t^{\mathrm{on}}_k$, movement and feedback
+times, $c_k$, contrasts, choices, outcomes, block probabilities, the trial mask; hence the true $\pi_k$), its $p$ and
+each unit's mean rate $\bar r_u$. On a 50 ms grid, with $k(t)$ the trial whose task latents are active at $t$
+(switching at feedback$_{k-1} + 0.5$ s, never later than $t^{\mathrm{on}}_k - 0.6$ s),
+\begin{align}
+\log \lambda_u(t) \;=\;& b_u
+ + g_\pi\, \ell^{\pi}_u \big(\pi_{k(t)} - \tfrac12\big)
+ + g_h\, \ell^{h}_u\, h_{k(t)}
+ + g_D \textstyle\sum_{r=1}^{3} \ell^{D}_{ur} D_r(t)
+ + g_{\mathrm{ev}} \textstyle\sum_{e} \ell^{e}_u E_e(t) \nonumber\\
+& + \ell^{f}_u \big(g_s\, \textstyle\sum_k c_k \sqrt{\kappa_k}\, \phi(t - t^{\mathrm{on}}_k) + a_f(t)\big)
+ + \ell^{a}_u a_{s}(t) + \bm m_u^\top \bm\eta(t),
+\label{eq:gen}\\
+n_{tu} \;\sim\;& \mathrm{Poisson}\big(\lambda_u(t)\, \cdot 0.05\big), \nonumber
+\end{align}
+where:
+\begin{itemize}
+\item $\phi(s) = e^{-s/0.3}\mathbf 1[0 \le s < 1.5]$ (seconds); $E_e(t) = \sum_k \phi(t - t^e_k)$ for $e \in$
+  \{stimulus, movement, feedback\}: unsigned evoked responses; $\kappa_k$ is the contrast;
+\item $h_k = \mathrm{std}\big(\sum_{j=1}^{10} c_{k-j}\, e^{-(j-1)/\tau_h}\big)$ with $\tau_h = 1$ trial: a stimulus
+  memory that carries no block information except through the stimuli themselves;
+\item $D_r(t)$, the drift processes: a random-sign ramp plus cosines with periods $\ge 20$ min (amplitudes $\propto
+  1/j$), plus weight $g_{\mathrm{mid}}$ on a 5 to 20 min mixture, unit variance, variances decaying by 0.3 per $r$
+  (``low-rank''); or one such process per unit (``per-unit'');
+\item $a_s$ an AR(1) slow noise (autocorrelation 0.99 per 0.5 s), $a_f$ a fast AR(1), $\bm\eta$ two shared fast noise
+  factors;
+\item loadings $\ell$ i.i.d.\ Gaussian (scale 0.6), with the stimulus loading sharing 0.3 of the prior loading;
+\item $b_u$ set after all terms so that the session mean of $\lambda_u$ equals $\bar r_u$.
+\end{itemize}
+Then the \emph{registered} pipeline is applied unchanged.
+
+\paragraph{Calibration.} Six gains $\theta = (g_\pi, g_D, g_{\mathrm{mid}}, g_h, g_{\mathrm{ev}}, g_s)$ are matched to
+six recorded session medians $m^\star$ by the damped fixed point
+\begin{equation}
+\theta_i \leftarrow \theta_i \cdot \operatorname{clip}\!\Big[\big(m^\star_i / m_i(\theta)\big)^{0.7 e_i}, \tfrac12, 2\Big],
+\end{equation}
+$e_i = \frac12$ for shares and $R^2$ (which scale like $\theta^2$), $e_i = 1$ for $\mathrm{AUC} - \frac12$, with
+$m_i(\theta)$ the median over 16 simulated sessions (seeds 900 to 915). Achieved / target: full-population
+$\Rc$ $0.111/0.108$; $S_{\mathrm{low}}$ $22.6\%/22.6\%$; 5 to 20 min share $4.7\%/4.7\%$; trial-locked $8.6\%/8.6\%$;
+previous-side AUC $0.558/0.563$; current-side AUC $0.866/0.869$. Calibrated $g_\pi = 0.29$ and $g_h = 0.036$: the
+prior alone already makes $c_{k-1}$ as decodable as in the recordings, because $\corr(\pi_k, c_{k-1}) = 0.64$.
+
+\section{Why stimulus memory leaks through the pseudo-session null}
+\label{sec:leak}
+
+Suppose the population encodes no prior, only $h_k$, a linear function of $c_{k-1}, \dots, c_{k-10}$. The decoder
+learns $\hat\pi_k = \bm\beta^\top \bm w_k \approx \gamma h_k$. For the real target, $\Cov(h_k, \pi_k) \neq 0$ because both
+are functions of the same past stimuli; the out-of-fold $R^2(\pi)$ approaches $\corr(h, \pi)^2 > 0$ (minus estimation
+loss). For each pseudo target, $\tilde\pi^{(b)}$ is built from $\tilde c^{(b)}$, independent of $c$, so
+$\Cov(h_k, \tilde\pi^{(b)}_k) = 0$ and $R^2(\tilde\pi^{(b)}) \le 0$ in expectation. Hence
+\begin{equation}
+\E[\Rc] \;\approx\; \corr(h, \pi)^2 - (\text{estimation loss}) \;>\; 0 \quad\text{with no prior encoded.}
+\end{equation}
+The pseudo-session null is a valid null for ``activity unrelated to the task sequence'', not for ``activity
+related to the stimuli but not to the belief''.
+
+\paragraph{The history-controlled score.} Replace every target by its residual on its own recent stimuli,
+\begin{equation}
+\pi^{\perp}_k = \pi_k - P_{[\bm 1, c_{k-1}, \dots, c_{k-5}]}\,\pi_k, \qquad
+\tilde\pi^{(b)\perp}_k = \tilde\pi^{(b)}_k - P_{[\bm 1, \tilde c^{(b)}_{k-1}, \dots, \tilde c^{(b)}_{k-5}]}\,\tilde\pi^{(b)}_k,
+\end{equation}
+and compute $\Rc$ on these. If the population encodes only $h$ with memory inside the 5-trial window, $\pi^\perp$ is
+(nearly) orthogonal to what it encodes and $\E[R^{2,\perp}_{\mathrm{c}}] \approx 0$. But the last five stimuli explain $R^2 = 0.81$
+of $\Var(\pi)$, so $\Var(\pi^\perp) \approx 0.19\,\Var(\pi)$: the control also removes most of a genuine prior. A memory
+longer than 5 trials would both mimic $\pi$ more and leak past the control.
+
+\section{Simulation design and readings}
+
+Eleven conditions, 32 seeds each (seeds $s$ and $s+16$ share a recorded task, so 16 independent tasks), sharing task,
+latent noise, most loadings, pseudo draws and fit seed across conditions. Per condition, with $\bar{\cdot}$ the seed
+mean, the \emph{capture} of a basis is $\kappa(V) = \overline{\Rc(V)} / \overline{\Rc(I_p)}$. Pre-set readings
+(committed before any simulated result):
+\begin{itemize}
+\item G1: positive control finds the prior ($\Rc(I_p) > 0$ and $\Rc(V^{\mathrm{in}}_{60}) > 0$ in $\ge 22$ of 32).
+\item A: with $\kappa_0 = \kappa(V^{\mathrm{in}}_{60})$ without drift: ``weak prior sufficient'' if $\kappa_0 < 0.25$;
+  else ``drift sufficient'' if $\kappa(V^{\mathrm{in}}_{60}) < \kappa_0/2$ and $\med\,\Delta_\pi \le 0$ at calibrated
+  drift; ``not sufficient'' if $\ge \kappa_0/2$ and $> 0$; else ``intermediate''.
+\item B: null calibrated; stimulus memory at calibrated strength leaks. B2 (added after calibration): memory alone
+  tuned to the recorded previous-side AUC mimics the prior ($\ge 22$ of 32 positive and mean $\ge 0.054$).
+\item C: 8 profile features compared with the recordings' 95\% intervals (descriptive).
+\end{itemize}
+
+\section{Simulation results}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Condition & $\Rc(I_p)$ & $\Rc(V^{\mathrm{in}}_{60})$ & $\Rc(V^{\mathrm{in}}_{1})$ & $\Delta_\pi$ \\
+\midrule
+strong prior ($3g_\pi$), no drift & 0.632 & 0.537 & 0.449 & $+0.089$ \\
+calibrated prior, no drift & 0.170 & 0.069 & 0.019 & $+0.050$ \\
+low-rank drift $\times\frac13$ & 0.174 & 0.047 & 0.019 & $+0.027$ \\
+low-rank drift $\times 1$ & 0.167 & $-0.006$ & $-0.033$ & $+0.027$ \\
+low-rank drift $\times 3$ & 0.268 & $-0.205$ & $-0.172$ & $-0.036$ \\
+per-unit drift $\times 1$ & 0.063 & $-0.088$ & $-0.038$ & $-0.052$ \\
+per-unit drift $\times 3$ & 0.084 & 0.136 & 0.028 & $+0.097$ \\
+no prior, no memory & $-0.043$ & $-0.036$ & $-0.053$ & $+0.017$ \\
+no prior, memory alone matching recordings & 0.078 & $-0.010$ & $-0.023$ & $+0.016$ \\
+\midrule
+recordings & 0.159 & $-0.046$ & 0.054 & $-0.099$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Reading the table in terms of \eqref{eq:rrr}--\eqref{eq:G}.}
+\begin{enumerate}
+\item \emph{G1 passes} ($32/32$): when $g_\pi$ is large the prior direction carries enough predictable variance to
+  enter $V_d$, and $\kappa(V^{\mathrm{in}}_{60}) = 0.85$.
+\item \emph{Without drift, long lags favour the prior}: $\kappa(V^{\mathrm{in}}_{60}) = 0.41\,[0.33, 0.48]$ and
+  $\Delta_\pi = +0.050$. With only fast competitors (stimulus and evoked responses, $\rho \approx 0$ beyond a second),
+  \eqref{eq:heur} favours the slow prior at 30 s, as the original hypothesis assumed.
+\item \emph{Calibrated drift erases the 30 s prior}: $\Rc(V^{\mathrm{in}}_{60})$ falls from 0.069 to $-0.006$ (paired
+  drop positive in 23 of 32; post hoc Wilcoxon $p = 0.002$) while $\Rc(I_p)$ is unchanged (0.167): the information is
+  still in the population, but $V_d$ is spent on the drift's large, persistent predicted variance. But $\Delta_\pi$
+  stays positive (21 of 32 seeds), unlike the recordings' $-0.099$, so reading A is \textbf{intermediate}: drift
+  reproduces the loss at 30 s, not the recordings' advantage for 0.5 s.
+\item \emph{Profile}: at calibrated low-rank drift, 6 of 8 features fall inside the recordings' intervals, notably
+  $R^2_{\mathrm{el}} = 0.79, 0.75, 0.65$ for $V^{\mathrm{in}}_{60}$, PCA, random (recordings $0.84, 0.80, 0.64$).
+  Per-unit drift matches 2 of 8 ($R^2_{\mathrm{el}} \approx 0.92$, too high) and makes even $\Rc(I_p)$ unreliable.
+\item \emph{Stimulus memory mimics the prior}: with $g_\pi = 0$ and $g_h$ re-tuned so memory alone reproduces the
+  recorded previous-side AUC, $\Rc(I_p) = 0.078\,[0.019, 0.132]$, positive in 24 of 32 seeds (12 of 16 tasks,
+  $p = 0.038$): 49 to 72\% of the recorded score depending on the summary, as Section~\ref{sec:leak} predicts. Reading B (memory
+  at calibrated strength) is negative and the null is calibrated (13 of 32).
+\item \emph{The history-controlled score}: $R^{2,\perp}_{\mathrm{c}}(I_p) = 0.026$ with a genuine prior and no drift (against 0.170
+  uncontrolled, consistent with $\Var(\pi^\perp) \approx 0.19\Var(\pi)$), $-0.017$ for memory alone. In the
+  recordings $R^{2,\perp}_{\mathrm{c}}(I_p) = -0.061$ (session median), a median that occurs with probability 0.002 to 0.01 among
+  medians of 16 simulated sessions in every condition at calibrated drift strength (except per-unit, 0.015 to 0.12).
+  The recordings do something the simulator does not.
+\end{enumerate}
+
+\section{The latent state-space model (A18 part B)}
+\label{sec:lds}
+
+\paragraph{Model.} One observation per trial, $\bm y_k$ = z-scored $\sqrt{\text{counts}}$ of the pre-stimulus window,
+\begin{align}
+\bm y_k &= C \bm x_k + D \bm u_k + \bm d + \bm\varepsilon_k, & \bm\varepsilon_k &\sim \mathcal N(0, \operatorname{diag}\bm r), \\
+x_{k+1,i} &= \phi_i\, x_{k,i} + \eta_{k,i}, & \eta_{k,i} &\sim \mathcal N(0, 1 - \phi_i^2),\quad \phi_i \in [0, 1 - 10^{-4}],
+\end{align}
+with $K = 8$ latents, each with its own timescale $\tau_i = -1/\ln\phi_i$ trials, and known inputs $\bm u_k$ = the
+cosine drift basis $D_{20}$ at the window time plus $c_{k-1}$, previous choice and previous reward. This is a
+linear-Gaussian analogue of GPFA with an exponential (Ornstein--Uhlenbeck) kernel and an explicit drift term. Fitted
+by EM (Kalman filter in information form, Rauch--Tung--Striebel smoother; closed-form M-step for $C, D, \bm d, \bm r$;
+a bounded 1-D update per $\phi_i$), 3 restarts.
+
+\paragraph{Readout.} To stop the dynamics from \emph{constructing} a prior by integrating past stimuli, the prior is
+decoded from each trial's own generalised-least-squares estimate
+\begin{equation}
+\hat{\bm x}_k = (C^\top R^{-1} C)^{-1} C^\top R^{-1}(\bm y_k - D\bm u_k - \bm d),
+\end{equation}
+with the same decoder and pseudo sessions as above, giving $\Rc(\mathrm{LDS})$.
+
+\paragraph{Gate (committed before any result).} At the task level (16 tasks): B1 in low-rank drift $\times1$,
+$\Rc(\mathrm{LDS}) > 0$ in $\ge 12$ of 16 tasks and mean $\ge \frac12$ mean $\Rc(I_p)$; B2 in memory alone, $< 12$ of
+16 positive and mean $\le \frac14$ of the B1 mean; null calibrated. Stop unless B1 and B2 both pass.
+
+\paragraph{Result.} Task-level means (16 tasks):
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Condition & $\Rc(\mathrm{LDS})$ & tasks $> 0$ & $\Rc(I_p)$ \\
+\midrule
+calibrated prior, no drift & 0.026 & 13/16 & 0.170 \\
+low-rank drift $\times 1$ & $-0.003$ & 8/16 & 0.167 \\
+memory alone & $-0.020$ & 6/16 & 0.078 \\
+no prior, no memory & $-0.025$ & 6/16 & $-0.043$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+B1 fails, so by the rule fixed in advance the latent-model work stops: it is not run on the recordings and no
+variant is tried. B2 passes but is moot: the readout is not fooled by memory, but it does not keep a genuine prior
+either. Even without drift it keeps only $0.026/0.170 \approx 15\%$ of the population's prior information. In terms of
+the model, $\hat{\bm x}_k$ is the GLS projection after subtracting $D\bm u_k$; since $\bm u_k$ contains $c_{k-1}$ and
+$\corr(\pi_k, c_{k-1}) = 0.64$, the subtraction removes part of the prior-related activity (about 42\% of $\Var(\pi)$ is
+linear in $c_{k-1}$). That is a plausible contributor, not a tested one. With drift, the fitted timescales are
+dominated by slow latents (medians $\tau \approx 43, 31, 21, 9$ trials) that absorb slow structure the cosine inputs do not.
+
+%======================================================================
+\part{Synthesis}
+%======================================================================
+
+\section{The failure, in one set of equations}
+\label{sec:synthesis}
+
+\begin{enumerate}
+\item The objective \eqref{eq:rrr} keeps the top-$d$ eigenvectors of $G = \hat Y^\top \hat Y + \lambda B_R^\top B_R$:
+  directions of largest \emph{predicted variance}. It never sees $\pi$.
+\item The recorded prior has $\rho_\pi(\Delta)^2$ falling from 0.99 to 0.01 by 2 min ($\tau_\pi \approx 12$ trials),
+  and a variance share about two orders of magnitude below $S_{\mathrm{low}}$. Under the heuristic \eqref{eq:heur} no
+  $\Delta$ favours it over a ramp-like drift.
+\item In a simulation calibrated to the recordings, the heuristic's prediction holds where the truth is known: without
+  drift $V^{\mathrm{in}}_{60}$ captures 41\% of the population's prior information; with drift of the recorded
+  strength it captures none, while $\Rc(I_p)$ is unchanged. This does not reproduce $\Delta_\pi < 0$.
+\item The measurement itself is ambiguous: $\Rc$ is positive for any population that encodes recent stimuli,
+  because $\pi = f(c_{1:k-1})$ and the null redraws $c$. Controlling for recent stimuli removes about 80\% of $\pi$ too.
+  So ``the prior is decodable'' and ``the population represents the belief $\pi$'' are different claims, and the data
+  here support only the first.
+\item A latent model with an explicit drift term, read out trial by trial, did not rescue the prior in simulation
+  (Section~\ref{sec:lds}): under calibrated drift it keeps none, and without drift about 15\%.
+\end{enumerate}
+
+\paragraph{What would change these conclusions.} A drift model that reproduces $\Delta_\pi < 0$ and the recordings'
+$R^{2,\perp}_{\mathrm{c}} < 0$ would strengthen the mechanism; one that cannot would point to features the simulator lacks (unit-level
+nonstationarity, longer stimulus memory). Evidence for a belief representation beyond memory would need information
+about $\pi$ that a flexible function of recent stimuli cannot provide, for example the run length $\ell_k$ or the
+effect of older stimuli at matched recent history, and that question is a good one to take to the instructor.
+
+\section*{Sources}
+Code: \texttt{src/pns/\{transform, prior, rrr, lagged, geometry, decode, stats, analysis, timescales, synth, sim\_a18,
+lds\}.py}; scripts 04 to 06, 23 to 27. Results: \texttt{results/stats/d5/}, \texttt{results/a16/}, \texttt{results/a17/},
+\texttt{results/a18/}. Every decision and its date: \texttt{AMENDMENTS.md}. Every number with its file:
+\texttt{RESULTS.md}.
+
+\end{document}

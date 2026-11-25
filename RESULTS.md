@@ -858,7 +858,26 @@ prior score of comparable size to the recorded one; the only control that remove
 prior; and the recordings' controlled score is lower than the simulator explains. A real-data latent-model result
 would therefore be hard to read either way. A18 already requires part B's own simulation gate first; in addition
 (post hoc, proposed here), the model should go to the recordings only if its readout separates "prior with drift"
-from "history alone" in simulation.
+from "history alone" in simulation. That gate was then run (below) and failed, so the latent model stops here.
+
+**Latent state-space model on the simulated sessions (A18 part B).** One bounded test, specified and committed
+before any result (`1a233eb`), with a stopping rule: a trial-indexed linear-Gaussian latent model (8 latents with
+their own timescales; known inputs: the slow cosine drift basis and the previous trial's stimulus, choice and reward)
+was fitted to the pre-stimulus windows, and the prior was decoded from each trial's own latent estimate with the same
+decoder and pseudo sessions. Gate, at the task level (16 tasks): B1, with calibrated drift the score must be positive
+in at least 12 tasks and at least half the full-population score; B2, with stimulus memory alone it must not be. Values
+from `results/a18/lds_gate.json` and `lds_sim_seeds.csv`.
+
+| Condition | Latent-model score (mean) | Tasks positive | Full population |
+|---|---|---|---|
+| Calibrated prior, no drift | 0.026 | 13 of 16 | 0.170 |
+| Low-rank drift x 1 | −0.003 | 8 of 16 | 0.167 |
+| No prior, memory alone matching the recordings | −0.020 | 6 of 16 | 0.078 |
+| No prior, no memory | −0.025 | 6 of 16 | −0.043 |
+
+B1 fails, so the reading is **"does not retain the prior under calibrated drift: stop"**. The model is not fooled by
+stimulus memory, but it also keeps little of a genuine prior even without drift (0.026 against 0.170). No latent model
+is run on the recordings and no variant is tried. See the A18 part B result note in `AMENDMENTS.md`.
 
 **Independent audit (24 November).** Two reviewers with no access to my conclusions audited the code and the claims.
 They found no leak of the current trial's stimulus into the pre-stimulus window and no decoder or target leakage, and
@@ -904,9 +923,9 @@ cognitive, and it is not explained by any single recording artifact tested.
    rule.
 4. **Testing the variance-ranking account directly**: comparisons with Dynamical Components Analysis and slow feature
    analysis, a ground-truth simulation with known drift and a known prior, and a drift-robust objective. The
-   simulation is done (A18 part A). The explicit-drift latent state-space model is built and tested on synthetic data
-   only; its specification (A18 part B) is not yet written, and it should be run on the simulated conditions,
-   including the history-only control, before any real data.
+   simulation is done (A18 part A). The explicit-drift latent state-space model was tested on the simulated sessions
+   (A18 part B) and failed its gate: it does not retain the prior under calibrated drift, so it was not run on the
+   recordings.
 5. **A block-transition-aligned analysis**, asking how the population prior signal changes trial by trial after a
    switch, since fixed-horizon prediction cannot separate a static from a dynamical belief code. Specified as A17
    part 6 (`28_switch_A17.py`, not yet written).

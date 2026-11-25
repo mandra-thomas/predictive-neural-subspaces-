@@ -860,3 +860,14 @@ considered, as a separate decision with its own specification. B1 passes and B2 
 but does not separate belief from stimulus memory"; stop. B1 fails: stop. In every case no further model variants,
 inputs or settings are tried. Script `scripts/27_lds_sim_A18.py`; outputs `results/a18/lds_sim_seeds.csv` and
 `lds_gate.json`.
+
+**A18 part B result note (written 2026-11-24, after the gate ran; post hoc).** The gate read "does not retain the
+prior under calibrated drift: stop". B1 failed (all-latent score in `lowrank_x1`: mean -0.003, positive in 8 of 16
+tasks, against a full-population mean of 0.167); B2 and the null passed. Descriptive: without drift the readout
+scored 0.026 (13 of 16 tasks) against 0.170 for the full population, so the model retains little of the prior even
+when nothing competes; the fitted timescales with drift were dominated by slow latents (medians 43, 31, 21 and 9
+trials) and without drift by fast ones. One plausible contributor, not tested (the stopping rule forbids variants):
+the inputs include the previous stimulus, which correlates 0.64 with the prior, so subtracting the input term removes
+part of the prior-related activity. The regenerated sessions matched part A exactly (largest difference 1e-16); 124
+of 128 fits converged within 300 iterations. Per the stopping rule, no latent model is run on real data and no
+variant is tried.

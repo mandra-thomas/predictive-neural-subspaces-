@@ -1,0 +1,41 @@
+{
+  "cells": {
+    "lowrank_x1": {
+      "lds_all_mean": -0.002850129701714676,
+      "lds_all_npos_tasks": 8,
+      "lds_all_binom_p": 0.5981903076171875,
+      "lds_band_mean": 0.0027117854417571703,
+      "full_mean": 0.16702491318128823
+    },
+    "neg_history_strong": {
+      "lds_all_mean": -0.0203835914890336,
+      "lds_all_npos_tasks": 6,
+      "lds_all_binom_p": 0.8949432373046875,
+      "lds_band_mean": -0.0037494888980688507,
+      "full_mean": 0.07755230712894363
+    },
+    "neg_pure": {
+      "lds_all_mean": -0.02478437797651603,
+      "lds_all_npos_tasks": 6,
+      "lds_all_binom_p": 0.8949432373046875,
+      "lds_band_mean": 0.0020018039405177816,
+      "full_mean": -0.04284833776855326
+    },
+    "nodrift": {
+      "lds_all_mean": 0.026224078280202043,
+      "lds_all_npos_tasks": 13,
+      "lds_all_binom_p": 0.0106353759765625,
+      "lds_band_mean": 0.017822728832976458,
+      "full_mean": 0.16954160202092927
+    }
+  },
+  "B1_prior_retained": false,
+  "B2_history_not_mimicked": true,
+  "null_calibrated": true,
+  "reading": "does not retain the prior under calibrated drift: stop",
+  "n_tasks": 16,
+  "need_tasks": 12,
+  "reproduction_max_abs_diff": 9.71445146547012e-17,
+  "n_converged": 124,
+  "n_fits": 128
+}

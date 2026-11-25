@@ -1,8 +1,8 @@
 # Project briefing: where everything stands
 
 *Written 24 November 2026 for Gunnar, to read in one sitting. It starts from the original question and ends with what
-to do before the 7 December deadline. Section 9 says what is established and what is not; section 11 gives my
-recommendation and section 12 lists the decisions that are yours.*
+to do before the 7 December deadline. Section 9 says what is established and what is not; section 11 covers the latent-model test and
+section 12 lists the decisions that are yours.*
 
 ## 1. The short version
 
@@ -28,6 +28,10 @@ Since the talk, the work has moved from "it failed" to "here is why, and here is
   where memory explains all of the recorded previous-stimulus decoding). The standard pseudo-session correction does
   not catch this. The control that removes stimulus memory also removes most of a genuine prior, and on the
   recordings it comes out lower than the simulator can produce at realistic settings, which nothing here explains.
+
+- **The latent model did not help, so it stops.** Tested on the simulated sessions with a gate fixed in advance, a
+  latent model with an explicit drift term kept none of the prior under realistic drift (and only about 15% without
+  drift). By the stopping rule it was not run on the recordings.
 
 What this is: a well-characterised negative result, a mechanism shown in simulation to reproduce most (not all) of
 the recorded pattern, and a methodological caution about how the prior is measured. What it is not: a rescue of the original hypothesis, or proof of what
@@ -337,6 +341,8 @@ the estimate. It is withdrawn and not used.
 - The A17 prediction that prior content would fall with lag: it is flat.
 - The claim that the prior "could not have entered" a rank-5 subspace: withdrawn (it was not a real bound).
 - The ground-truth capture metric: withdrawn.
+- The latent state-space model: failed its pre-set gate on simulated data (keeps no prior under realistic drift);
+  not run on the recordings.
 - The talk's "130 independent windows" argument: wrong, corrected.
 
 **Labels.** Everything after the talk (A17, A18) is post hoc: designed after the original results were known. Each
@@ -370,48 +376,52 @@ one the methods, numbers and wording. Their findings, and what changed:
 
 All of this is recorded in a dated "A18 audit note" in `AMENDMENTS.md`.
 
-## 11. Recommendation: should the latent model go ahead?
+## 11. The latent model: tested, failed its gate, stopped
 
-The rule written in advance says yes: the positive control passed, the history control is valid by its definition,
-and at the recorded drift the full population still decodes the prior in 27 of 32 simulated sessions, so a model
-that separates drift could in principle find it. Drift is what erases the prior from the 30 s subspace in
-simulation, which is the situation an explicit-drift latent model is built for.
+After this briefing was first written, an outside review recommended one bounded test of the latent model on the
+simulated sessions, with a stopping rule, and nothing more. That test (A18 part B) was specified and committed before
+any result, then run.
 
-My recommendation is **yes, but only on simulated data first.** Two results make a real-data latent-model result
-hard to read in either direction. First, stimulus memory alone can produce a prior score of comparable size, so a
-"prior-like" latent in the recordings could be stimulus memory. Second, the control that removes stimulus memory
-also removes most of a genuine prior, and the recordings fail it in a way the simulator does not explain, so a null
-result would not mean much either. So the next step is part B, specified and
-committed first. It would run the latent model on these same simulated conditions, including "history alone", and
-go to the recordings only if the model's readout cleanly separates "prior with drift" from "history alone" in
-simulation. If it cannot, stop there and write the report around the simulation. That is a perfectly good ending.
+The model is fitted trial by trial to the pre-stimulus windows: 8 latents, each with its own timescale, with the slow
+cosine drift basis and the previous trial's stimulus, choice and reward as known inputs. The prior is decoded from each
+trial's own latent estimate, so the model cannot build a prior by accumulating past stimuli. It had to pass two
+checks, judged over 16 tasks. First, with realistic drift it must keep at least half of what the full population
+decodes (B1). Second, with stimulus memory alone it must not report a comparable prior (B2).
 
-**Time budget (deadline 7 December):**
+| Condition | Latent model | Tasks positive | Full population |
+|---|---|---|---|
+| Calibrated prior, no drift | 0.026 | 13 of 16 | 0.170 |
+| Calibrated prior, realistic drift | −0.003 | 8 of 16 | 0.167 |
+| Memory alone | −0.020 | 6 of 16 | 0.078 |
+| No prior, no memory | −0.025 | 6 of 16 | −0.043 |
+
+B1 failed, so the work stops: the model is not run on the recordings and no variant is tried. It isn't fooled by
+memory, but it doesn't keep a genuine prior either, and even without drift it keeps only about 15% of what the full
+population decodes. A plausible contributor is that one of its inputs is the previous stimulus, which correlates 0.64
+with the prior, so subtracting that input removes part of the prior-related activity. That explanation is untested;
+the stopping rule forbids chasing it.
+
+**What this means for the plan.** The analysis is finished. All remaining time goes to the report:
 
 | Dates | Work |
 |---|---|
-| 25–26 Nov | Part B specification committed; latent model on the simulated conditions (code exists and is tested) |
-| 27 Nov | Decide: real data or stop. Hard stop for the latent model |
-| 28–29 Nov | Real-data latent model only if the gate passed; otherwise start the report |
-| 30 Nov – 3 Dec | Rewrite the report: timescales section, simulation section, history caution, honest P1–P3 framing, 9-page main text |
+| 25 Nov – 3 Dec | Rewrite the report: timescales, simulation, latent-model negative, the stimulus-memory caution, honest P1–P3 framing, 9-page main text |
 | 4–5 Dec | Check every number against its file; finish docs |
 | 6–7 Dec | Your AI-use statement; submit |
 
-The report can be written from what exists now. The latent model is optional extra, not a requirement.
-
 ## 12. Decisions that are yours
 
-1. **Go ahead with part B (the latent model on simulated data first), or stop the analysis here** and put all
-   remaining time into the report.
-2. **How to frame the report.** The outcome table committed in A17 points to: "a variance-ranked predictive objective
+1. **How to frame the report.** The outcome table committed in A17 points to: "a variance-ranked predictive objective
    cannot favour a one-minute prior over drift at any horizon", backed by the simulation. Given the "intermediate"
    verdict and the audit, I would soften that to: "drift of the recorded strength erases the prior from long-lag
    subspaces in a calibrated simulation, reproducing most of the recorded pattern", plus the stimulus-memory
    caution. P1–P3 stay first in the abstract either way.
-3. **Whether to tell the instructor about the stimulus-memory issue** before the report. It bears on the prior gate
+2. **Whether to tell the instructor about the stimulus-memory issue** before the report. It bears on the prior gate
    that the whole project rests on.
-4. **The AI-use statement.** It must say that Claude designed and ran A17 and A18, with agent review.
-5. **Whether to merge** `pilot-timescale-fix` into `master` on GitHub (I never merge without you).
+3. **The AI-use statement.** It must say that Claude designed, coded, ran and analysed A17 and A18, with agent
+   review. Agent reviews catch mistakes but are not independent human verification, so the statement should also say
+   which parts you inspected and checked yourself.
+4. **Whether to merge** `pilot-timescale-fix` into `master` on GitHub (I never merge without you).
 
 ## 13. Where everything is
 
@@ -428,7 +438,9 @@ The report can be written from what exists now. The latent model is optional ext
   data except tests); scripts 23 to 26.
 - **Key commits on the pilot branch:** `0dbca28` (A17 written), `8486770` (A17 parts 1–2), `2b27bb6` (review
   corrections), `3a81ba1` (A18 written, before any simulation), `2f7611d` (addendum), `a42056b` (simulation results),
-  `91d431d` (audit corrections).
+  `91d431d` (audit corrections), `1a233eb` (latent-model gate written, before any result).
+- **The mathematical walkthrough:** `reports/math_walkthrough/math_walkthrough.pdf` (every analysis as the exact
+  quantity computed, and every result in those terms).
 
 ## Glossary
 
